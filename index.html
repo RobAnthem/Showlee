@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Showlee - TV Show Guessing Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+
+        .guess-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr;
+            gap: 6px;
+            margin-bottom: 10px;
+            perspective: 1000px;
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.6rem;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            padding: 2px;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            background: #1e293b;
+            overflow: hidden;
+            word-break: break-word;
+            position: relative;
+        }
+
+        .poster-cell {
+            padding: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .poster-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        @media (min-width: 640px) {
+            .cell { font-size: 0.75rem; padding: 6px; }
+            .guess-row { gap: 10px; }
+        }
+
+        .correct { background-color: #22c55e !important; border-color: #16a34a !important; }
+        .partial { background-color: #eab308 !important; border-color: #ca8a04 !important; }
+        .incorrect { background-color: #ef4444 !important; border-color: #dc2626 !important; }
+
+        .flip { animation: flip-cell 0.6s ease forwards; }
+        @keyframes flip-cell {
+            0% { transform: rotateX(0); }
+            50% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0); }
+        }
+
+        .autocomplete-items {
+            position: absolute;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0 0 12px 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .autocomplete-item:hover { background-color: #334155; }
+
+        .summary-box {
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            min-height: 85px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .summary-box.found { border-color: #22c55e; background: #064e3b; }
+
+        #final-reveal-img {
+            width: 160px;
+            height: 240px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin: 0 auto 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <header class="w-full max-w-4xl flex justify-between items-center py-6 border-b border-slate-700 mb-6">
+        <div class="flex items-center gap-2">
+            <div class="bg-indigo-600 p-2 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tighter italic">SHOWLEE</h1>
+        </div>
+        <div id="gameStatus" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-800/50 px-4 py-1.5 rounded-full border border-slate-700">Loading Data...</div>
+    </header>
+
+    <main class="w-full max-w-4xl flex-grow">
+        
+        <!-- Upload box only shows if auto-fetch fails -->
+        <div id="uploadContainer" class="hidden bg-slate-800/40 border-2 border-dashed border-slate-700 rounded-3xl p-12 text-center">
+            <div class="flex flex-col items-center gap-4">
+                <div class="bg-indigo-500/10 p-5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-bold mb-1">Data File Missing</h3>
+                    <p class="text-slate-400 text-sm mb-8">Please upload 10k_Poplar_Tv_Shows.csv manually</p>
+                    <label class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-2xl cursor-pointer transition shadow-xl shadow-indigo-900/40 inline-block">
+                        Select File
+                        <input type="file" id="fileInput" accept=".csv" class="hidden">
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameInterface" class="hidden">
+            <div id="statusMessage" class="hidden mb-8 p-8 rounded-3xl bg-slate-800 border-2 border-slate-700 text-center shadow-2xl">
+                <img id="final-reveal-img" src="" alt="Poster" class="hidden">
+                <h2 id="statusTitle" class="text-3xl font-black mb-2"></h2>
+                <p id="statusDesc" class="text-slate-400 mb-6"></p>
+                <button onclick="resetGame()" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-500 transition shadow-lg">
+                    PLAY AGAIN
+                </button>
+            </div>
+
+            <div id="inputSection" class="relative max-w-md mx-auto mb-8">
+                <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
+                    class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
+                <div id="autocompleteList" class="autocomplete-items hidden"></div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10">
+                <div id="sum-genre" class="summary-box">
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Genres</div>
+                    <div class="text-xs font-bold">?</div>
+                </div>
+                <div id="sum-date" class="summary-box">
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Release</div>
+                    <div class="text-xs font-bold italic text-slate-400">...</div>
+                </div>
+                <div id="sum-lang" class="summary-box">
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Language</div>
+                    <div class="text-xs font-bold">?</div>
+                </div>
+                <div id="sum-country" class="summary-box">
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Country</div>
+                    <div class="text-xs font-bold">?</div>
+                </div>
+                <div id="sum-rating" class="summary-box">
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Rating</div>
+                    <div class="text-xs font-bold">?</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-6 gap-2 mb-3 text-[10px] uppercase font-black text-slate-500 text-center tracking-widest">
+                <div class="col-span-1">Title</div>
+                <div>Genres</div>
+                <div>Year</div>
+                <div>Lang</div>
+                <div>Country</div>
+                <div>Rating</div>
+            </div>
+
+            <div id="gameBoard" class="mb-10"></div>
+        </div>
+    </main>
+
+    <script>
+        const genreMap = {
+            10759: "Action", 16: "Animation", 35: "Comedy", 80: "Crime", 99: "Doc", 
+            18: "Drama", 10751: "Family", 10762: "Kids", 9648: "Mystery", 10763: "News", 
+            10764: "Reality", 10765: "Sci-Fi or Fantasy", 10766: "Soap", 10767: "Talk", 
+            10768: "War", 37: "Western"
+        };
+
+        const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
+
+        let tvShows = [];
+        let targetShow;
+        let guesses = [];
+        const MAX_GUESSES = 6;
+        
+        let minYearBound = 1900;
+        let maxYearBound = new Date().getFullYear();
+        let yearGuessed = false;
+
+        const fileInput = document.getElementById('fileInput');
+        const gameInterface = document.getElementById('gameInterface');
+        const gameBoard = document.getElementById('gameBoard');
+        const showInput = document.getElementById('showInput');
+        const autocompleteList = document.getElementById('autocompleteList');
+
+        // Automatic fetch for GitHub Pages
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('10k_Poplar_Tv_Shows.csv');
+                if (!response.ok) throw new Error('File not found');
+                const text = await response.text();
+                tvShows = parseCSV(text);
+                if (tvShows.length > 0) initGame();
+            } catch (err) {
+                console.log("Auto-fetch failed, showing manual upload.");
+                document.getElementById('uploadContainer').classList.remove('hidden');
+                document.getElementById('gameStatus').textContent = "Waiting for CSV";
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                tvShows = parseCSV(event.target.result);
+                if (tvShows.length > 0) initGame();
+            };
+            reader.readAsText(file);
+        });
+
+        function parseCSV(text) {
+            const rows = [];
+            const lines = text.split(/\r?\n/);
+            const headers = lines[0].split(',');
+            const getIdx = (name) => headers.indexOf(name);
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i]) continue;
+                const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                if (row.length < 13) continue;
+                
+                try {
+                    const genreIds = row[getIdx('genre_ids')].match(/\d+/g);
+                    let genres = [];
+                    if (genreIds) {
+                        genreIds.forEach(id => {
+                            const mapped = genreMap[id];
+                            if (mapped) genres.push(mapped);
+                        });
+                    }
+                    if (genres.length === 0) genres = ["Other"];
+
+                    const date = row[getIdx('first_air_date')] || "N/A";
+                    const countryRaw = row[getIdx('origin_country')];
+                    const countryMatch = countryRaw.match(/[A-Z]{2}/);
+                    
+                    rows.push({
+                        title: row[getIdx('name')].replace(/"/g, '').trim(),
+                        genres: [...new Set(genres)], 
+                        country: countryMatch ? countryMatch[0] : "??",
+                        lang: row[getIdx('original_language')] || "??",
+                        date: date,
+                        year: parseInt(date.substring(0, 4)) || 0,
+                        rating: parseFloat(row[getIdx('vote_average')]) || 0,
+                        poster: row[getIdx('poster_path')] || "",
+                        popularity: parseFloat(row[getIdx('popularity')]) || 0,
+                        votes: parseInt(row[getIdx('vote_count')]) || 0
+                    });
+                } catch (e) { continue; }
+            }
+            return rows;
+        }
+
+        function initGame() {
+            document.getElementById('uploadContainer').classList.add('hidden');
+            gameInterface.classList.remove('hidden');
+            resetGame();
+        }
+
+        function resetGame() {
+            const candidates = tvShows.filter(s => s.popularity > 35 && s.votes > 200);
+            targetShow = candidates[Math.floor(Math.random() * candidates.length)];
+            console.log("Solution:", targetShow.title);
+
+            guesses = [];
+            minYearBound = 1900;
+            maxYearBound = new Date().getFullYear();
+            yearGuessed = false;
+
+            gameBoard.innerHTML = "";
+            showInput.value = "";
+            autocompleteList.classList.add('hidden');
+            document.getElementById('inputSection').classList.remove('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
+            document.getElementById('gameStatus').textContent = `${tvShows.length} Shows Loaded`;
+
+            const summaryIds = ['sum-genre', 'sum-date', 'sum-lang', 'sum-country', 'sum-rating'];
+            summaryIds.forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('found');
+                const valEl = el.querySelector('div:last-child');
+                valEl.textContent = id === 'sum-date' ? "Searching..." : "?";
+                if (id === 'sum-date') valEl.classList.add('italic', 'text-slate-400');
+            });
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function submitGuess(show) {
+            if (guesses.some(g => g.title === show.title)) return;
+            guesses.push(show);
+            renderRow(show);
+            updateSummary(show);
+            showInput.value = "";
+            autocompleteList.classList.add('hidden');
+            if (show.title === targetShow.title) endGame(true);
+            else if (guesses.length >= MAX_GUESSES) endGame(false);
+        }
+
+        function renderRow(guess) {
+            const row = document.createElement('div');
+            row.className = 'guess-row';
+            const fields = [
+                { type: 'title', val: guess.title },
+                { type: 'genres', val: guess.genres },
+                { type: 'year', val: guess.year },
+                { type: 'lang', val: guess.lang },
+                { type: 'country', val: guess.country },
+                { type: 'rating', val: guess.rating }
+            ];
+
+            fields.forEach((field, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'cell flip';
+                cell.style.animationDelay = `${i * 100}ms`;
+
+                if (field.type === 'title') {
+                    cell.classList.add('poster-cell');
+                    if (guess.poster) cell.style.backgroundImage = `url(https://image.tmdb.org/t/p/w200${guess.poster})`;
+                    const overlay = document.createElement('div');
+                    overlay.className = 'poster-overlay';
+                    overlay.textContent = field.val;
+                    cell.appendChild(overlay);
+                    cell.classList.add(field.val === targetShow.title ? 'correct' : 'incorrect');
+                } else if (field.type === 'genres') {
+                    cell.textContent = field.val.join(", ");
+                    const common = field.val.filter(g => targetShow.genres.includes(g));
+                    if (common.length === targetShow.genres.length && field.val.length === targetShow.genres.length) cell.classList.add('correct');
+                    else if (common.length > 0) cell.classList.add('partial');
+                    else cell.classList.add('incorrect');
+                } else if (field.type === 'year') {
+                    cell.textContent = field.val;
+                    if (field.val === targetShow.year) cell.classList.add('correct');
+                    else {
+                        if (Math.abs(field.val - targetShow.year) <= 2) cell.classList.add('partial');
+                        else cell.classList.add('incorrect');
+                        cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.year ? '↑' : '↓'}</span>`;
+                    }
+                } else if (field.type === 'lang') {
+                    cell.textContent = field.val.toUpperCase();
+                    cell.classList.add(field.val === targetShow.lang ? 'correct' : 'incorrect');
+                } else if (field.type === 'country') {
+                    cell.textContent = field.val;
+                    cell.classList.add(field.val === targetShow.country ? 'correct' : 'incorrect');
+                } else if (field.type === 'rating') {
+                    cell.textContent = field.val;
+                    const diff = Math.abs(field.val - targetShow.rating);
+                    if (diff === 0) cell.classList.add('correct');
+                    else {
+                        if (diff <= 0.5) cell.classList.add('partial');
+                        else cell.classList.add('incorrect');
+                        cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.rating ? '↑' : '↓'}</span>`;
+                    }
+                }
+                row.appendChild(cell);
+            });
+            gameBoard.prepend(row);
+        }
+
+        function updateSummary(guess) {
+            if (!yearGuessed) {
+                const guessYear = guess.year;
+                if (guessYear === targetShow.year) {
+                    yearGuessed = true;
+                    const dateBox = document.getElementById('sum-date');
+                    const dateVal = dateBox.querySelector('div:last-child');
+                    dateBox.classList.add('found');
+                    dateVal.textContent = targetShow.year;
+                    dateVal.classList.remove('italic', 'text-slate-400');
+                } else if (guessYear !== 0) {
+                    if (guessYear < targetShow.year) minYearBound = Math.max(minYearBound, guessYear);
+                    else if (guessYear > targetShow.year) maxYearBound = Math.min(maxYearBound, guessYear);
+                    const dateVal = document.getElementById('sum-date').querySelector('div:last-child');
+                    dateVal.textContent = `${minYearBound} — ${maxYearBound}`;
+                }
+            }
+
+            const keys = [
+                { id: 'sum-genre', val: guess.genres.sort().join(','), target: targetShow.genres.sort().join(','), display: guess.genres.join(", ") },
+                { id: 'sum-lang', val: guess.lang, target: targetShow.lang, display: languageNames.of(guess.lang) || guess.lang.toUpperCase() },
+                { id: 'sum-country', val: guess.country, target: targetShow.country, display: guess.country },
+                { id: 'sum-rating', val: guess.rating, target: targetShow.rating, display: guess.rating }
+            ];
+
+            keys.forEach(k => {
+                const el = document.getElementById(k.id);
+                if (!el.classList.contains('found') && k.val === k.target) {
+                    el.classList.add('found');
+                    el.querySelector('div:last-child').textContent = k.display;
+                }
+            });
+        }
+
+        function endGame(won) {
+            document.getElementById('inputSection').classList.add('hidden');
+            const statusMsg = document.getElementById('statusMessage');
+            statusMsg.classList.remove('hidden');
+            
+            const summaryUpdates = [
+                { id: 'sum-genre', val: targetShow.genres.join(", ") },
+                { id: 'sum-date', val: targetShow.year },
+                { id: 'sum-lang', val: languageNames.of(targetShow.lang) || targetShow.lang.toUpperCase() },
+                { id: 'sum-country', val: targetShow.country },
+                { id: 'sum-rating', val: targetShow.rating }
+            ];
+            summaryUpdates.forEach(upd => {
+                const el = document.getElementById(upd.id);
+                el.classList.add('found');
+                const valEl = el.querySelector('div:last-child');
+                valEl.textContent = upd.val;
+                valEl.classList.remove('italic', 'text-slate-400');
+            });
+
+            if (targetShow.poster) {
+                const img = document.getElementById('final-reveal-img');
+                img.src = `https://image.tmdb.org/t/p/w500${targetShow.poster}`;
+                img.classList.remove('hidden');
+            }
+
+            document.getElementById('statusTitle').textContent = won ? "VICTORY!" : "GAME OVER";
+            document.getElementById('statusTitle').style.color = won ? "#22c55e" : "#ef4444";
+            document.getElementById('statusDesc').innerHTML = `The show was <strong>${targetShow.title}</strong>.`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        showInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            if (val.length < 2) { autocompleteList.classList.add('hidden'); return; }
+            const filtered = tvShows
+                .filter(s => s.title.toLowerCase().includes(val))
+                .sort((a,b) => (b.popularity * b.votes) - (a.popularity * a.votes))
+                .slice(0, 10);
+            autocompleteList.innerHTML = "";
+            if (filtered.length > 0) {
+                autocompleteList.classList.remove('hidden');
+                filtered.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'autocomplete-item';
+                    div.innerHTML = `<div><div class="font-bold">${item.title}</div><div class="text-[10px] text-slate-500">${item.genres.slice(0,2).join(", ")}</div></div><span class="text-[11px] text-slate-500 font-medium">${item.year}</span>`;
+                    div.onclick = () => submitGuess(item);
+                    autocompleteList.appendChild(div);
+                });
+            } else autocompleteList.classList.add('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!showInput.contains(e.target)) autocompleteList.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
