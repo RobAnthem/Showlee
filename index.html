@@ -56,6 +56,7 @@
             align-items: center;
             justify-content: center;
             padding: 4px;
+            color: white !important; /* Keep title visible over posters */
         }
 
         @media (min-width: 640px) {
@@ -63,8 +64,8 @@
             .guess-row { gap: 10px; }
         }
 
-        .correct { background-color: #22c55e !important; border-color: #16a34a !important; }
-        .partial { background-color: #eab308 !important; border-color: #ca8a04 !important; }
+        .correct { background-color: #22c55e !important; border-color: #16a34a !important; color: #000 !important; }
+        .partial { background-color: #eab308 !important; border-color: #ca8a04 !important; color: #000 !important; }
         .incorrect { background-color: #ef4444 !important; border-color: #dc2626 !important; }
 
         .flip { animation: flip-cell 0.6s ease forwards; }
@@ -111,8 +112,11 @@
             justify-content: center;
             transition: all 0.3s ease;
         }
-        .summary-box.found { border-color: #22c55e; background: #064e3b; }
-        .summary-box.partial-found { border-color: #eab308; background: #422006; }
+        .summary-box.found { border-color: #22c55e; background: #22c55e; color: #000; }
+        .summary-box.partial-found { border-color: #eab308; background: #eab308; color: #000; }
+        
+        /* Ensure specific sub-elements in summary boxes respect the black text rule */
+        .summary-box.found div, .summary-box.partial-found div { color: #000 !important; }
 
         #final-reveal-img {
             width: 160px;
@@ -123,10 +127,21 @@
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
 
-        .streak-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: #6366f1;
+            width: 0%;
+            transition: width 0.4s ease;
         }
     </style>
 </head>
@@ -149,7 +164,6 @@
 
     <main class="w-full max-w-4xl flex-grow">
         
-        <!-- Upload box only shows if auto-fetch fails -->
         <div id="uploadContainer" class="hidden bg-slate-800/40 border-2 border-dashed border-slate-700 rounded-3xl p-12 text-center">
             <div class="flex flex-col items-center gap-4">
                 <div class="bg-indigo-500/10 p-5 rounded-full">
@@ -176,16 +190,7 @@
                 </button>
             </div>
 
-            <div id="inputSection" class="relative max-w-md mx-auto mb-8">
-                <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
-                    class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
-                <div id="autocompleteList" class="autocomplete-items hidden"></div>
-                <div id="guessesLeft" class="text-center mt-3 text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                    6 guesses remaining
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10">
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
                 <div id="sum-genre" class="summary-box">
                     <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Genres</div>
                     <div class="text-xs font-bold">?</div>
@@ -205,6 +210,22 @@
                 <div id="sum-rating" class="summary-box">
                     <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Rating</div>
                     <div class="text-xs font-bold">?</div>
+                </div>
+            </div>
+
+            <!-- Moved search bar here -->
+            <div id="inputSection" class="relative max-w-md mx-auto mb-12">
+                <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
+                    class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
+                <div id="autocompleteList" class="autocomplete-items hidden"></div>
+                
+                <div class="mt-4 px-2">
+                    <div class="progress-bar-container">
+                        <div id="progressBarFill" class="progress-bar-fill"></div>
+                    </div>
+                    <div id="guessesLeft" class="text-center text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                        10 guesses remaining
+                    </div>
                 </div>
             </div>
 
@@ -234,14 +255,13 @@
         let tvShows = [];
         let targetShow;
         let guesses = [];
-        const MAX_GUESSES = 6;
+        const MAX_GUESSES = 10; // Updated to 10
         
         let minYearBound = 1900;
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
         let discoveredGenres = new Set();
 
-        // Streak variables
         let streakData = {
             current: 0,
             best: 0
@@ -253,8 +273,8 @@
         const showInput = document.getElementById('showInput');
         const autocompleteList = document.getElementById('autocompleteList');
         const guessesLeftDisplay = document.getElementById('guessesLeft');
+        const progressBarFill = document.getElementById('progressBarFill');
 
-        // Initialize Streaks from LocalStorage
         function loadStreak() {
             const saved = localStorage.getItem('showlee_streak_data');
             if (saved) {
@@ -273,7 +293,6 @@
             document.getElementById('bestStreak').textContent = streakData.best;
         }
 
-        // Automatic fetch for GitHub Pages
         window.addEventListener('DOMContentLoaded', async () => {
             loadStreak();
             try {
@@ -283,7 +302,6 @@
                 tvShows = parseCSV(text);
                 if (tvShows.length > 0) initGame();
             } catch (err) {
-                console.log("Auto-fetch failed, showing manual upload.");
                 document.getElementById('uploadContainer').classList.remove('hidden');
                 document.getElementById('gameStatus').textContent = "Waiting for CSV";
             }
@@ -382,10 +400,21 @@
         }
 
         function updateGuessesLeft() {
-            const left = MAX_GUESSES - guesses.length;
+            const count = guesses.length;
+            const left = MAX_GUESSES - count;
             guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
-            if (left <= 2) guessesLeftDisplay.classList.replace('text-slate-500', 'text-orange-400');
-            else guessesLeftDisplay.classList.replace('text-orange-400', 'text-slate-500');
+            
+            // Update progress bar
+            const percentage = (count / MAX_GUESSES) * 100;
+            progressBarFill.style.width = `${percentage}%`;
+            
+            if (left <= 3) {
+                guessesLeftDisplay.classList.replace('text-slate-500', 'text-orange-400');
+                progressBarFill.classList.add('bg-orange-500');
+            } else {
+                guessesLeftDisplay.classList.replace('text-orange-400', 'text-slate-500');
+                progressBarFill.classList.remove('bg-orange-500');
+            }
         }
 
         function submitGuess(show) {
@@ -461,7 +490,6 @@
         }
 
         function updateSummary(guess) {
-            // Genre Summary logic
             const genreBox = document.getElementById('sum-genre');
             if (!genreBox.classList.contains('found')) {
                 const common = guess.genres.filter(g => targetShow.genres.includes(g));
@@ -517,7 +545,6 @@
             const statusMsg = document.getElementById('statusMessage');
             statusMsg.classList.remove('hidden');
 
-            // Update Streaks
             if (won) {
                 streakData.current++;
                 if (streakData.current > streakData.best) {
