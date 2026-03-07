@@ -14,19 +14,16 @@
             color: #f1f5f9;
         }
 
-        /* Standard Colors */
-        .correct { background-color: #00FF00 !important; border-color: #00CC00 !important; color: #000 !important; }
-        .partial { background-color: #FFD700 !important; border-color: #CCAC00 !important; color: #000 !important; }
-        .incorrect { background-color: #FF1a1a !important; border-color: #CC0000 !important; color: #fff !important; }
+        /* Standard Colors: Green for Correct, Blue for Partial, Red for Incorrect */
+        .correct { background-color: #22c55e !important; border-color: #16a34a !important; color: #fff !important; }
+        .partial { background-color: #3b82f6 !important; border-color: #2563eb !important; color: #fff !important; }
+        .incorrect { background-color: #ef4444 !important; border-color: #dc2626 !important; color: #fff !important; }
 
-        /* Colorblind Mode Overrides */
-        body.colorblind-mode .correct { background-color: #3b82f6 !important; border-color: #1d4ed8 !important; color: #fff !important; }
-        body.colorblind-mode .partial { background-color: #f97316 !important; border-color: #c2410c !important; color: #fff !important; }
-        body.colorblind-mode .incorrect { background-color: #475569 !important; border-color: #1e293b !important; color: #94a3b8 !important; }
+        /* Colorblind Mode Overrides (High Contrast) */
+        body.colorblind-mode .correct { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #000 !important; }
+        body.colorblind-mode .partial { background-color: #94a3b8 !important; border-color: #64748b !important; color: #fff !important; }
+        body.colorblind-mode .incorrect { background-color: #1e293b !important; border-color: #0f172a !important; color: #475569 !important; }
         
-        body.colorblind-mode .summary-box.found { background-color: #3b82f6 !important; color: #fff !important; border-color: #3b82f6; }
-        body.colorblind-mode .summary-box.partial-found { background-color: #f97316 !important; color: #fff !important; border-color: #f97316; }
-
         .game-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -92,8 +89,8 @@
             overflow: hidden;
         }
         
-        .summary-box.found { border-color: #00FF00; background: #00FF00; color: #000; }
-        .summary-box.partial-found { border-color: #FFD700; background: #FFD700; color: #000; }
+        .summary-box.found { border-color: #22c55e; background: #22c55e; color: #fff; }
+        .summary-box.partial-found { border-color: #3b82f6; background: #3b82f6; color: #fff; }
 
         .autocomplete-items {
             position: absolute;
@@ -149,22 +146,6 @@
             100% { transform: rotateX(0deg); }
         }
 
-        .tmdb-attribution {
-            margin-top: 3rem;
-            padding: 2rem 1rem;
-            border-top: 1px solid #334155;
-            text-align: center;
-            color: #94a3b8;
-            font-size: 0.7rem;
-        }
-
-        .tmdb-logo {
-            width: 180px;
-            height: auto;
-            margin: 0 auto 0.75rem;
-            display: block;
-        }
-
         .switch {
             position: relative;
             display: inline-block;
@@ -208,7 +189,7 @@
                     <input type="checkbox" id="colorblindToggle">
                     <span class="slider"></span>
                 </label>
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Colorblind Mode</span>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">High Contrast</span>
             </div>
         </div>
         <div class="flex flex-col items-end">
@@ -238,6 +219,7 @@
                 </button>
             </div>
 
+            <!-- Summary Boxes -->
             <div class="summary-grid mb-8">
                 <div id="sum-genre" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Genre</div>
@@ -269,6 +251,7 @@
                 </div>
             </div>
 
+            <!-- Input Area -->
             <div id="inputSection" class="relative max-w-md mx-auto mb-8">
                 <div class="flex gap-2">
                     <div class="relative flex-grow">
@@ -291,6 +274,7 @@
                 </div>
             </div>
 
+            <!-- Headers -->
             <div class="game-grid mb-2 text-[8px] uppercase font-black text-slate-500 text-center tracking-widest">
                 <div>Poster</div>
                 <div>Genre</div>
@@ -306,11 +290,8 @@
         </div>
     </main>
 
-    <footer class="w-full max-w-3xl tmdb-attribution">
-        <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
-            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="tmdb-logo">
-        </a>
-        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+    <footer class="w-full max-w-3xl py-8 text-center text-slate-500 text-[10px]">
+        <p>Built for TV fans. Powered by metadata.</p>
     </footer>
 
     <script>
@@ -489,8 +470,6 @@
                 updateSummaryUI(g);
             });
 
-            if (hintUsed) hintButton.disabled = true;
-
             if (isGameOver) {
                 const won = guesses.length > 0 && guesses[guesses.length - 1].title === targetShow.title;
                 endGame(won, true);
@@ -534,18 +513,17 @@
         }
 
         function updateGuessesLeft() {
+            if (isGameOver) return;
             const count = guesses.length;
             const left = MAX_GUESSES - count;
             guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
             progressBarFill.style.width = `${(count / MAX_GUESSES) * 100}%`;
-            hintButton.disabled = (count < 4 || hintUsed || isGameOver);
+            
+            const unsolved = getUnsolvedCategories();
+            hintButton.disabled = (count < 4 || hintUsed || unsolved.length === 0);
         }
 
-        function useHint() {
-            if (hintUsed || guesses.length < 4 || isGameOver) return;
-            hintUsed = true;
-            hintButton.disabled = true;
-
+        function getUnsolvedCategories() {
             const unsolved = [];
             if (!yearGuessed) unsolved.push('sum-date');
             if (discoveredGenres.size < targetShow.genres.length) unsolved.push('sum-genre');
@@ -554,12 +532,22 @@
             if (!document.getElementById('sum-lang').classList.contains('found')) unsolved.push('sum-lang');
             if (!document.getElementById('sum-country').classList.contains('found')) unsolved.push('sum-country');
             if (!document.getElementById('sum-rating').classList.contains('found')) unsolved.push('sum-rating');
+            return unsolved;
+        }
 
+        function useHint() {
+            if (hintUsed || guesses.length < 4 || isGameOver) return;
+            const unsolved = getUnsolvedCategories();
             if (unsolved.length === 0) return;
+
+            hintUsed = true;
+            hintButton.disabled = true;
+
             const chosenId = unsolved[Math.floor(Math.random() * unsolved.length)];
             const el = document.getElementById(chosenId);
             const valEl = el.querySelector('div:last-child');
-            el.classList.add('found');
+            el.classList.remove('partial-found');
+            el.classList.add('found'); // Make it green immediately
 
             if (chosenId === 'sum-genre') {
                 targetShow.genres.forEach(g => discoveredGenres.add(g));
@@ -737,6 +725,7 @@
         function endGame(won, isResumed = false) {
             isGameOver = true;
             document.getElementById('inputSection').classList.add('hidden');
+            hintButton.disabled = true;
             const statusMsg = document.getElementById('statusMessage');
             statusMsg.classList.remove('hidden');
 
@@ -777,12 +766,7 @@
 
             const title = document.getElementById('statusTitle');
             title.textContent = won ? "VICTORY!" : "GAME OVER";
-            
-            if (document.body.classList.contains('colorblind-mode')) {
-                title.style.color = won ? "#3b82f6" : "#94a3b8";
-            } else {
-                title.style.color = won ? "#00FF00" : "#FF1a1a";
-            }
+            title.style.color = won ? "#22c55e" : "#ef4444";
             
             document.getElementById('statusDesc').innerHTML = `The show was <strong>${targetShow.title}</strong>.`;
             
