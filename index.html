@@ -10,18 +10,40 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #121213;
+            background-color: #0d0d0e;
             color: #ffffff;
         }
 
-        /* Color Scheme: Green for correct, Blue for partial, Gray for incorrect */
-        .correct { background-color: #538d4e !important; border-color: #538d4e !important; color: #ffffff !important; }
-        .partial { background-color: #3b82f6 !important; border-color: #3b82f6 !important; color: #ffffff !important; }
-        .incorrect { background-color: #3a3a3c !important; border-color: #3a3a3c !important; color: #ffffff !important; }
+        /* Vibrant Color Scheme with Black Text for Green/Blue */
+        .correct { 
+            background-color: #00ff88 !important; 
+            border-color: #00ff88 !important; 
+            color: #000000 !important; 
+            text-shadow: none;
+        }
+        .partial { 
+            background-color: #33ccff !important; 
+            border-color: #33ccff !important; 
+            color: #000000 !important; 
+            text-shadow: none;
+        }
+        .incorrect { 
+            background-color: #3a3a3c !important; 
+            border-color: #3a3a3c !important; 
+            color: #ffffff !important; 
+        }
 
-        /* Colorblind mode override */
-        body.colorblind-mode .correct { background-color: #f5793a !important; border-color: #f5793a !important; }
-        body.colorblind-mode .partial { background-color: #85c0f9 !important; border-color: #85c0f9 !important; }
+        /* Colorblind mode override: Intense Orange and Sky Blue */
+        body.colorblind-mode .correct { 
+            background-color: #f5793a !important; 
+            border-color: #f5793a !important; 
+            color: #000000 !important;
+        }
+        body.colorblind-mode .partial { 
+            background-color: #85c0f9 !important; 
+            border-color: #85c0f9 !important; 
+            color: #000000 !important;
+        }
         
         .game-grid {
             display: grid;
@@ -38,9 +60,9 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 0.65rem;
-            line-height: 1.1;
+            line-height: 1;
             border: 2px solid #3a3a3c;
             text-transform: uppercase;
             transition: all 0.3s ease;
@@ -48,7 +70,7 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
-            padding: 4px;
+            padding: 2px;
             box-sizing: border-box;
         }
 
@@ -62,15 +84,20 @@
         .poster-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.65);
+            background: rgba(0,0,0,0.7);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 4px;
             font-size: 0.6rem;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
             text-align: center;
+            color: inherit; /* Inherits black if parent is correct/partial */
+        }
+        
+        /* Ensure text in poster overlays also turns black when correct/partial */
+        .correct .poster-overlay, .partial .poster-overlay {
+            background: rgba(255,255,255,0.1); /* Lighter overlay to show poster while keeping text black */
+            color: #000000 !important;
         }
 
         .summary-grid {
@@ -91,10 +118,24 @@
             flex-direction: column;
             justify-content: center;
             min-height: 60px;
+            transition: background-color 0.5s ease, color 0.5s ease;
         }
         
-        .summary-box.found { border-color: #538d4e; background: #538d4e; }
-        .summary-box.partial-found { border-color: #3b82f6; background: #3b82f6; }
+        .summary-box.found { 
+            border-color: #00ff88; 
+            background: #00ff88; 
+            color: #000000;
+        }
+        .summary-box.partial-found { 
+            border-color: #33ccff; 
+            background: #33ccff; 
+            color: #000000;
+        }
+        
+        /* Summary labels when box is filled */
+        .summary-box.found span, .summary-box.partial-found span {
+            color: rgba(0,0,0,0.7);
+        }
 
         .autocomplete-items {
             position: absolute;
@@ -102,10 +143,11 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: #121213;
+            background: #1a1a1b;
             border: 1px solid #3a3a3c;
             max-height: 250px;
             overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         .autocomplete-item {
@@ -118,16 +160,18 @@
 
         .progress-bar-container {
             width: 100%;
-            height: 4px;
-            background: #3a3a3c;
+            height: 6px;
+            background: #2a2a2c;
             margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
         }
         
         .progress-bar-fill {
             height: 100%;
             background: #565758;
             width: 0%;
-            transition: width 0.3s;
+            transition: width 0.3s ease;
         }
 
         .mode-btn {
@@ -138,9 +182,9 @@
             border: 1px solid #3a3a3c;
         }
         .mode-btn.active {
-            background: #565758;
-            color: white;
-            border-color: #565758;
+            background: #ffffff;
+            color: black;
+            border-color: #ffffff;
         }
         
         .flip { animation: flip-cell 0.5s ease forwards; }
@@ -155,7 +199,7 @@
     <header class="w-full max-w-2xl flex flex-col items-center py-4 border-b border-zinc-800 mb-6">
         <h1 class="text-3xl font-black tracking-widest mb-4">SHOWLEE</h1>
         
-        <div class="w-full flex justify-between items-end">
+        <div class="w-full flex justify-between items-end px-2">
             <div class="flex flex-col gap-2">
                 <div class="flex">
                     <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active rounded-l">Normal</button>
@@ -231,7 +275,7 @@
             <div id="inputSection" class="w-full max-w-md mb-8">
                 <div class="relative flex gap-2">
                     <input id="showInput" type="text" placeholder="Guess a show..." autocomplete="off"
-                        class="flex-grow bg-transparent border-2 border-zinc-700 p-3 focus:outline-none focus:border-zinc-500 text-sm">
+                        class="flex-grow bg-transparent border-2 border-zinc-700 p-3 focus:outline-none focus:border-zinc-400 text-sm">
                     <button id="hintButton" onclick="useHint()" disabled class="bg-zinc-800 text-zinc-400 font-bold px-4 text-[10px] uppercase disabled:opacity-30">Hint</button>
                     <div id="autocompleteList" class="autocomplete-items hidden"></div>
                 </div>
@@ -452,16 +496,15 @@
             if (unsolved.length === 0) return;
             const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
             const el = document.getElementById(cid);
-            el.classList.add('found');
             const v = el.querySelector('span:last-child');
             v.className = "text-[10px] font-bold";
-            if (cid === 'sum-genre') v.textContent = targetShow.genres[0];
-            else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; }
-            else if (cid === 'sum-seasons') v.textContent = targetShow.seasons;
-            else if (cid === 'sum-network') v.textContent = targetShow.networks[0];
-            else if (cid === 'sum-lang') v.textContent = languageNames.of(targetShow.lang) || targetShow.lang;
-            else if (cid === 'sum-country') v.textContent = targetShow.country;
-            else if (cid === 'sum-rating') v.textContent = targetShow.score;
+            if (cid === 'sum-genre') { v.textContent = targetShow.genres[0]; el.classList.add('found'); }
+            else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
+            else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
+            else if (cid === 'sum-network') { v.textContent = targetShow.networks[0]; el.classList.add('found'); }
+            else if (cid === 'sum-lang') { v.textContent = languageNames.of(targetShow.lang) || targetShow.lang; el.classList.add('found'); }
+            else if (cid === 'sum-country') { v.textContent = targetShow.country; el.classList.add('found'); }
+            else if (cid === 'sum-rating') { v.textContent = targetShow.score; el.classList.add('found'); }
             saveSession();
         }
 
@@ -515,11 +558,11 @@
                 } else if (f.type === 'y' || f.type === 's' || f.type === 'r') {
                     const tv = f.type === 'y' ? targetShow.year : f.type === 's' ? targetShow.seasons : targetShow.score;
                     const range = f.type === 'y' ? 2 : f.type === 's' ? 1 : 0.5;
-                    c.innerHTML = `<div>${f.val}</div>`;
+                    c.innerHTML = `<div class="w-full">${f.val}</div>`;
                     if (f.val === tv) c.classList.add('correct');
                     else {
                         c.classList.add(Math.abs(f.val - tv) <= range ? 'partial' : 'incorrect');
-                        c.innerHTML += `<div class="text-[8px] opacity-50">${f.val < tv ? '↑' : '↓'}</div>`;
+                        c.innerHTML += `<div class="text-[8px] font-black opacity-60">${f.val < tv ? '▲' : '▼'}</div>`;
                     }
                 } else {
                     const tv = f.type === 'l' ? targetShow.lang : targetShow.country;
@@ -537,6 +580,7 @@
             commonG.forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
                 gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres)[0];
+                gBox.classList.remove('found', 'partial-found');
                 gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
             }
 
@@ -545,6 +589,7 @@
             commonN.forEach(x => discoveredNetworks.add(x));
             if (discoveredNetworks.size > 0) {
                 nBox.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
+                nBox.classList.remove('found', 'partial-found');
                 nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
             }
 
@@ -590,7 +635,7 @@
             }
             const st = document.getElementById('statusTitle');
             st.textContent = won ? "VICTORY" : "OUT OF GUESSES";
-            st.className = won ? "text-xl font-bold mb-1 text-green-500" : "text-xl font-bold mb-1 text-red-500";
+            st.className = won ? "text-xl font-bold mb-1 text-[#00ff88]" : "text-xl font-bold mb-1 text-red-500";
             document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
             saveSession();
         }
