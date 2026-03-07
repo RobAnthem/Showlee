@@ -59,7 +59,6 @@
             position: relative;
         }
 
-        /* Tooltip style */
         .cell[data-tooltip]:hover::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -124,16 +123,8 @@
             min-height: 64px;
         }
         
-        .summary-box.found { 
-            border-color: #1b8a32; 
-            background: #1b8a32; 
-            color: #000000; 
-        }
-        .summary-box.partial-found { 
-            border-color: #d1a01d; 
-            background: #d1a01d; 
-            color: #000000; 
-        }
+        .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
+        .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
         
         .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
             color: rgba(0,0,0,0.6) !important; 
@@ -179,20 +170,20 @@
         }
 
         .mode-btn {
-            padding: 6px 18px;
-            font-size: 12px;
+            padding: 6px 14px;
+            font-size: 10px;
             font-weight: 700;
             text-transform: uppercase;
             border: 1px solid #404249;
             background: #1a1c1e;
+            transition: all 0.2s;
         }
         .mode-btn.active {
-            background: #1b8a32;
+            background: #d1a01d;
             color: black;
-            border-color: #1b8a32;
+            border-color: #d1a01d;
         }
         
-        /* Toggle Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -241,11 +232,12 @@
         
         <div class="w-full flex justify-between items-end px-2">
             <div class="flex flex-col gap-3">
-                <div class="flex">
-                    <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active rounded-l-lg">Normal</button>
-                    <button id="modeAnime" onclick="setMode('anime')" class="mode-btn rounded-r-lg">Anime</button>
+                <div class="flex overflow-hidden rounded-lg">
+                    <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active">Mainstream</button>
+                    <button id="modeAnime" onclick="setMode('anime')" class="mode-btn">Anime</button>
+                    <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn">International</button>
                 </div>
-                <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800">
+                <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800 self-start">
                     <span class="text-[10px] font-black uppercase text-zinc-500">Emoji Mode</span>
                     <label class="switch">
                         <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
@@ -256,7 +248,7 @@
 
             <div class="flex flex-col items-end">
                 <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
-                    <span id="streakModeLabel">Normal</span> Streak
+                    <span id="streakModeLabel">Mainstream</span> Streak
                 </div>
                 <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
                 <div class="text-[10px] text-zinc-600 uppercase mt-1 font-bold">
@@ -362,7 +354,7 @@
         let hintUsed = false;
         let isGameOver = false;
 
-        let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 } };
+        let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
         const GENRE_EMOJIS = {
             'Action': '💥', 'Adventure': '🏹', 'Animation': '🎨', 'Comedy': '😂', 'Crime': '🚓',
@@ -372,25 +364,15 @@
             'Kids': '🧸', 'Politics': '🏛️', 'Action & Adventure': '💥', 'Sci-Fi & Fantasy': '🚀'
         };
 
-        const fileInput = document.getElementById('fileInput');
-        const gameInterface = document.getElementById('gameInterface');
-        const gameBoard = document.getElementById('gameBoard');
-        const showInput = document.getElementById('showInput');
-        const autocompleteList = document.getElementById('autocompleteList');
-        const guessesLeftDisplay = document.getElementById('guessesLeft');
-        const progressBarFill = document.getElementById('progressBarFill');
-        const hintButton = document.getElementById('hintButton');
-        const emojiToggle = document.getElementById('emojiToggle');
-
         window.addEventListener('DOMContentLoaded', async () => {
-            const savedStreaks = localStorage.getItem('showlee_streaks_v5');
+            const savedStreaks = localStorage.getItem('showlee_streaks_v6');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
             updateStreakUI();
 
             const savedEmojiMode = localStorage.getItem('showlee_emoji_mode');
             if (savedEmojiMode !== null) {
                 emojiMode = savedEmojiMode === 'true';
-                emojiToggle.checked = emojiMode;
+                document.getElementById('emojiToggle').checked = emojiMode;
             }
 
             try {
@@ -407,7 +389,7 @@
         function toggleEmojiMode(enabled) {
             emojiMode = enabled;
             localStorage.setItem('showlee_emoji_mode', enabled);
-            gameBoard.innerHTML = "";
+            document.getElementById('gameBoard').innerHTML = "";
             guesses.forEach(g => renderRow(g, false));
         }
 
@@ -416,16 +398,19 @@
             currentGameMode = mode;
             document.getElementById('modeNormal').classList.toggle('active', mode === 'normal');
             document.getElementById('modeAnime').classList.toggle('active', mode === 'anime');
-            document.getElementById('streakModeLabel').textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+            document.getElementById('modeForeign').classList.toggle('active', mode === 'foreign');
+            
+            const labelMap = { normal: 'Mainstream', anime: 'Anime', foreign: 'International' };
+            document.getElementById('streakModeLabel').textContent = labelMap[mode];
             updateStreakUI();
             
-            const saved = localStorage.getItem(`showlee_session_v5_${mode}`);
+            const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
             if (saved) resumeGame(JSON.parse(saved));
             else startNewGame();
         }
 
         function updateStreakUI() {
-            const s = streaks[currentGameMode];
+            const s = streaks[currentGameMode] || { current: 0, best: 0 };
             document.getElementById('currentStreak').textContent = s.current;
             document.getElementById('bestStreak').textContent = s.best;
         }
@@ -470,17 +455,27 @@
 
         function initGame() {
             document.getElementById('uploadContainer').classList.add('hidden');
-            gameInterface.classList.remove('hidden');
-            const saved = localStorage.getItem(`showlee_session_v5_${currentGameMode}`);
+            document.getElementById('gameInterface').classList.remove('hidden');
+            const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
             if (saved) resumeGame(JSON.parse(saved));
             else startNewGame();
         }
 
         function startNewGame() {
             const pool = tvShows.filter(s => {
-                const isAnime = s.country === 'JP';
-                if (currentGameMode === 'anime') return isAnime && s.poster && s.score > 0;
-                return !isAnime && s.poster && s.year > 1950 && s.score > 0;
+                const isAnime = s.country === 'JP' && s.genres.includes('Animation');
+                const isUS = s.country === 'US';
+                const isVeryFamous = s.score > 7.5; // Threshold for "well known" global hits
+
+                if (currentGameMode === 'anime') {
+                    return isAnime && s.poster && s.score > 0;
+                } else if (currentGameMode === 'normal') {
+                    // Normal = US OR Extremely high score global hits
+                    return (isUS || isVeryFamous) && !isAnime && s.poster && s.year > 1960;
+                } else {
+                    // Foreign = All others (not US, not Anime)
+                    return !isUS && !isAnime && s.poster && s.score > 0;
+                }
             });
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
             guesses = []; minYearBound = 1900; maxYearBound = new Date().getFullYear();
@@ -523,9 +518,9 @@
         }
 
         function clearUI() {
-            gameBoard.innerHTML = "";
-            showInput.value = "";
-            autocompleteList.classList.add('hidden');
+            document.getElementById('gameBoard').innerHTML = "";
+            document.getElementById('showInput').value = "";
+            document.getElementById('autocompleteList').classList.add('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-lang', 'sum-country', 'sum-rating'].forEach(id => {
@@ -539,7 +534,7 @@
         }
 
         function saveSession() {
-            localStorage.setItem(`showlee_session_v5_${currentGameMode}`, JSON.stringify({
+            localStorage.setItem(`showlee_session_v6_${currentGameMode}`, JSON.stringify({
                 targetShow, guesses, minYearBound, maxYearBound, yearGuessed,
                 discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
                 hintUsed, isGameOver
@@ -549,15 +544,15 @@
         function updateGuessesLeft() {
             if (isGameOver) return;
             const left = MAX_GUESSES - guesses.length;
-            guessesLeftDisplay.textContent = `${left} CHANCES LEFT`;
-            progressBarFill.style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
-            hintButton.disabled = (guesses.length < 4 || hintUsed);
+            document.getElementById('guessesLeft').textContent = `${left} CHANCES LEFT`;
+            document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
+            document.getElementById('hintButton').disabled = (guesses.length < 4 || hintUsed);
         }
 
         function useHint() {
             if (hintUsed || guesses.length < 4 || isGameOver) return;
             hintUsed = true;
-            hintButton.disabled = true;
+            document.getElementById('hintButton').disabled = true;
             const unsolved = ['sum-date', 'sum-genre', 'sum-seasons', 'sum-network', 'sum-lang', 'sum-country', 'sum-rating']
                 .filter(id => !document.getElementById(id).classList.contains('found'));
             if (unsolved.length === 0) return;
@@ -586,8 +581,8 @@
             renderRow(show, true);
             updateSummaryUI(show);
             updateGuessesLeft();
-            showInput.value = "";
-            autocompleteList.classList.add('hidden');
+            document.getElementById('showInput').value = "";
+            document.getElementById('autocompleteList').classList.add('hidden');
             if (show.title === targetShow.title) endGame(true);
             else if (guesses.length >= MAX_GUESSES) endGame(false);
             else saveSession();
@@ -622,7 +617,6 @@
                     c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
                 } else if (f.type === 'g' || f.type === 'n') {
                     const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
-                    
                     if (f.type === 'g' && emojiMode) {
                         const emojis = f.val.map(g => GENRE_EMOJIS[g] || '❓');
                         c.textContent = emojis.slice(0, 2).join(" ");
@@ -631,7 +625,6 @@
                     } else {
                         c.textContent = f.val.slice(0, 2).join(", ");
                     }
-
                     const common = f.val.filter(x => targetArr.includes(x));
                     if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial');
@@ -644,8 +637,7 @@
                     else {
                         c.classList.add(Math.abs(f.val - tv) <= range ? 'partial' : 'incorrect');
                         const arrow = f.val < tv ? '▲' : '▼';
-                        const opacity = c.classList.contains('partial') ? 'opacity-40' : 'opacity-60';
-                        c.innerHTML += `<div class="text-[8px] font-black ${opacity}">${arrow}</div>`;
+                        c.innerHTML += `<div class="text-[8px] font-black opacity-60">${arrow}</div>`;
                     }
                 } else {
                     const tv = f.type === 'l' ? targetShow.lang : targetShow.country;
@@ -654,23 +646,23 @@
                 }
                 row.appendChild(c);
             });
-            gameBoard.prepend(row);
+            document.getElementById('gameBoard').prepend(row);
         }
 
         function updateSummaryUI(guess) {
-            const gBox = document.getElementById('sum-genre');
             const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
             commonG.forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
+                const gBox = document.getElementById('sum-genre');
                 gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres)[0];
                 gBox.classList.remove('found', 'partial-found');
                 gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
             }
 
-            const nBox = document.getElementById('sum-network');
             const commonN = guess.networks.filter(x => targetShow.networks.includes(x));
             commonN.forEach(x => discoveredNetworks.add(x));
             if (discoveredNetworks.size > 0) {
+                const nBox = document.getElementById('sum-network');
                 nBox.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
                 nBox.classList.remove('found', 'partial-found');
                 nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
@@ -681,15 +673,13 @@
                     yearGuessed = true;
                     const el = document.getElementById('sum-date');
                     el.classList.add('found');
-                    el.classList.remove('partial-found');
                     const v = el.querySelector('span:last-child');
                     v.textContent = targetShow.year; v.className = "text-[11px] font-black";
                 } else if (guess.year > 0) {
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year);
                     else maxYearBound = Math.min(maxYearBound, guess.year);
                     document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
-                    const el = document.getElementById('sum-date');
-                    if (Math.abs(guess.year - targetShow.year) <= 5) el.classList.add('partial-found');
+                    if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
                 }
             }
 
@@ -712,7 +702,7 @@
                 const s = streaks[currentGameMode];
                 if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
                 else s.current = 0;
-                localStorage.setItem('showlee_streaks_v5', JSON.stringify(streaks));
+                localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
                 updateStreakUI();
             }
             if (targetShow.poster) {
@@ -726,31 +716,35 @@
             saveSession();
         }
 
-        showInput.addEventListener('input', (e) => {
+        document.getElementById('showInput').addEventListener('input', (e) => {
             const v = e.target.value.toLowerCase();
-            if (v.length < 2) { autocompleteList.classList.add('hidden'); return; }
+            const al = document.getElementById('autocompleteList');
+            if (v.length < 2) { al.classList.add('hidden'); return; }
             const matches = tvShows.filter(s => s.title.toLowerCase().includes(v)).slice(0, 8);
-            autocompleteList.innerHTML = "";
+            al.innerHTML = "";
             if (matches.length) {
-                autocompleteList.classList.remove('hidden');
+                al.classList.remove('hidden');
                 matches.forEach(m => {
                     const d = document.createElement('div');
                     d.className = 'autocomplete-item text-sm flex justify-between items-center';
-                    const isM = (currentGameMode === 'anime' && m.country === 'JP') || (currentGameMode === 'normal' && m.country !== 'JP');
                     d.innerHTML = `
                         <div class="flex flex-col">
-                            <span class="${isM ? 'text-white font-bold' : 'text-zinc-500 font-medium'}">${m.title}</span>
+                            <span class="text-white font-bold">${m.title}</span>
                             <span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks.slice(0,1)}</span>
                         </div>
                         <span class="text-zinc-500 text-[10px] font-black">${m.year}</span>
                     `;
                     d.onclick = () => submitGuess(m);
-                    autocompleteList.appendChild(d);
+                    al.appendChild(d);
                 });
-            } else autocompleteList.classList.add('hidden');
+            } else al.classList.add('hidden');
         });
 
-        document.addEventListener('click', (e) => { if (!showInput.contains(e.target)) autocompleteList.classList.add('hidden'); });
+        document.addEventListener('click', (e) => { 
+            if (!document.getElementById('showInput').contains(e.target)) {
+                document.getElementById('autocompleteList').classList.add('hidden');
+            }
+        });
     </script>
 </body>
 </html>
