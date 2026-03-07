@@ -14,17 +14,16 @@
             color: #f1f5f9;
         }
 
-        /* Vibrant Colors */
-        .correct { background-color: #00ff40 !important; border-color: #00cc33 !important; color: #000 !important; }
-        .partial { background-color: #ffcc00 !important; border-color: #e6b800 !important; color: #000 !important; }
-        .incorrect { background-color: #ff3333 !important; border-color: #cc0000 !important; color: #fff !important; }
+        /* Vibrant High-Contrast Colors */
+        .correct { background-color: #00FF00 !important; border-color: #00CC00 !important; color: #000 !important; }
+        .partial { background-color: #FFD700 !important; border-color: #CCAC00 !important; color: #000 !important; }
+        .incorrect { background-color: #FF1a1a !important; border-color: #CC0000 !important; color: #fff !important; }
 
         .guess-row {
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr; /* Added column for seasons */
+            grid-template-columns: 1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr;
             gap: 8px;
             margin-bottom: 10px;
-            perspective: 1000px;
         }
 
         .cell {
@@ -39,8 +38,6 @@
             border: 2px solid #334155;
             border-radius: 8px;
             padding: 4px;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
             background: #1e293b;
             overflow: hidden;
             word-break: break-word;
@@ -65,18 +62,6 @@
             font-size: 0.6rem;
         }
 
-        @media (min-width: 640px) {
-            .cell { font-size: 0.75rem; }
-            .guess-row { gap: 10px; }
-        }
-
-        .flip { animation: flip-cell 0.6s ease forwards; }
-        @keyframes flip-cell {
-            0% { transform: rotateX(0); }
-            50% { transform: rotateX(90deg); }
-            100% { transform: rotateX(0); }
-        }
-
         .autocomplete-items {
             position: absolute;
             z-index: 99;
@@ -86,7 +71,7 @@
             background: #1e293b;
             border: 1px solid #475569;
             border-radius: 0 0 16px 16px;
-            max-height: 300px;
+            max-height: 400px;
             overflow-y: auto;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
         }
@@ -102,29 +87,30 @@
 
         .autocomplete-item:hover { background-color: #334155; }
 
+        /* Summary Boxes Uniform Sizing */
         .summary-box {
             background: #1e293b;
             border: 2px solid #334155;
             border-radius: 12px;
             padding: 8px;
             text-align: center;
-            aspect-ratio: 1/1; /* Uniform Size */
+            aspect-ratio: 1/1; 
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
         
-        .summary-box.found { border-color: #00ff40; background: #00ff40; color: #000; }
-        .summary-box.partial-found { border-color: #ffcc00; background: #ffcc00; color: #000; }
+        .summary-box.found { border-color: #00FF00; background: #00FF00; color: #000; }
+        .summary-box.partial-found { border-color: #FFD700; background: #FFD700; color: #000; }
         .summary-box.found div, .summary-box.partial-found div { color: #000 !important; }
 
         .progress-bar-container {
             width: 100%;
-            height: 10px;
+            height: 8px;
             background: #1e293b;
-            border-radius: 5px;
+            border-radius: 4px;
             margin: 12px 0;
             overflow: hidden;
             border: 1px solid #334155;
@@ -137,13 +123,16 @@
             transition: width 0.4s ease;
         }
 
-        #hintButton {
-            transition: all 0.3s ease;
-        }
         #hintButton:disabled {
             opacity: 0.3;
             cursor: not-allowed;
             filter: grayscale(1);
+        }
+        
+        .flip { animation: flip-cell 0.5s ease forwards; }
+        @keyframes flip-cell {
+            0% { transform: rotateX(90deg); }
+            100% { transform: rotateX(0deg); }
         }
     </style>
 </head>
@@ -168,17 +157,11 @@
         
         <div id="uploadContainer" class="hidden bg-slate-800/40 border-2 border-dashed border-slate-700 rounded-3xl p-12 text-center">
             <div class="flex flex-col items-center gap-4">
-                <div class="bg-indigo-500/10 p-5 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                </div>
-                <div>
-                    <h3 class="text-2xl font-bold mb-1">Data File Missing</h3>
-                    <p class="text-slate-400 text-sm mb-8">Please upload tv_metadata_clean_2026-03-07.csv manually</p>
-                    <label class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-2xl cursor-pointer transition shadow-xl shadow-indigo-900/40 inline-block">
-                        Select File
-                        <input type="file" id="fileInput" accept=".csv" class="hidden">
-                    </label>
-                </div>
+                <h3 class="text-2xl font-bold">Data File Missing</h3>
+                <label class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-2xl cursor-pointer transition inline-block">
+                    Select tv_metadata_clean_2026-03-07.csv
+                    <input type="file" id="fileInput" accept=".csv" class="hidden">
+                </label>
             </div>
         </div>
 
@@ -192,7 +175,7 @@
                 </button>
             </div>
 
-            <!-- Uniform Summary Boxes -->
+            <!-- Dashboard -->
             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-8">
                 <div id="sum-genre" class="summary-box">
                     <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Genre</div>
@@ -215,21 +198,20 @@
                     <div class="text-[10px] font-bold">?</div>
                 </div>
                 <div id="sum-rating" class="summary-box">
-                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Rating</div>
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Score</div>
                     <div class="text-[10px] font-bold">?</div>
                 </div>
             </div>
 
-            <!-- Search Area -->
+            <!-- Input and Hint -->
             <div id="inputSection" class="relative max-w-md mx-auto mb-12">
                 <div class="flex gap-2">
                     <div class="relative flex-grow">
-                        <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
+                        <input id="showInput" type="text" placeholder="Type a show name..." autocomplete="off"
                             class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
                         <div id="autocompleteList" class="autocomplete-items hidden"></div>
                     </div>
-                    <!-- Hint Button -->
-                    <button id="hintButton" onclick="useHint()" disabled class="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 rounded-2xl shadow-lg flex flex-col items-center justify-center text-[10px]">
+                    <button id="hintButton" onclick="useHint()" disabled class="bg-amber-400 hover:bg-amber-300 text-black font-black px-4 rounded-2xl shadow-lg flex flex-col items-center justify-center text-[10px] transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
                         HINT
                     </button>
@@ -245,8 +227,9 @@
                 </div>
             </div>
 
+            <!-- Headers -->
             <div class="grid grid-cols-7 gap-2 mb-3 text-[9px] uppercase font-black text-slate-500 text-center tracking-widest">
-                <div class="col-span-1">Title</div>
+                <div>Poster</div>
                 <div>Genres</div>
                 <div>Year</div>
                 <div>Seas</div>
@@ -272,7 +255,6 @@
         let yearGuessed = false;
         let discoveredGenres = new Set();
         let hintUsed = false;
-
         let streakData = { current: 0, best: 0 };
 
         const fileInput = document.getElementById('fileInput');
@@ -284,35 +266,23 @@
         const progressBarFill = document.getElementById('progressBarFill');
         const hintButton = document.getElementById('hintButton');
 
-        function loadStreak() {
-            const saved = localStorage.getItem('showlee_streak_data');
+        window.addEventListener('DOMContentLoaded', async () => {
+            const saved = localStorage.getItem('showlee_streak_vibrant');
             if (saved) {
                 streakData = JSON.parse(saved);
-                updateStreakDisplay();
+                document.getElementById('currentStreak').textContent = streakData.current;
+                document.getElementById('bestStreak').textContent = streakData.best;
             }
-        }
-
-        function saveStreak() {
-            localStorage.setItem('showlee_streak_data', JSON.stringify(streakData));
-            updateStreakDisplay();
-        }
-
-        function updateStreakDisplay() {
-            document.getElementById('currentStreak').textContent = streakData.current;
-            document.getElementById('bestStreak').textContent = streakData.best;
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            loadStreak();
+            
             try {
                 const response = await fetch('tv_metadata_clean_2026-03-07.csv');
-                if (!response.ok) throw new Error('File not found');
+                if (!response.ok) throw new Error('Not found');
                 const text = await response.text();
                 tvShows = parseCSV(text);
                 if (tvShows.length > 0) initGame();
             } catch (err) {
                 document.getElementById('uploadContainer').classList.remove('hidden');
-                document.getElementById('gameStatus').textContent = "Waiting for CSV";
+                document.getElementById('gameStatus').textContent = "Upload CSV to Start";
             }
         });
 
@@ -330,32 +300,31 @@
         function parseCSV(text) {
             const rows = [];
             const lines = text.split(/\r?\n/);
-            // ID,Name,Year,Genres,Country,Language,Seasons,Networks,Rating,User_Score,Status,Poster_URL
             const headers = lines[0].split(',');
-            const getIdx = (name) => headers.indexOf(name);
+            const getIdx = (n) => headers.indexOf(n);
 
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i]) continue;
-                // Complex split to handle quotes
+                // Handle comma within quotes
                 const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                 if (row.length < 10) continue;
                 
                 try {
+                    const name = row[getIdx('Name')].replace(/"/g, '').trim();
+                    if (name === '[Deleted/Not Found]' || !name) continue;
+
                     const genreStr = row[getIdx('Genres')].replace(/"/g, '');
                     const genres = genreStr.split(',').map(g => g.trim()).filter(g => g && g !== 'N/A' && g !== '-');
                     
-                    const name = row[getIdx('Name')].replace(/"/g, '').trim();
-                    if (name === '[Deleted/Not Found]') continue;
-
                     rows.push({
                         title: name,
                         year: parseInt(row[getIdx('Year')]) || 0,
                         genres: genres.length ? genres : ["Other"],
                         country: row[getIdx('Country')].replace(/"/g, '') || "??",
-                        lang: row[getIdx('Language')] || "??",
+                        lang: row[getIdx('Language')].replace(/"/g, '') || "??",
                         seasons: parseInt(row[getIdx('Seasons')]) || 0,
-                        rating: parseFloat(row[getIdx('User_Score')]) || 0, // Using User_Score for game logic
-                        poster: row[getIdx('Poster_URL')].replace(/"/g, '') || ""
+                        score: parseFloat(row[getIdx('User_Score')]) || 0,
+                        poster: row[getIdx('Poster_URL')].replace(/"/g, '').trim()
                     });
                 } catch (e) { continue; }
             }
@@ -369,11 +338,10 @@
         }
 
         function resetGame() {
-            // Pick a reasonable target (has poster and score)
-            const candidates = tvShows.filter(s => s.poster && s.rating > 5);
-            targetShow = candidates[Math.floor(Math.random() * candidates.length)];
-            console.log("Solution:", targetShow.title);
-
+            // Target shows that have a poster and a valid year
+            const pool = tvShows.filter(s => s.poster && s.year > 1950 && s.score > 0);
+            targetShow = pool[Math.floor(Math.random() * pool.length)];
+            
             guesses = [];
             minYearBound = 1900;
             maxYearBound = new Date().getFullYear();
@@ -386,7 +354,7 @@
             autocompleteList.classList.add('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
-            document.getElementById('gameStatus').textContent = `${tvShows.length} Shows Loaded`;
+            document.getElementById('gameStatus').textContent = `Playing (${tvShows.length} Shows)`;
             
             updateGuessesLeft();
 
@@ -398,7 +366,6 @@
                 valEl.textContent = id === 'sum-date' ? "Searching..." : "?";
                 if (id === 'sum-date') valEl.classList.add('italic', 'text-slate-400');
             });
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -406,21 +373,9 @@
             const count = guesses.length;
             const left = MAX_GUESSES - count;
             guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
+            progressBarFill.style.width = `${(count / MAX_GUESSES) * 100}%`;
             
-            const percentage = (count / MAX_GUESSES) * 100;
-            progressBarFill.style.width = `${percentage}%`;
-            
-            // Toggle hint button
-            if (count >= 5 && !hintUsed) hintButton.disabled = false;
-            else hintButton.disabled = true;
-
-            if (left <= 3) {
-                guessesLeftDisplay.classList.replace('text-slate-500', 'text-orange-500');
-                progressBarFill.classList.replace('bg-indigo-600', 'bg-orange-500');
-            } else {
-                guessesLeftDisplay.classList.replace('text-orange-500', 'text-slate-500');
-                progressBarFill.classList.add('bg-indigo-600');
-            }
+            hintButton.disabled = (count < 5 || hintUsed);
         }
 
         function useHint() {
@@ -428,7 +383,6 @@
             hintUsed = true;
             hintButton.disabled = true;
 
-            // Find an unsolved summary box
             const unsolved = [];
             if (!yearGuessed) unsolved.push('sum-date');
             if (discoveredGenres.size < targetShow.genres.length) unsolved.push('sum-genre');
@@ -439,10 +393,8 @@
 
             if (unsolved.length === 0) return;
             const chosenId = unsolved[Math.floor(Math.random() * unsolved.length)];
-            
             const el = document.getElementById(chosenId);
             const valEl = el.querySelector('div:last-child');
-            el.classList.remove('partial-found');
             el.classList.add('found');
 
             if (chosenId === 'sum-genre') {
@@ -459,7 +411,7 @@
             } else if (chosenId === 'sum-country') {
                 valEl.textContent = targetShow.country;
             } else if (chosenId === 'sum-rating') {
-                valEl.textContent = targetShow.rating;
+                valEl.textContent = targetShow.score;
             }
         }
 
@@ -478,17 +430,17 @@
         function renderRow(guess) {
             const row = document.createElement('div');
             row.className = 'guess-row';
-            const fields = [
+            const data = [
                 { type: 'title', val: guess.title },
                 { type: 'genres', val: guess.genres },
                 { type: 'year', val: guess.year },
                 { type: 'seasons', val: guess.seasons },
                 { type: 'lang', val: guess.lang },
                 { type: 'country', val: guess.country },
-                { type: 'rating', val: guess.rating }
+                { type: 'score', val: guess.score }
             ];
 
-            fields.forEach((field, i) => {
+            data.forEach((field, i) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell flip';
                 cell.style.animationDelay = `${i * 100}ms`;
@@ -513,7 +465,7 @@
                     else {
                         if (Math.abs(field.val - targetShow.year) <= 2) cell.classList.add('partial');
                         else cell.classList.add('incorrect');
-                        cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.year ? '↑' : '↓'}</span>`;
+                        cell.innerHTML += `<span class="mt-1 opacity-60">${field.val < targetShow.year ? '↑' : '↓'}</span>`;
                     }
                 } else if (field.type === 'seasons') {
                     cell.textContent = field.val;
@@ -521,7 +473,7 @@
                     else {
                         if (Math.abs(field.val - targetShow.seasons) <= 1) cell.classList.add('partial');
                         else cell.classList.add('incorrect');
-                        cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.seasons ? '↑' : '↓'}</span>`;
+                        cell.innerHTML += `<span class="mt-1 opacity-60">${field.val < targetShow.seasons ? '↑' : '↓'}</span>`;
                     }
                 } else if (field.type === 'lang') {
                     cell.textContent = field.val.toUpperCase();
@@ -529,14 +481,14 @@
                 } else if (field.type === 'country') {
                     cell.textContent = field.val;
                     cell.classList.add(field.val === targetShow.country ? 'correct' : 'incorrect');
-                } else if (field.type === 'rating') {
+                } else if (field.type === 'score') {
                     cell.textContent = field.val;
-                    const diff = Math.abs(field.val - targetShow.rating);
+                    const diff = Math.abs(field.val - targetShow.score);
                     if (diff === 0) cell.classList.add('correct');
                     else {
                         if (diff <= 0.5) cell.classList.add('partial');
                         else cell.classList.add('incorrect');
-                        cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.rating ? '↑' : '↓'}</span>`;
+                        cell.innerHTML += `<span class="mt-1 opacity-60">${field.val < targetShow.score ? '↑' : '↓'}</span>`;
                     }
                 }
                 row.appendChild(cell);
@@ -578,7 +530,7 @@
                 { id: 'sum-seasons', val: guess.seasons, target: targetShow.seasons, display: guess.seasons },
                 { id: 'sum-lang', val: guess.lang, target: targetShow.lang, display: languageNames.of(guess.lang) || guess.lang.toUpperCase() },
                 { id: 'sum-country', val: guess.country, target: targetShow.country, display: guess.country },
-                { id: 'sum-rating', val: guess.rating, target: targetShow.rating, display: guess.rating }
+                { id: 'sum-rating', val: guess.score, target: targetShow.score, display: guess.score }
             ];
 
             keys.forEach(k => {
@@ -599,16 +551,18 @@
                 streakData.current++;
                 if (streakData.current > streakData.best) streakData.best = streakData.current;
             } else streakData.current = 0;
-            saveStreak();
             
-            // Final Reveal
+            localStorage.setItem('showlee_streak_vibrant', JSON.stringify(streakData));
+            document.getElementById('currentStreak').textContent = streakData.current;
+            document.getElementById('bestStreak').textContent = streakData.best;
+            
             const summaryUpdates = [
                 { id: 'sum-genre', val: targetShow.genres.join(", ") },
                 { id: 'sum-date', val: targetShow.year },
                 { id: 'sum-seasons', val: targetShow.seasons },
                 { id: 'sum-lang', val: languageNames.of(targetShow.lang) || targetShow.lang.toUpperCase() },
                 { id: 'sum-country', val: targetShow.country },
-                { id: 'sum-rating', val: targetShow.rating }
+                { id: 'sum-rating', val: targetShow.score }
             ];
             summaryUpdates.forEach(upd => {
                 const el = document.getElementById(upd.id);
@@ -626,7 +580,7 @@
             }
 
             document.getElementById('statusTitle').textContent = won ? "VICTORY!" : "GAME OVER";
-            document.getElementById('statusTitle').style.color = won ? "#00ff40" : "#ff3333";
+            document.getElementById('statusTitle').style.color = won ? "#00FF00" : "#FF1a1a";
             document.getElementById('statusDesc').innerHTML = `The show was <strong>${targetShow.title}</strong>.`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -636,7 +590,6 @@
             if (val.length < 2) { autocompleteList.classList.add('hidden'); return; }
             const filtered = tvShows
                 .filter(s => s.title.toLowerCase().includes(val))
-                .sort((a,b) => b.rating - a.rating)
                 .slice(0, 10);
             
             autocompleteList.innerHTML = "";
@@ -646,13 +599,13 @@
                     const div = document.createElement('div');
                     div.className = 'autocomplete-item';
                     div.innerHTML = `
-                        <div class="flex flex-col">
+                        <div class="flex flex-col gap-0.5">
                             <span class="font-bold text-sm text-white">${item.title}</span>
-                            <span class="text-[11px] text-amber-400 font-bold uppercase tracking-wide">${item.genres.slice(0,2).join(" & ")}</span>
+                            <span class="text-[11px] text-amber-300 font-extrabold uppercase tracking-tight">${item.genres.join(" • ")}</span>
                         </div>
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs text-indigo-300 font-black">${item.year}</span>
-                            <span class="text-[9px] text-slate-500 uppercase">${item.country}</span>
+                        <div class="flex flex-col items-end gap-0.5">
+                            <span class="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded font-black">${item.year}</span>
+                            <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">${item.country}</span>
                         </div>`;
                     div.onclick = () => submitGuess(item);
                     autocompleteList.appendChild(div);
