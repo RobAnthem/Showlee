@@ -14,7 +14,7 @@
             color: #ffffff;
         }
 
-        /* Color Scheme: Green for correct, Blue for partial (formerly yellow), Gray for incorrect */
+        /* Color Scheme: Green for correct, Blue for partial, Gray for incorrect */
         .correct { background-color: #538d4e !important; border-color: #538d4e !important; color: #ffffff !important; }
         .partial { background-color: #3b82f6 !important; border-color: #3b82f6 !important; color: #ffffff !important; }
         .incorrect { background-color: #3a3a3c !important; border-color: #3a3a3c !important; color: #ffffff !important; }
@@ -39,13 +39,17 @@
             justify-content: center;
             text-align: center;
             font-weight: 700;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
+            line-height: 1.1;
             border: 2px solid #3a3a3c;
             text-transform: uppercase;
             transition: all 0.3s ease;
             overflow: hidden;
-            word-break: break-word;
-            padding: 2px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            padding: 4px;
+            box-sizing: border-box;
         }
 
         .poster-cell {
@@ -58,12 +62,15 @@
         .poster-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.65);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 4px;
             font-size: 0.6rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            text-align: center;
         }
 
         .summary-grid {
