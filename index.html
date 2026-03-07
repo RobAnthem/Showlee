@@ -14,21 +14,9 @@
             color: #ffffff;
         }
 
-        .correct { 
-            background-color: #1b8a32 !important; 
-            border-color: #146425 !important; 
-            color: #000000 !important; 
-        }
-        .partial { 
-            background-color: #d1a01d !important; 
-            border-color: #a37c15 !important; 
-            color: #000000 !important; 
-        }
-        .incorrect { 
-            background-color: #c41e1e !important; 
-            border-color: #8c1515 !important; 
-            color: #ffffff !important; 
-        }
+        .correct { background-color: #1b8a32 !important; border-color: #146425 !important; color: #000000 !important; }
+        .partial { background-color: #d1a01d !important; border-color: #a37c15 !important; color: #000000 !important; }
+        .incorrect { background-color: #c41e1e !important; border-color: #8c1515 !important; color: #ffffff !important; }
 
         .game-grid {
             display: grid;
@@ -59,165 +47,55 @@
             position: relative;
         }
 
-        .cell[data-tooltip]:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2d2f35;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            white-space: nowrap;
-            z-index: 100;
-            pointer-events: none;
-            margin-bottom: 4px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-
-        .poster-cell {
-            padding: 0;
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
+        .poster-cell { padding: 0; background-size: cover; background-position: center; position: relative; }
         .poster-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            font-size: 0.6rem;
-            text-align: center;
-            color: white;
+            position: absolute; inset: 0; background: rgba(0,0,0,0.75);
+            display: flex; align-items: center; justify-content: center;
+            padding: 4px; font-size: 0.6rem; text-align: center; color: white;
         }
         
-        .correct .poster-overlay, .partial .poster-overlay {
-            background: transparent; 
-            color: #000000 !important;
-            font-weight: 900;
-        }
+        .correct .poster-overlay, .partial .poster-overlay { background: transparent; color: #000000 !important; font-weight: 900; }
 
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            width: 100%;
-            max-width: 620px;
-        }
-
+        .summary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; width: 100%; max-width: 620px; }
         .summary-box {
-            background: #1a1c1e;
-            border: 2px solid #2d2f35;
-            border-radius: 4px;
-            padding: 8px 2px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            min-height: 64px;
+            background: #1a1c1e; border: 2px solid #2d2f35; border-radius: 4px;
+            padding: 8px 2px; text-align: center; display: flex; flex-direction: column;
+            justify-content: center; min-height: 64px;
         }
         
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
         
-        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
-            color: rgba(0,0,0,0.6) !important; 
-        }
-
         .autocomplete-items {
-            position: absolute;
-            z-index: 99;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: #1a1c1e;
-            border: 1px solid #404249;
-            max-height: 250px;
-            overflow-y: auto;
-            border-radius: 4px;
-            margin-top: 4px;
+            position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
+            background: #1a1c1e; border: 1px solid #404249; max-height: 250px;
+            overflow-y: auto; border-radius: 4px; margin-top: 4px;
         }
 
-        .autocomplete-item {
-            padding: 12px;
-            cursor: pointer;
-            border-bottom: 1px solid #2d2f35;
-        }
-
+        .autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #2d2f35; }
         .autocomplete-item:hover { background-color: #2d2f35; }
 
-        .progress-bar-container {
-            width: 100%;
-            height: 8px;
-            background: #1a1c1e;
-            margin: 16px 0;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #2d2f35;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: #d1a01d;
-            width: 0%;
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .progress-bar-container { width: 100%; height: 8px; background: #1a1c1e; margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2d2f35; }
+        .progress-bar-fill { height: 100%; background: #d1a01d; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .mode-btn {
-            padding: 6px 14px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            border: 1px solid #404249;
-            background: #1a1c1e;
-            transition: all 0.2s;
+        .mode-btn, .diff-btn {
+            padding: 6px 12px; font-size: 9px; font-weight: 700; text-transform: uppercase;
+            border: 1px solid #404249; background: #1a1c1e; transition: all 0.2s;
         }
-        .mode-btn.active {
-            background: #d1a01d;
-            color: black;
-            border-color: #d1a01d;
-        }
-        
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 36px;
-            height: 20px;
-        }
+        .mode-btn.active, .diff-btn.active { background: #d1a01d; color: black; border-color: #d1a01d; }
+        .diff-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        #hintButton.hint-ready { background-color: #1b8a32 !important; border-color: #146425 !important; color: white !important; }
+
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            inset: 0;
-            background-color: #2d2f35;
-            transition: .4s;
-            border-radius: 20px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2d2f35; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: #d1a01d; }
         input:checked + .slider:before { transform: translateX(16px); }
 
         .flip { animation: flip-cell 0.6s ease forwards; }
-        @keyframes flip-cell {
-            0% { transform: rotateX(90deg); opacity: 0; }
-            100% { transform: rotateX(0deg); opacity: 1; }
-        }
+        @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
@@ -230,30 +108,45 @@
             <h1 class="text-4xl font-black tracking-tighter italic">SHOWLEE</h1>
         </div>
         
-        <div class="w-full flex justify-between items-end px-2">
+        <div class="w-full grid grid-cols-1 md:grid-cols-3 items-end gap-4 px-2">
             <div class="flex flex-col gap-3">
-                <div class="flex overflow-hidden rounded-lg">
-                    <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active">Mainstream</button>
-                    <button id="modeAnime" onclick="setMode('anime')" class="mode-btn">Anime</button>
-                    <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn">International</button>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-black uppercase text-zinc-500">Category</span>
+                    <div class="flex overflow-hidden rounded-lg">
+                        <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active">Mainstream</button>
+                        <button id="modeAnime" onclick="setMode('anime')" class="mode-btn">Anime</button>
+                        <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn">International</button>
+                    </div>
                 </div>
-                <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800 self-start">
-                    <span class="text-[10px] font-black uppercase text-zinc-500">Emoji Mode</span>
-                    <label class="switch">
-                        <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
-                        <span class="slider"></span>
-                    </label>
+            </div>
+
+            <div class="flex flex-col gap-1 items-center">
+                <span class="text-[9px] font-black uppercase text-zinc-500">Difficulty</span>
+                <div class="flex overflow-hidden rounded-lg">
+                    <button id="diffEasy" onclick="setDifficulty('easy')" class="diff-btn">Easy</button>
+                    <button id="diffNormal" onclick="setDifficulty('normal')" class="diff-btn active">Normal</button>
+                    <button id="diffHard" onclick="setDifficulty('hard')" class="diff-btn">Impossible</button>
                 </div>
             </div>
 
             <div class="flex flex-col items-end">
                 <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
-                    <span id="streakModeLabel">Mainstream</span> Streak
+                    Streak (<span id="streakModeLabel">Mainstream</span>)
                 </div>
                 <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
                 <div class="text-[10px] text-zinc-600 uppercase mt-1 font-bold">
                     Best: <span id="bestStreak">0</span>
                 </div>
+            </div>
+        </div>
+        
+        <div class="w-full mt-4 flex justify-start px-2">
+            <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800">
+                <span class="text-[9px] font-black uppercase text-zinc-500">Emoji Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
     </header>
@@ -345,6 +238,7 @@
         const MAX_GUESSES = 10;
         
         let currentGameMode = 'normal';
+        let currentDifficulty = 'normal';
         let emojiMode = false;
         let minYearBound = 1900;
         let maxYearBound = new Date().getFullYear();
@@ -376,7 +270,7 @@
             }
 
             try {
-                const response = await fetch('tv_metadata_clean_2026-03-07.csv');
+                const response = await fetch('enriched_shows_2026-03-07.csv');
                 if (!response.ok) throw new Error();
                 const text = await response.text();
                 tvShows = parseCSV(text);
@@ -385,35 +279,6 @@
                 document.getElementById('uploadContainer').classList.remove('hidden');
             }
         });
-
-        function toggleEmojiMode(enabled) {
-            emojiMode = enabled;
-            localStorage.setItem('showlee_emoji_mode', enabled);
-            document.getElementById('gameBoard').innerHTML = "";
-            guesses.forEach(g => renderRow(g, false));
-        }
-
-        function setMode(mode) {
-            if (mode === currentGameMode) return;
-            currentGameMode = mode;
-            document.getElementById('modeNormal').classList.toggle('active', mode === 'normal');
-            document.getElementById('modeAnime').classList.toggle('active', mode === 'anime');
-            document.getElementById('modeForeign').classList.toggle('active', mode === 'foreign');
-            
-            const labelMap = { normal: 'Mainstream', anime: 'Anime', foreign: 'International' };
-            document.getElementById('streakModeLabel').textContent = labelMap[mode];
-            updateStreakUI();
-            
-            const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
-            if (saved) resumeGame(JSON.parse(saved));
-            else startNewGame();
-        }
-
-        function updateStreakUI() {
-            const s = streaks[currentGameMode] || { current: 0, best: 0 };
-            document.getElementById('currentStreak').textContent = s.current;
-            document.getElementById('bestStreak').textContent = s.best;
-        }
 
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
@@ -435,18 +300,17 @@
                 cells.push(cell.trim());
                 if (cells.length < headers.length - 1) continue;
 
-                const name = cells[getIdx('Name')]?.replace(/"/g, '');
-                if (!name || name === '[Deleted/Not Found]') continue;
-
                 rows.push({
-                    title: name,
+                    id: cells[getIdx('ID')],
+                    title: (cells[getIdx('Name')] || "").replace(/"/g, ''),
                     year: parseInt(cells[getIdx('Year')]) || 0,
                     genres: (cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== '-'),
-                    country: cells[getIdx('Country')]?.replace(/"/g, '') || "??",
-                    lang: cells[getIdx('Language')]?.replace(/"/g, '') || "??",
+                    country: (cells[getIdx('Country')] || "").replace(/"/g, '') || "??",
+                    lang: (cells[getIdx('Language')] || "").replace(/"/g, '').toLowerCase() || "??",
                     seasons: parseInt(cells[getIdx('Seasons')]) || 0,
                     networks: (cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== '-'),
-                    score: parseFloat(cells[getIdx('User_Score')]) || 0,
+                    score: parseFloat(cells[getIdx('Vote_Average')]) || 0,
+                    votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
                     poster: (cells[getIdx('Poster_URL')] || "").replace(/"/g, '').trim()
                 });
             }
@@ -461,32 +325,82 @@
             else startNewGame();
         }
 
-        function startNewGame() {
-            const pool = tvShows.filter(s => {
-                const isAnime = s.country === 'JP' && s.genres.includes('Animation');
-                const isEnglish = s.lang === 'en';
-                const isVeryFamous = s.score > 7.5; // Threshold for "well known" global hits
+        function toggleEmojiMode(enabled) {
+            emojiMode = enabled;
+            localStorage.setItem('showlee_emoji_mode', enabled);
+            document.getElementById('gameBoard').innerHTML = "";
+            guesses.forEach(g => renderRow(g, false));
+        }
 
-                if (currentGameMode === 'anime') {
-                    return isAnime && s.poster && s.score > 0;
-                } else if (currentGameMode === 'normal') {
-                    // Normal = Only English language shows (US/UK/Canada/etc) + global hits that were produced in English
-                    return isEnglish && !isAnime && s.poster && s.year > 1960 && (s.country === 'US' || isVeryFamous);
-                } else {
-                    // Foreign/International = All non-English language productions (excluding Japanese Anime)
-                    return !isEnglish && !isAnime && s.poster && s.score > 0;
-                }
+        function setMode(mode) {
+            if (mode === currentGameMode) return;
+            currentGameMode = mode;
+            updateStreakUI();
+            
+            const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
+            if (saved) resumeGame(JSON.parse(saved));
+            else startNewGame();
+        }
+
+        function setDifficulty(diff) {
+            if (isGameOver) return; // Don't switch while in summary screen
+            if (streaks[currentGameMode].current > 0) return; // Locked by streak
+            currentDifficulty = diff;
+            startNewGame();
+        }
+
+        function updateStreakUI() {
+            const s = streaks[currentGameMode] || { current: 0, best: 0 };
+            document.getElementById('currentStreak').textContent = s.current;
+            document.getElementById('bestStreak').textContent = s.best;
+            
+            document.getElementById('modeNormal').classList.toggle('active', currentGameMode === 'normal');
+            document.getElementById('modeAnime').classList.toggle('active', currentGameMode === 'anime');
+            document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
+            
+            const labelMap = { normal: 'Mainstream', anime: 'Anime', foreign: 'International' };
+            document.getElementById('streakModeLabel').textContent = labelMap[currentGameMode];
+            
+            // Handle Difficulty UI
+            ['Easy', 'Normal', 'Hard'].forEach(d => {
+                const el = document.getElementById(`diff${d}`);
+                const diffKey = d.toLowerCase();
+                el.classList.toggle('active', currentDifficulty === diffKey);
+                // Disable if streak > 0
+                el.disabled = (s.current > 0);
             });
+        }
+
+        function startNewGame() {
+            // Filter by category
+            let pool = tvShows.filter(s => {
+                const isAnime = s.genres.includes('Animation') && s.country === 'JP';
+                const isEnglish = s.lang === 'en';
+                if (currentGameMode === 'anime') return isAnime;
+                if (currentGameMode === 'normal') return isEnglish && !isAnime;
+                return !isEnglish && !isAnime;
+            });
+
+            // Sort by popularity for difficulty slicing
+            pool.sort((a, b) => b.votes - a.votes);
+
+            // Apply Difficulty Slice
+            if (currentDifficulty === 'easy') pool = pool.slice(0, 1500);
+            else if (currentDifficulty === 'normal') pool = pool.slice(0, 3000);
+            // hard/impossible is the whole pool
+
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
             guesses = []; minYearBound = 1900; maxYearBound = new Date().getFullYear();
             yearGuessed = false; discoveredGenres = new Set(); discoveredNetworks = new Set();
             hintUsed = false; isGameOver = false;
             clearUI();
+            updateStreakUI();
             saveSession();
         }
 
         function resumeGame(session) {
             targetShow = session.targetShow;
+            currentDifficulty = session.difficulty || 'normal';
             guesses = []; 
             minYearBound = session.minYearBound || 1900; 
             maxYearBound = session.maxYearBound || new Date().getFullYear();
@@ -497,6 +411,7 @@
             isGameOver = session.isGameOver;
             
             clearUI();
+            updateStreakUI();
             
             const yearEl = document.getElementById('sum-date');
             if (yearGuessed) {
@@ -537,7 +452,7 @@
             localStorage.setItem(`showlee_session_v6_${currentGameMode}`, JSON.stringify({
                 targetShow, guesses, minYearBound, maxYearBound, yearGuessed,
                 discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
-                hintUsed, isGameOver
+                hintUsed, isGameOver, difficulty: currentDifficulty
             }));
         }
 
@@ -546,20 +461,28 @@
             const left = MAX_GUESSES - guesses.length;
             document.getElementById('guessesLeft').textContent = `${left} CHANCES LEFT`;
             document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
-            document.getElementById('hintButton').disabled = (guesses.length < 4 || hintUsed);
+            
+            const canHint = guesses.length >= 4 && !hintUsed;
+            const btn = document.getElementById('hintButton');
+            btn.disabled = !canHint;
+            btn.classList.toggle('hint-ready', canHint);
         }
 
         function useHint() {
             if (hintUsed || guesses.length < 4 || isGameOver) return;
             hintUsed = true;
             document.getElementById('hintButton').disabled = true;
+            document.getElementById('hintButton').classList.remove('hint-ready');
+
             const unsolved = ['sum-date', 'sum-genre', 'sum-seasons', 'sum-network', 'sum-lang', 'sum-country', 'sum-rating']
                 .filter(id => !document.getElementById(id).classList.contains('found'));
+            
             if (unsolved.length === 0) return;
             const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
             const el = document.getElementById(cid);
             const v = el.querySelector('span:last-child');
             v.className = "text-[11px] font-black";
+            
             if (cid === 'sum-genre') { v.textContent = targetShow.genres[0]; el.classList.add('found'); }
             else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
             else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
@@ -676,8 +599,10 @@
                     const v = el.querySelector('span:last-child');
                     v.textContent = targetShow.year; v.className = "text-[11px] font-black";
                 } else if (guess.year > 0) {
-                    if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year);
-                    else maxYearBound = Math.min(maxYearBound, guess.year);
+                    // Update bounds exclusively
+                    if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
+                    else maxYearBound = Math.min(maxYearBound, guess.year - 1);
+                    
                     document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
                     if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
                 }
@@ -720,7 +645,13 @@
             const v = e.target.value.toLowerCase();
             const al = document.getElementById('autocompleteList');
             if (v.length < 2) { al.classList.add('hidden'); return; }
-            const matches = tvShows.filter(s => s.title.toLowerCase().includes(v)).slice(0, 8);
+            
+            // Search all shows, but prioritize by votes for relevance
+            const matches = tvShows
+                .filter(s => s.title.toLowerCase().includes(v))
+                .sort((a,b) => b.votes - a.votes)
+                .slice(0, 8);
+
             al.innerHTML = "";
             if (matches.length) {
                 al.classList.remove('hidden');
