@@ -63,6 +63,8 @@
             justify-content: center; min-height: 64px;
         }
         
+        /* Ensure label text turns black when box is found or partial */
+        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { color: rgba(0,0,0,0.7) !important; }
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
         
@@ -93,11 +95,8 @@
         input:checked + .slider { background-color: #d1a01d; }
         input:checked + .slider:before { transform: translateX(16px); }
 
-        /* Modal Styles */
         #difficultyModal { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
-        .diff-card {
-            background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer;
-        }
+        .diff-card { background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer; }
         .diff-card:hover { border-color: #d1a01d; transform: translateY(-2px); }
 
         .flip { animation: flip-cell 0.6s ease forwards; }
@@ -106,20 +105,15 @@
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
-    <!-- Difficulty Popup -->
     <div id="difficultyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
         <div class="w-full max-w-lg bg-[#0b0c0d] border-2 border-zinc-800 rounded-2xl p-8 shadow-2xl">
             <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Choose Your Difficulty</h3>
             <p class="text-zinc-500 text-xs mb-8 font-bold uppercase tracking-widest">Locked until your streak ends</p>
-            
             <div class="grid grid-cols-1 gap-4">
                 <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
                     <div>
                         <h4 class="font-black text-lg group-hover:text-[#d1a01d]">EASY</h4>
                         <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 1,500 most popular shows</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 flex items-center justify-center group-hover:border-[#d1a01d]">
-                        <div class="w-3 h-3 bg-[#d1a01d] rounded-full scale-0 group-hover:scale-100 transition"></div>
                     </div>
                 </div>
                 <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
@@ -127,17 +121,11 @@
                         <h4 class="font-black text-lg group-hover:text-[#d1a01d]">NORMAL</h4>
                         <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 3,000 most popular shows</p>
                     </div>
-                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 flex items-center justify-center group-hover:border-[#d1a01d]">
-                        <div class="w-3 h-3 bg-[#d1a01d] rounded-full scale-0 group-hover:scale-100 transition"></div>
-                    </div>
                 </div>
                 <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
                     <div>
                         <h4 class="font-black text-lg group-hover:text-[#d1a01d]">IMPOSSIBLE</h4>
                         <p class="text-zinc-500 text-[10px] font-bold uppercase">All available shows in database</p>
-                    </div>
-                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 flex items-center justify-center group-hover:border-[#d1a01d]">
-                        <div class="w-3 h-3 bg-[#d1a01d] rounded-full scale-0 group-hover:scale-100 transition"></div>
                     </div>
                 </div>
             </div>
@@ -209,7 +197,7 @@
             <div class="summary-grid mb-8">
                 <div id="sum-genre" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
-                    <span class="text-[11px] font-black">?</span>
+                    <span class="text-[10px] font-black leading-tight">?</span>
                 </div>
                 <div id="sum-date" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Year</span>
@@ -283,7 +271,6 @@
         let discoveredNetworks = new Set();
         let hintUsed = false;
         let isGameOver = false;
-        let lastGameWon = false;
 
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
@@ -405,11 +392,8 @@
 
         function handleNextShowClick() {
             const s = streaks[currentGameMode];
-            if (s.current === 0) {
-                showDifficultyPopup();
-            } else {
-                startNewGame();
-            }
+            if (s.current === 0) showDifficultyPopup();
+            else startNewGame();
         }
 
         function showDifficultyPopup() {
@@ -439,7 +423,7 @@
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
             guesses = []; minYearBound = 1900; maxYearBound = new Date().getFullYear();
             yearGuessed = false; discoveredGenres = new Set(); discoveredNetworks = new Set();
-            hintUsed = false; isGameOver = false; lastGameWon = false;
+            hintUsed = false; isGameOver = false;
             
             clearUI();
             updateStreakUI();
@@ -491,7 +475,7 @@
                 el.classList.remove('found', 'partial-found');
                 const v = el.querySelector('span:last-child');
                 v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
-                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : "text-[11px] font-black";
+                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : (id === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black");
             });
             updateGuessesLeft();
         }
@@ -529,9 +513,9 @@
             const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
             const el = document.getElementById(cid);
             const v = el.querySelector('span:last-child');
-            v.className = "text-[11px] font-black";
+            v.className = cid === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black";
             
-            if (cid === 'sum-genre') { v.textContent = targetShow.genres[0]; el.classList.add('found'); }
+            if (cid === 'sum-genre') { v.textContent = targetShow.genres.join(", "); el.classList.add('found'); }
             else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
             else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
             else if (cid === 'sum-network') { v.textContent = targetShow.networks[0]; el.classList.add('found'); }
@@ -539,11 +523,6 @@
             else if (cid === 'sum-content-rating') { v.textContent = targetShow.contentRating; el.classList.add('found'); }
             else if (cid === 'sum-rating') { v.textContent = targetShow.score; el.classList.add('found'); }
             saveSession();
-        }
-
-        function surrender() {
-            if (isGameOver) return;
-            endGame(false, false, "SURRENDERED");
         }
 
         function submitGuess(show) {
@@ -592,7 +571,6 @@
                     if (f.type === 'g' && emojiMode) {
                         const emojis = f.val.map(g => GENRE_EMOJIS[g] || '❓');
                         c.textContent = emojis.slice(0, 2).join(" ");
-                        c.setAttribute('data-tooltip', f.val.join(", "));
                         c.style.fontSize = '1.1rem';
                     } else {
                         c.textContent = f.val.slice(0, 2).join(", ");
@@ -602,7 +580,6 @@
                     else if (common.length > 0) c.classList.add('partial');
                     else c.classList.add('incorrect');
                 } else if (f.type === 'o') {
-                    // Origin: Both language and country must match
                     c.innerHTML = `<span class="text-[8px] opacity-60">${f.val.lang.toUpperCase()}</span><span>${f.val.country}</span>`;
                     const langMatch = f.val.lang === targetShow.lang;
                     const countryMatch = f.val.country === targetShow.country;
@@ -610,7 +587,6 @@
                     else if (langMatch || countryMatch) c.classList.add('partial');
                     else c.classList.add('incorrect');
                 } else if (f.type === 'cr') {
-                    // Content Rating
                     c.textContent = f.val;
                     c.classList.add(f.val === targetShow.contentRating ? 'correct' : 'incorrect');
                 } else if (f.type === 'y' || f.type === 's' || f.type === 'r') {
@@ -630,11 +606,13 @@
         }
 
         function updateSummaryUI(guess) {
+            // Updated Genre Logic: Discover and show all genres found
             const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
             commonG.forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
                 const gBox = document.getElementById('sum-genre');
-                gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres)[0];
+                // Display all unique discovered genres
+                gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
                 gBox.classList.remove('found', 'partial-found');
                 gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
             }
@@ -692,7 +670,6 @@
 
         function endGame(won, resumed, customTitle) {
             isGameOver = true;
-            lastGameWon = won;
             document.getElementById('inputSection').classList.add('hidden');
             const sm = document.getElementById('statusMessage');
             sm.classList.remove('hidden');
@@ -718,30 +695,24 @@
             const v = e.target.value.toLowerCase();
             const al = document.getElementById('autocompleteList');
             if (v.length < 2) { al.classList.add('hidden'); return; }
-            
             const matches = tvShows
                 .filter(s => s.title.toLowerCase().includes(v))
                 .sort((a,b) => b.votes - a.votes)
                 .slice(0, 8);
-
             al.innerHTML = "";
             if (matches.length) {
                 al.classList.remove('hidden');
                 matches.forEach(m => {
                     const d = document.createElement('div');
                     d.className = 'autocomplete-item text-sm flex justify-between items-center';
-                    d.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="text-white font-bold">${m.title}</span>
-                            <span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks.slice(0,1)}</span>
-                        </div>
-                        <span class="text-zinc-500 text-[10px] font-black">${m.year}</span>
-                    `;
+                    d.innerHTML = `<div class="flex flex-col"><span class="text-white font-bold">${m.title}</span><span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks.slice(0,1)}</span></div><span class="text-zinc-500 text-[10px] font-black">${m.year}</span>`;
                     d.onclick = () => submitGuess(m);
                     al.appendChild(d);
                 });
             } else al.classList.add('hidden');
         });
+
+        function surrender() { if (!isGameOver) endGame(false, false, "SURRENDERED"); }
 
         document.addEventListener('click', (e) => { 
             if (!document.getElementById('showInput').contains(e.target)) {
