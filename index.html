@@ -121,6 +121,12 @@
             margin: 0 auto 16px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
         }
+
+        .streak-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
@@ -132,7 +138,12 @@
             </div>
             <h1 class="text-3xl font-extrabold tracking-tighter italic">SHOWLEE</h1>
         </div>
-        <div id="gameStatus" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-800/50 px-4 py-1.5 rounded-full border border-slate-700">Loading Data...</div>
+        <div class="flex flex-col items-end gap-1">
+            <div id="gameStatus" class="text-[10px] text-slate-400 font-bold uppercase tracking-widest bg-slate-800/50 px-4 py-1.5 rounded-full border border-slate-700">Loading Data...</div>
+            <div class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">
+                Streak: <span id="currentStreak">0</span> | Best: <span id="bestStreak">0</span>
+            </div>
+        </div>
     </header>
 
     <main class="w-full max-w-4xl flex-grow">
@@ -168,6 +179,9 @@
                 <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
                     class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
                 <div id="autocompleteList" class="autocomplete-items hidden"></div>
+                <div id="guessesLeft" class="text-center mt-3 text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                    6 guesses remaining
+                </div>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-10">
@@ -225,14 +239,41 @@
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
 
+        // Streak variables
+        let streakData = {
+            current: 0,
+            best: 0
+        };
+
         const fileInput = document.getElementById('fileInput');
         const gameInterface = document.getElementById('gameInterface');
         const gameBoard = document.getElementById('gameBoard');
         const showInput = document.getElementById('showInput');
         const autocompleteList = document.getElementById('autocompleteList');
+        const guessesLeftDisplay = document.getElementById('guessesLeft');
+
+        // Initialize Streaks from LocalStorage
+        function loadStreak() {
+            const saved = localStorage.getItem('showlee_streak_data');
+            if (saved) {
+                streakData = JSON.parse(saved);
+                updateStreakDisplay();
+            }
+        }
+
+        function saveStreak() {
+            localStorage.setItem('showlee_streak_data', JSON.stringify(streakData));
+            updateStreakDisplay();
+        }
+
+        function updateStreakDisplay() {
+            document.getElementById('currentStreak').textContent = streakData.current;
+            document.getElementById('bestStreak').textContent = streakData.best;
+        }
 
         // Automatic fetch for GitHub Pages
         window.addEventListener('DOMContentLoaded', async () => {
+            loadStreak();
             try {
                 const response = await fetch('10k_Poplar_Tv_Shows.csv');
                 if (!response.ok) throw new Error('File not found');
@@ -322,6 +363,8 @@
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             document.getElementById('gameStatus').textContent = `${tvShows.length} Shows Loaded`;
+            
+            updateGuessesLeft();
 
             const summaryIds = ['sum-genre', 'sum-date', 'sum-lang', 'sum-country', 'sum-rating'];
             summaryIds.forEach(id => {
@@ -335,11 +378,19 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
+        function updateGuessesLeft() {
+            const left = MAX_GUESSES - guesses.length;
+            guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
+            if (left <= 2) guessesLeftDisplay.classList.replace('text-slate-500', 'text-orange-400');
+            else guessesLeftDisplay.classList.replace('text-orange-400', 'text-slate-500');
+        }
+
         function submitGuess(show) {
             if (guesses.some(g => g.title === show.title)) return;
             guesses.push(show);
             renderRow(show);
             updateSummary(show);
+            updateGuessesLeft();
             showInput.value = "";
             autocompleteList.classList.add('hidden');
             if (show.title === targetShow.title) endGame(true);
@@ -444,6 +495,17 @@
             document.getElementById('inputSection').classList.add('hidden');
             const statusMsg = document.getElementById('statusMessage');
             statusMsg.classList.remove('hidden');
+
+            // Update Streaks
+            if (won) {
+                streakData.current++;
+                if (streakData.current > streakData.best) {
+                    streakData.best = streakData.current;
+                }
+            } else {
+                streakData.current = 0;
+            }
+            saveStreak();
             
             const summaryUpdates = [
                 { id: 'sum-genre', val: targetShow.genres.join(", ") },
