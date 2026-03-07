@@ -14,29 +14,29 @@
             color: #ffffff;
         }
 
-        /* Dark Deep Colors */
+        /* Brighter, More Vibrant Green */
         .correct { 
-            background-color: #014421 !important; /* Forest Green */
-            border-color: #014421 !important; 
-            color: #000000 !important; /* Black text on green */
+            background-color: #10b981 !important; /* Emerald 500 */
+            border-color: #10b981 !important; 
+            color: #000000 !important;
             text-shadow: none;
         }
         .partial { 
-            background-color: #003366 !important; /* Deep Blue */
-            border-color: #003366 !important; 
-            color: #ffffff !important; /* White text on blue */
+            background-color: #004a99 !important; /* Richer Deep Blue */
+            border-color: #004a99 !important; 
+            color: #ffffff !important;
             text-shadow: none;
         }
         .incorrect { 
-            background-color: #800000 !important; /* Dark Red */
+            background-color: #800000 !important; /* Dark Maroon Red */
             border-color: #800000 !important; 
             color: #ffffff !important; 
         }
 
         /* Colorblind mode override */
         body.colorblind-mode .correct { 
-            background-color: #d55e00 !important; 
-            border-color: #d55e00 !important; 
+            background-color: #f57c00 !important; 
+            border-color: #f57c00 !important; 
             color: #000000 !important;
         }
         body.colorblind-mode .partial { 
@@ -98,10 +98,6 @@
             background: rgba(255,255,255,0.1); 
             color: #000000 !important;
         }
-        .partial .poster-overlay {
-            background: rgba(0,0,0,0.2); 
-            color: #ffffff !important;
-        }
 
         .summary-grid {
             display: grid;
@@ -125,13 +121,13 @@
         }
         
         .summary-box.found { 
-            border-color: #014421; 
-            background: #014421; 
+            border-color: #10b981; 
+            background: #10b981; 
             color: #000000;
         }
         .summary-box.partial-found { 
-            border-color: #003366; 
-            background: #003366; 
+            border-color: #004a99; 
+            background: #004a99; 
             color: #ffffff;
         }
         
@@ -199,7 +195,6 @@
 
     <header class="w-full max-w-2xl flex flex-col items-center py-4 border-b border-zinc-800 mb-6">
         <div class="flex items-center gap-3 mb-4">
-            <!-- Inline SVG TV Icon -->
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white">
                 <rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>
             </svg>
@@ -300,7 +295,7 @@
 
     <footer class="w-full max-w-2xl py-8 mt-auto border-t border-zinc-800 flex flex-col items-center gap-4">
         <div class="flex flex-col items-center text-center px-4">
-            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d5376160ad1348134d619b2675d0c8078215341162d5351f733f01b69a216f40.svg" alt="TMDB Logo" class="w-12 mb-2 opacity-80">
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-4 mb-3 opacity-90">
             <p class="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-widest font-bold">
                 This product uses the TMDB API but is not endorsed or certified by TMDB.
             </p>
@@ -651,7 +646,7 @@
             }
             const st = document.getElementById('statusTitle');
             st.textContent = won ? "VICTORY" : "OUT OF GUESSES";
-            st.className = won ? "text-xl font-bold mb-1 text-[#00ff88]" : "text-xl font-bold mb-1 text-red-500";
+            st.className = won ? "text-xl font-bold mb-1 text-[#10b981]" : "text-xl font-bold mb-1 text-red-500";
             document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
             saveSession();
         }
