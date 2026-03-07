@@ -14,20 +14,20 @@
             color: #ffffff;
         }
 
-        /* Original Palette with Requested Swaps */
+        /* Color Scheme from Reference Image */
         .correct { 
-            background-color: #22c55e !important; /* Green */
-            border-color: #16a34a !important; 
+            background-color: #1b8a32 !important; /* Deep Green */
+            border-color: #146425 !important; 
             color: #ffffff !important;
         }
         .partial { 
-            background-color: #3b82f6 !important; /* Blue (replacing Yellow) */
-            border-color: #2563eb !important; 
+            background-color: #d1a01d !important; /* Amber/Yellow from image */
+            border-color: #a37c15 !important; 
             color: #ffffff !important;
         }
         .incorrect { 
-            background-color: #ef4444 !important; /* Red */
-            border-color: #dc2626 !important; 
+            background-color: #c41e1e !important; /* Deep Red */
+            border-color: #8c1515 !important; 
             color: #ffffff !important; 
         }
 
@@ -56,7 +56,7 @@
             word-wrap: break-word;
             padding: 4px;
             box-sizing: border-box;
-            border-radius: 4px;
+            border-radius: 2px; /* Sharper corners like the reference image */
         }
 
         .poster-cell {
@@ -81,7 +81,7 @@
         
         .correct .poster-overlay, .partial .poster-overlay {
             background: transparent; 
-            text-shadow: 0px 1px 4px rgba(0,0,0,0.8);
+            text-shadow: 0px 1px 4px rgba(0,0,0,0.9);
         }
 
         .summary-grid {
@@ -95,7 +95,7 @@
         .summary-box {
             background: #1a1c1e;
             border: 2px solid #2d2f35;
-            border-radius: 8px;
+            border-radius: 4px;
             padding: 8px 2px;
             text-align: center;
             display: flex;
@@ -105,18 +105,18 @@
         }
         
         .summary-box.found { 
-            border-color: #22c55e; 
-            background: #22c55e; 
+            border-color: #1b8a32; 
+            background: #1b8a32; 
             color: #ffffff;
         }
         .summary-box.partial-found { 
-            border-color: #3b82f6; 
-            background: #3b82f6; 
+            border-color: #d1a01d; 
+            background: #d1a01d; 
             color: #ffffff;
         }
         
         .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
-            color: rgba(255,255,255,0.7); 
+            color: rgba(255,255,255,0.8); 
         }
 
         .autocomplete-items {
@@ -153,7 +153,7 @@
         
         .progress-bar-fill {
             height: 100%;
-            background: #3b82f6;
+            background: #d1a01d; /* Using the partial color for accent */
             width: 0%;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -167,9 +167,9 @@
             background: #1a1c1e;
         }
         .mode-btn.active {
-            background: #3b82f6;
+            background: #1b8a32;
             color: white;
-            border-color: #3b82f6;
+            border-color: #1b8a32;
         }
         
         .flip { animation: flip-cell 0.6s ease forwards; }
@@ -183,7 +183,7 @@
 
     <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
         <div class="flex items-center gap-3 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1a01d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>
             </svg>
             <h1 class="text-4xl font-black tracking-tighter italic">SHOWLEE</h1>
@@ -212,14 +212,14 @@
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
         <div id="uploadContainer" class="hidden text-center py-16 border-2 border-dashed border-zinc-800 rounded-xl w-full bg-[#1a1c1e]">
             <p class="text-zinc-400 mb-6 font-bold uppercase tracking-tight">Database Not Loaded</p>
-            <label class="bg-[#3b82f6] text-white font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-blue-600 transition shadow-lg">
+            <label class="bg-[#d1a01d] text-white font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-yellow-600 transition shadow-lg">
                 LOAD CSV
                 <input type="file" id="fileInput" accept=".csv" class="hidden">
             </label>
         </div>
 
         <div id="gameInterface" class="hidden w-full flex flex-col items-center">
-            <div id="statusMessage" class="hidden mb-8 p-8 border-2 border-[#3b82f6] w-full text-center bg-[#1a1c1e] rounded-xl shadow-2xl">
+            <div id="statusMessage" class="hidden mb-8 p-8 border-2 border-[#d1a01d] w-full text-center bg-[#1a1c1e] rounded-xl shadow-2xl">
                 <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 shadow-xl hidden">
                 <h2 id="statusTitle" class="text-3xl font-black mb-2 tracking-tighter italic"></h2>
                 <p id="statusDesc" class="text-zinc-400 text-sm mb-6"></p>
@@ -262,7 +262,7 @@
             <div id="inputSection" class="w-full max-w-md mb-10">
                 <div class="relative flex gap-3">
                     <input id="showInput" type="text" placeholder="Type a TV show name..." autocomplete="off"
-                        class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#3b82f6] text-sm font-bold placeholder-zinc-600">
+                        class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder-zinc-600">
                     <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-5 rounded-lg text-[11px] uppercase disabled:opacity-30 hover:bg-zinc-800 transition">Hint</button>
                     <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
                 </div>
@@ -538,7 +538,6 @@
                     else c.classList.add('incorrect');
                 } else if (f.type === 'y' || f.type === 's' || f.type === 'r') {
                     const tv = f.type === 'y' ? targetShow.year : f.type === 's' ? targetShow.seasons : targetShow.score;
-                    // Years show blue if within 5 years. Seasons and Rating stay at smaller ranges for partial logic.
                     const range = f.type === 'y' ? 5 : f.type === 's' ? 1 : 0.5;
                     c.innerHTML = `<div class="w-full">${f.val}</div>`;
                     if (f.val === tv) c.classList.add('correct');
@@ -586,7 +585,6 @@
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year);
                     else maxYearBound = Math.min(maxYearBound, guess.year);
                     document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
-                    // Summary color for year: if within 5 years of range, show partial color
                     const el = document.getElementById('sum-date');
                     if (Math.abs(guess.year - targetShow.year) <= 5) el.classList.add('partial-found');
                 }
@@ -620,7 +618,7 @@
             }
             const st = document.getElementById('statusTitle');
             st.textContent = won ? "VICTORY" : "GAME OVER";
-            st.className = won ? "text-3xl font-black mb-2 tracking-tighter italic text-[#22c55e]" : "text-3xl font-black mb-2 tracking-tighter italic text-[#ef4444]";
+            st.className = won ? "text-3xl font-black mb-2 tracking-tighter italic text-[#1b8a32]" : "text-3xl font-black mb-2 tracking-tighter italic text-[#c41e1e]";
             document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
             saveSession();
         }
