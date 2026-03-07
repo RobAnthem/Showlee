@@ -63,7 +63,7 @@
             justify-content: center; min-height: 64px;
         }
         
-        /* Ensure label text turns black when box is found or partial */
+        /* Labels turn black on found (green) or partial (yellow) boxes */
         .summary-box.found span:first-child, .summary-box.partial-found span:first-child { color: rgba(0,0,0,0.7) !important; }
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
@@ -606,17 +606,17 @@
         }
 
         function updateSummaryUI(guess) {
-            // Updated Genre Logic: Discover and show all genres found
+            // Genre Summary logic
             const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
             commonG.forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
                 const gBox = document.getElementById('sum-genre');
-                // Display all unique discovered genres
                 gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
                 gBox.classList.remove('found', 'partial-found');
                 gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
             }
 
+            // Network Summary logic
             const commonN = guess.networks.filter(x => targetShow.networks.includes(x));
             commonN.forEach(x => discoveredNetworks.add(x));
             if (discoveredNetworks.size > 0) {
@@ -626,6 +626,7 @@
                 nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
             }
 
+            // Year Summary logic
             if (!yearGuessed) {
                 if (guess.year === targetShow.year) {
                     yearGuessed = true;
@@ -641,23 +642,29 @@
                 }
             }
 
-            if (guess.lang === targetShow.lang || guess.country === targetShow.country) {
-                const oBox = document.getElementById('sum-origin');
-                if (guess.lang === targetShow.lang && guess.country === targetShow.country) {
+            // Origin Summary logic (Locked once Green)
+            const oBox = document.getElementById('sum-origin');
+            if (!oBox.classList.contains('found')) {
+                const langMatch = guess.lang === targetShow.lang;
+                const countryMatch = guess.country === targetShow.country;
+                if (langMatch && countryMatch) {
+                    oBox.classList.remove('partial-found');
                     oBox.classList.add('found');
                     oBox.querySelector('span:last-child').textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`;
-                } else {
+                } else if (langMatch || countryMatch) {
                     oBox.classList.add('partial-found');
-                    oBox.querySelector('span:last-child').textContent = guess.lang === targetShow.lang ? targetShow.lang.toUpperCase() : targetShow.country;
+                    oBox.querySelector('span:last-child').textContent = langMatch ? targetShow.lang.toUpperCase() : targetShow.country;
                 }
             }
 
+            // Content Rating Summary logic
             if (guess.contentRating === targetShow.contentRating) {
                 const crBox = document.getElementById('sum-content-rating');
                 crBox.classList.add('found');
                 crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
             }
 
+            // Seasons and Rating Summary logic
             const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-rating', guess.score, targetShow.score]];
             map.forEach(m => {
                 const el = document.getElementById(m[0]);
