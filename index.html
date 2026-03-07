@@ -142,6 +142,22 @@
             0% { transform: rotateX(90deg); }
             100% { transform: rotateX(0deg); }
         }
+
+        .tmdb-attribution {
+            margin-top: 3rem;
+            padding: 2rem 1rem;
+            border-top: 1px solid #334155;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.7rem;
+        }
+
+        .tmdb-logo {
+            width: 100px;
+            height: auto;
+            margin: 0 auto 0.75rem;
+            display: block;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
@@ -230,7 +246,7 @@
                 </div>
             </div>
 
-            <!-- Headers - EXACT same grid as guess-row -->
+            <!-- Headers -->
             <div class="game-grid mb-2 text-[9px] uppercase font-black text-slate-500 text-center tracking-widest">
                 <div>Poster</div>
                 <div>Genre</div>
@@ -245,6 +261,13 @@
             <div id="gameBoard" class="flex flex-col gap-2 mb-10"></div>
         </div>
     </main>
+
+    <footer class="w-full max-w-2xl tmdb-attribution">
+        <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537610632e749910f30001f99bab2ae3fc15a465a3bc6b140c2b3e573fab9b0.svg" alt="TMDB Logo" class="tmdb-logo">
+        </a>
+        <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+    </footer>
 
     <script>
         const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
@@ -299,34 +322,57 @@
             reader.readAsText(file);
         });
 
+        /**
+         * Robust CSV Parser that handles quoted strings with commas.
+         */
         function parseCSV(text) {
             const rows = [];
             const lines = text.split(/\r?\n/);
-            const headers = lines[0].split(',');
+            if (lines.length === 0) return [];
+            
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
             const getIdx = (n) => headers.indexOf(n);
 
             for (let i = 1; i < lines.length; i++) {
-                if (!lines[i]) continue;
-                const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if (row.length < 10) continue;
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // Simple state machine to split by comma while respecting quotes
+                const cells = [];
+                let currentCell = "";
+                let inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        cells.push(currentCell.trim());
+                        currentCell = "";
+                    } else {
+                        currentCell += char;
+                    }
+                }
+                cells.push(currentCell.trim());
+
+                if (cells.length < headers.length - 2) continue; 
                 
                 try {
-                    const name = row[getIdx('Name')].replace(/"/g, '').trim();
-                    if (name === '[Deleted/Not Found]' || !name) continue;
-                    const genreStr = row[getIdx('Genres')].replace(/"/g, '');
-                    const genres = genreStr.split(',').map(g => g.trim()).filter(g => g && g !== 'N/A' && g !== '-');
+                    const name = cells[getIdx('Name')]?.replace(/"/g, '').trim();
+                    if (!name || name === '[Deleted/Not Found]') continue;
+
+                    const genreStr = cells[getIdx('Genres')] || "";
+                    const genres = genreStr.replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== 'N/A' && g !== '-');
                     
                     rows.push({
                         title: name,
-                        year: parseInt(row[getIdx('Year')]) || 0,
+                        year: parseInt(cells[getIdx('Year')]) || 0,
                         genres: genres.length ? genres : ["Other"],
-                        country: row[getIdx('Country')].replace(/"/g, '') || "??",
-                        lang: row[getIdx('Language')].replace(/"/g, '') || "??",
-                        seasons: parseInt(row[getIdx('Seasons')]) || 0,
-                        score: parseFloat(row[getIdx('User_Score')]) || 0,
-                        poster: row[getIdx('Poster_URL')] ? row[getIdx('Poster_URL')].replace(/"/g, '').trim() : ""
+                        country: cells[getIdx('Country')]?.replace(/"/g, '') || "??",
+                        lang: cells[getIdx('Language')]?.replace(/"/g, '') || "??",
+                        seasons: parseInt(cells[getIdx('Seasons')]) || 0,
+                        score: parseFloat(cells[getIdx('User_Score')]) || 0,
+                        poster: cells[getIdx('Poster_URL')] ? cells[getIdx('Poster_URL')].replace(/"/g, '').trim() : ""
                     });
-                } catch (e) { continue; }
+                } catch (e) { console.warn("Error parsing row", i, e); }
             }
             return rows;
         }
@@ -339,6 +385,7 @@
 
         function resetGame() {
             const pool = tvShows.filter(s => s.poster && s.year > 1950 && s.score > 0);
+            if (pool.length === 0) return;
             targetShow = pool[Math.floor(Math.random() * pool.length)];
             
             guesses = [];
