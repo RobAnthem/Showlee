@@ -10,47 +10,47 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d0d0e;
+            background-color: #0b0c0d;
             color: #ffffff;
         }
 
-        /* Brighter, More Vibrant Green */
+        /* Gamedle Color Palette */
         .correct { 
-            background-color: #10b981 !important; /* Emerald 500 */
-            border-color: #10b981 !important; 
+            background-color: #37eb37 !important; /* Gamedle Neon Green */
+            border-color: #37eb37 !important; 
             color: #000000 !important;
             text-shadow: none;
         }
         .partial { 
-            background-color: #004a99 !important; /* Richer Deep Blue */
-            border-color: #004a99 !important; 
-            color: #ffffff !important;
+            background-color: #ff9900 !important; /* Gamedle Vibrant Orange */
+            border-color: #ff9900 !important; 
+            color: #000000 !important;
             text-shadow: none;
         }
         .incorrect { 
-            background-color: #800000 !important; /* Dark Maroon Red */
-            border-color: #800000 !important; 
+            background-color: #313338 !important; /* Gamedle Charcoal/Dark Grey */
+            border-color: #404249 !important; 
             color: #ffffff !important; 
         }
 
         /* Colorblind mode override */
         body.colorblind-mode .correct { 
-            background-color: #f57c00 !important; 
-            border-color: #f57c00 !important; 
-            color: #000000 !important;
+            background-color: #0072b2 !important; 
+            border-color: #0072b2 !important; 
+            color: #ffffff !important;
         }
         body.colorblind-mode .partial { 
-            background-color: #56b4e9 !important; 
-            border-color: #56b4e9 !important; 
+            background-color: #f0e442 !important; 
+            border-color: #f0e442 !important; 
             color: #000000 !important;
         }
         
         .game-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
+            gap: 6px;
             width: 100%;
-            max-width: 600px;
+            max-width: 620px;
         }
 
         .cell {
@@ -62,16 +62,15 @@
             text-align: center;
             font-weight: 800;
             font-size: 0.65rem;
-            line-height: 1;
-            border: 2px solid #3a3a3c;
+            line-height: 1.1;
+            border: 2px solid #2d2f35;
             text-transform: uppercase;
             transition: all 0.3s ease;
             overflow: hidden;
             word-wrap: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
-            padding: 2px;
+            padding: 4px;
             box-sizing: border-box;
+            border-radius: 4px;
         }
 
         .poster-cell {
@@ -84,7 +83,7 @@
         .poster-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -94,8 +93,8 @@
             color: inherit;
         }
         
-        .correct .poster-overlay {
-            background: rgba(255,255,255,0.1); 
+        .correct .poster-overlay, .partial .poster-overlay {
+            background: transparent; 
             color: #000000 !important;
         }
 
@@ -104,35 +103,35 @@
             grid-template-columns: repeat(7, 1fr);
             gap: 8px;
             width: 100%;
-            max-width: 600px;
+            max-width: 620px;
         }
 
         .summary-box {
-            background: #121213;
-            border: 2px solid #3a3a3c;
-            border-radius: 4px;
-            padding: 6px 2px;
+            background: #1a1c1e;
+            border: 2px solid #2d2f35;
+            border-radius: 8px;
+            padding: 8px 2px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 60px;
-            transition: background-color 0.5s ease, color 0.5s ease;
+            min-height: 64px;
         }
         
         .summary-box.found { 
-            border-color: #10b981; 
-            background: #10b981; 
+            border-color: #37eb37; 
+            background: #37eb37; 
             color: #000000;
         }
         .summary-box.partial-found { 
-            border-color: #004a99; 
-            background: #004a99; 
-            color: #ffffff;
+            border-color: #ff9900; 
+            background: #ff9900; 
+            color: #000000;
         }
         
-        .summary-box.found span:first-child { color: rgba(0,0,0,0.5); }
-        .summary-box.partial-found span:first-child { color: rgba(255,255,255,0.5); }
+        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
+            color: rgba(0,0,0,0.6); 
+        }
 
         .autocomplete-items {
             position: absolute;
@@ -140,84 +139,89 @@
             top: 100%;
             left: 0;
             right: 0;
-            background: #1a1a1b;
-            border: 1px solid #3a3a3c;
+            background: #1a1c1e;
+            border: 1px solid #404249;
             max-height: 250px;
             overflow-y: auto;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin-top: 4px;
         }
 
         .autocomplete-item {
-            padding: 10px;
+            padding: 12px;
             cursor: pointer;
-            border-bottom: 1px solid #3a3a3c;
+            border-bottom: 1px solid #2d2f35;
         }
 
-        .autocomplete-item:hover { background-color: #2a2a2c; }
+        .autocomplete-item:hover { background-color: #2d2f35; }
 
         .progress-bar-container {
             width: 100%;
-            height: 6px;
-            background: #2a2a2c;
-            margin: 15px 0;
+            height: 8px;
+            background: #1a1c1e;
+            margin: 16px 0;
             border-radius: 10px;
             overflow: hidden;
+            border: 1px solid #2d2f35;
         }
         
         .progress-bar-fill {
             height: 100%;
-            background: #565758;
+            background: #5865f2; /* Gamedle/Discord Blue Accent */
             width: 0%;
-            transition: width 0.3s ease;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .mode-btn {
-            padding: 4px 16px;
+            padding: 6px 18px;
             font-size: 12px;
             font-weight: 700;
             text-transform: uppercase;
-            border: 1px solid #3a3a3c;
+            border: 1px solid #404249;
+            background: #1a1c1e;
         }
         .mode-btn.active {
-            background: #ffffff;
-            color: black;
-            border-color: #ffffff;
+            background: #5865f2;
+            color: white;
+            border-color: #5865f2;
         }
         
-        .flip { animation: flip-cell 0.5s ease forwards; }
+        .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell {
-            0% { transform: rotateX(90deg); }
-            100% { transform: rotateX(0deg); }
+            0% { transform: rotateX(90deg); opacity: 0; }
+            100% { transform: rotateX(0deg); opacity: 1; }
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
-    <header class="w-full max-w-2xl flex flex-col items-center py-4 border-b border-zinc-800 mb-6">
-        <div class="flex items-center gap-3 mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+    <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#5865f2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
                 <rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>
             </svg>
-            <h1 class="text-3xl font-black tracking-widest">SHOWLEE</h1>
+            <h1 class="text-4xl font-black tracking-tighter italic">SHOWLEE</h1>
         </div>
         
         <div class="w-full flex justify-between items-end px-2">
-            <div class="flex flex-col gap-2">
+            <div class="flex flex-col gap-3">
                 <div class="flex">
-                    <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active rounded-l">Normal</button>
-                    <button id="modeAnime" onclick="setMode('anime')" class="mode-btn rounded-r">Anime</button>
+                    <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active rounded-l-lg">Normal</button>
+                    <button id="modeAnime" onclick="setMode('anime')" class="mode-btn rounded-r-lg">Anime</button>
                 </div>
-                <div class="flex items-center gap-2 text-[10px] text-zinc-500 uppercase font-bold">
-                    <span>Colorblind</span>
-                    <input type="checkbox" id="colorblindToggle" class="accent-blue-500">
-                </div>
+                <label class="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" id="colorblindToggle" class="hidden peer">
+                    <div class="w-4 h-4 border-2 border-zinc-600 rounded peer-checked:bg-[#5865f2] peer-checked:border-[#5865f2]"></div>
+                    <span class="text-[10px] text-zinc-500 uppercase font-black group-hover:text-zinc-300">Colorblind Mode</span>
+                </label>
             </div>
 
             <div class="flex flex-col items-end">
-                <div class="text-xs font-bold text-zinc-400 uppercase">
-                    <span id="streakModeLabel">Normal</span> Streak: <span id="currentStreak" class="text-white">0</span>
+                <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
+                    <span id="streakModeLabel">Normal</span> Streak
                 </div>
-                <div class="text-[10px] text-zinc-500 uppercase">
+                <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
+                <div class="text-[10px] text-zinc-600 uppercase mt-1 font-bold">
                     Best: <span id="bestStreak">0</span>
                 </div>
             </div>
@@ -225,78 +229,78 @@
     </header>
 
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
-        <div id="uploadContainer" class="hidden text-center py-10 border-2 border-dashed border-zinc-800 rounded w-full">
-            <p class="text-zinc-400 mb-4">Database not detected locally.</p>
-            <label class="bg-white text-black font-bold py-2 px-6 rounded cursor-pointer hover:bg-zinc-200 transition">
-                Upload CSV
+        <div id="uploadContainer" class="hidden text-center py-16 border-2 border-dashed border-zinc-800 rounded-xl w-full bg-[#1a1c1e]">
+            <p class="text-zinc-400 mb-6 font-bold uppercase tracking-tight">Database Not Loaded</p>
+            <label class="bg-[#5865f2] text-white font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-[#4752c4] transition shadow-lg">
+                LOAD CSV
                 <input type="file" id="fileInput" accept=".csv" class="hidden">
             </label>
         </div>
 
         <div id="gameInterface" class="hidden w-full flex flex-col items-center">
-            <div id="statusMessage" class="hidden mb-6 p-6 border-2 border-zinc-800 w-full text-center bg-zinc-900 rounded">
-                <img id="final-reveal-img" src="" alt="Poster" class="w-24 h-36 object-cover mx-auto mb-4 hidden rounded border border-zinc-700">
-                <h2 id="statusTitle" class="text-xl font-bold mb-1"></h2>
-                <p id="statusDesc" class="text-zinc-400 text-sm mb-4"></p>
-                <button onclick="startNewGame()" class="bg-white text-black font-bold py-2 px-6 rounded hover:bg-zinc-200 transition text-sm">
-                    NEW GAME
+            <div id="statusMessage" class="hidden mb-8 p-8 border-2 border-[#5865f2] w-full text-center bg-[#1a1c1e] rounded-xl shadow-2xl">
+                <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 shadow-xl hidden">
+                <h2 id="statusTitle" class="text-3xl font-black mb-2 tracking-tighter italic"></h2>
+                <p id="statusDesc" class="text-zinc-400 text-sm mb-6"></p>
+                <button onclick="startNewGame()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
+                    Next Show
                 </button>
             </div>
 
-            <div class="summary-grid mb-6">
+            <div class="summary-grid mb-8">
                 <div id="sum-genre" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Genre</span>
-                    <span class="text-[10px] font-bold">?</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-date" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Year</span>
-                    <span class="text-[10px] font-bold text-zinc-600">...</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Year</span>
+                    <span class="text-[11px] font-black text-zinc-600">...</span>
                 </div>
                 <div id="sum-seasons" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Seas</span>
-                    <span class="text-[10px] font-bold">?</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Seas</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-network" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Netw</span>
-                    <span class="text-[10px] font-bold">?</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Netw</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-lang" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Lang</span>
-                    <span class="text-[10px] font-bold">?</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Lang</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-country" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Ctry</span>
-                    <span class="text-[10px] font-bold">?</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Ctry</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-rating" class="summary-box">
-                    <span class="text-[9px] text-zinc-500 font-bold uppercase mb-1">Score</span>
-                    <span class="text-[10px] font-bold">?</span>
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Score</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
             </div>
 
-            <div id="inputSection" class="w-full max-w-md mb-8">
-                <div class="relative flex gap-2">
-                    <input id="showInput" type="text" placeholder="Guess a show..." autocomplete="off"
-                        class="flex-grow bg-transparent border-2 border-zinc-700 p-3 focus:outline-none focus:border-zinc-400 text-sm">
-                    <button id="hintButton" onclick="useHint()" disabled class="bg-zinc-800 text-zinc-400 font-bold px-4 text-[10px] uppercase disabled:opacity-30">Hint</button>
-                    <div id="autocompleteList" class="autocomplete-items hidden"></div>
+            <div id="inputSection" class="w-full max-w-md mb-10">
+                <div class="relative flex gap-3">
+                    <input id="showInput" type="text" placeholder="Type a TV show name..." autocomplete="off"
+                        class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#5865f2] text-sm font-bold placeholder-zinc-600">
+                    <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-5 rounded-lg text-[11px] uppercase disabled:opacity-30 hover:bg-zinc-800 transition">Hint</button>
+                    <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
                 </div>
                 <div class="progress-bar-container">
                     <div id="progressBarFill" class="progress-bar-fill"></div>
                 </div>
-                <div id="guessesLeft" class="text-center text-[10px] uppercase font-bold text-zinc-500">
-                    10 guesses left
+                <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">
+                    10 CHANCES LEFT
                 </div>
             </div>
 
-            <div id="gameBoard" class="flex flex-col gap-1.5 w-full items-center mb-10"></div>
+            <div id="gameBoard" class="flex flex-col gap-2 w-full items-center mb-12"></div>
         </div>
     </main>
 
-    <footer class="w-full max-w-2xl py-8 mt-auto border-t border-zinc-800 flex flex-col items-center gap-4">
+    <footer class="w-full max-w-2xl py-10 mt-auto border-t border-zinc-900 flex flex-col items-center gap-6">
         <div class="flex flex-col items-center text-center px-4">
-            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-4 mb-3 opacity-90">
-            <p class="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-widest font-bold">
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-5 mb-4 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+            <p class="text-[9px] text-zinc-600 leading-relaxed uppercase tracking-[0.15em] font-black max-w-xs">
                 This product uses the TMDB API but is not endorsed or certified by TMDB.
             </p>
         </div>
@@ -318,10 +322,7 @@
         let hintUsed = false;
         let isGameOver = false;
 
-        let streaks = {
-            normal: { current: 0, best: 0 },
-            anime: { current: 0, best: 0 }
-        };
+        let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 } };
 
         const fileInput = document.getElementById('fileInput');
         const gameInterface = document.getElementById('gameInterface');
@@ -476,8 +477,8 @@
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
                 const v = el.querySelector('span:last-child');
-                v.textContent = id === 'sum-date' ? `${minYearBound} — ${maxYearBound}` : "?";
-                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[10px] font-bold text-zinc-600" : "text-[10px] font-bold";
+                v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
+                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : "text-[11px] font-black";
             });
             updateGuessesLeft();
         }
@@ -493,7 +494,7 @@
         function updateGuessesLeft() {
             if (isGameOver) return;
             const left = MAX_GUESSES - guesses.length;
-            guessesLeftDisplay.textContent = `${left} guesses left`;
+            guessesLeftDisplay.textContent = `${left} CHANCES LEFT`;
             progressBarFill.style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
             hintButton.disabled = (guesses.length < 4 || hintUsed);
         }
@@ -508,7 +509,7 @@
             const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
             const el = document.getElementById(cid);
             const v = el.querySelector('span:last-child');
-            v.className = "text-[10px] font-bold";
+            v.className = "text-[11px] font-black";
             if (cid === 'sum-genre') { v.textContent = targetShow.genres[0]; el.classList.add('found'); }
             else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
             else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
@@ -610,11 +611,11 @@
                     const el = document.getElementById('sum-date');
                     el.classList.add('found');
                     const v = el.querySelector('span:last-child');
-                    v.textContent = targetShow.year; v.className = "text-[10px] font-bold";
+                    v.textContent = targetShow.year; v.className = "text-[11px] font-black";
                 } else if (guess.year > 0) {
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year);
                     else maxYearBound = Math.min(maxYearBound, guess.year);
-                    document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}-${maxYearBound}`;
+                    document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
                 }
             }
 
@@ -645,8 +646,8 @@
                 img.src = targetShow.poster; img.classList.remove('hidden');
             }
             const st = document.getElementById('statusTitle');
-            st.textContent = won ? "VICTORY" : "OUT OF GUESSES";
-            st.className = won ? "text-xl font-bold mb-1 text-[#10b981]" : "text-xl font-bold mb-1 text-red-500";
+            st.textContent = won ? "VICTORY" : "GAME OVER";
+            st.className = won ? "text-3xl font-black mb-2 tracking-tighter italic text-[#37eb37]" : "text-3xl font-black mb-2 tracking-tighter italic text-red-500";
             document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
             saveSession();
         }
@@ -660,9 +661,15 @@
                 autocompleteList.classList.remove('hidden');
                 matches.forEach(m => {
                     const d = document.createElement('div');
-                    d.className = 'autocomplete-item text-sm flex justify-between';
+                    d.className = 'autocomplete-item text-sm flex justify-between items-center';
                     const isM = (currentGameMode === 'anime' && m.country === 'JP') || (currentGameMode === 'normal' && m.country !== 'JP');
-                    d.innerHTML = `<span class="${isM ? 'text-white font-bold' : 'text-zinc-500'}">${m.title}</span><span class="text-zinc-500 text-[10px]">${m.year}</span>`;
+                    d.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="${isM ? 'text-white font-bold' : 'text-zinc-500 font-medium'}">${m.title}</span>
+                            <span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks.slice(0,1)}</span>
+                        </div>
+                        <span class="text-zinc-500 text-[10px] font-black">${m.year}</span>
+                    `;
                     d.onclick = () => submitGuess(m);
                     autocompleteList.appendChild(d);
                 });
