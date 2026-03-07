@@ -14,16 +14,16 @@
             color: #ffffff;
         }
 
-        /* Color Scheme from Reference Image */
+        /* Color Scheme: Black text on Bright Colors */
         .correct { 
             background-color: #1b8a32 !important; /* Deep Green */
             border-color: #146425 !important; 
-            color: #ffffff !important;
+            color: #000000 !important; /* Black text */
         }
         .partial { 
             background-color: #d1a01d !important; /* Amber/Yellow from image */
             border-color: #a37c15 !important; 
-            color: #ffffff !important;
+            color: #000000 !important; /* Black text */
         }
         .incorrect { 
             background-color: #c41e1e !important; /* Deep Red */
@@ -56,7 +56,7 @@
             word-wrap: break-word;
             padding: 4px;
             box-sizing: border-box;
-            border-radius: 2px; /* Sharper corners like the reference image */
+            border-radius: 2px;
         }
 
         .poster-cell {
@@ -76,12 +76,14 @@
             padding: 4px;
             font-size: 0.6rem;
             text-align: center;
-            color: inherit;
+            color: white; /* Title remains white over dark poster */
         }
         
+        /* When poster is correct or partial, ensure text visibility */
         .correct .poster-overlay, .partial .poster-overlay {
             background: transparent; 
-            text-shadow: 0px 1px 4px rgba(0,0,0,0.9);
+            color: #000000 !important;
+            font-weight: 900;
         }
 
         .summary-grid {
@@ -107,16 +109,16 @@
         .summary-box.found { 
             border-color: #1b8a32; 
             background: #1b8a32; 
-            color: #ffffff;
+            color: #000000; /* Black text */
         }
         .summary-box.partial-found { 
             border-color: #d1a01d; 
             background: #d1a01d; 
-            color: #ffffff;
+            color: #000000; /* Black text */
         }
         
         .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
-            color: rgba(255,255,255,0.8); 
+            color: rgba(0,0,0,0.6) !important; 
         }
 
         .autocomplete-items {
@@ -153,7 +155,7 @@
         
         .progress-bar-fill {
             height: 100%;
-            background: #d1a01d; /* Using the partial color for accent */
+            background: #d1a01d;
             width: 0%;
             transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -168,7 +170,7 @@
         }
         .mode-btn.active {
             background: #1b8a32;
-            color: white;
+            color: black;
             border-color: #1b8a32;
         }
         
@@ -212,7 +214,7 @@
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
         <div id="uploadContainer" class="hidden text-center py-16 border-2 border-dashed border-zinc-800 rounded-xl w-full bg-[#1a1c1e]">
             <p class="text-zinc-400 mb-6 font-bold uppercase tracking-tight">Database Not Loaded</p>
-            <label class="bg-[#d1a01d] text-white font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-yellow-600 transition shadow-lg">
+            <label class="bg-[#d1a01d] text-black font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-yellow-600 transition shadow-lg">
                 LOAD CSV
                 <input type="file" id="fileInput" accept=".csv" class="hidden">
             </label>
@@ -543,7 +545,9 @@
                     if (f.val === tv) c.classList.add('correct');
                     else {
                         c.classList.add(Math.abs(f.val - tv) <= range ? 'partial' : 'incorrect');
-                        c.innerHTML += `<div class="text-[8px] font-black opacity-60">${f.val < tv ? '▲' : '▼'}</div>`;
+                        const arrow = f.val < tv ? '▲' : '▼';
+                        const opacity = c.classList.contains('partial') ? 'opacity-40' : 'opacity-60';
+                        c.innerHTML += `<div class="text-[8px] font-black ${opacity}">${arrow}</div>`;
                     }
                 } else {
                     const tv = f.type === 'l' ? targetShow.lang : targetShow.country;
