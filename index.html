@@ -14,12 +14,19 @@
             color: #f1f5f9;
         }
 
-        /* Vibrant High-Contrast Colors */
+        /* Standard Colors */
         .correct { background-color: #00FF00 !important; border-color: #00CC00 !important; color: #000 !important; }
         .partial { background-color: #FFD700 !important; border-color: #CCAC00 !important; color: #000 !important; }
         .incorrect { background-color: #FF1a1a !important; border-color: #CC0000 !important; color: #fff !important; }
 
-        /* Unified Grid System */
+        /* Colorblind Mode Overrides (High Contrast Blue/Orange/White) */
+        body.colorblind-mode .correct { background-color: #3b82f6 !important; border-color: #1d4ed8 !important; color: #fff !important; }
+        body.colorblind-mode .partial { background-color: #f97316 !important; border-color: #c2410c !important; color: #fff !important; }
+        body.colorblind-mode .incorrect { background-color: #475569 !important; border-color: #1e293b !important; color: #94a3b8 !important; }
+        
+        body.colorblind-mode .summary-box.found { background-color: #3b82f6 !important; color: #fff !important; border-color: #3b82f6; }
+        body.colorblind-mode .summary-box.partial-found { background-color: #f97316 !important; color: #fff !important; border-color: #f97316; }
+
         .game-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -64,7 +71,6 @@
             line-height: 1.1;
         }
 
-        /* Summary Boxes Uniform Sizing */
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -158,16 +164,54 @@
             margin: 0 auto 0.75rem;
             display: block;
         }
+
+        /* Toggle Switch Styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #334155;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px; width: 14px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #6366f1; }
+        input:checked + .slider:before { transform: translateX(14px); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
     <header class="w-full max-w-2xl flex justify-between items-center py-4 border-b border-slate-700 mb-6">
-        <div class="flex items-center gap-2">
-            <div class="bg-indigo-600 p-2 rounded-lg">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+        <div class="flex flex-col">
+            <div class="flex items-center gap-2">
+                <div class="bg-indigo-600 p-2 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tighter italic">SHOWLEE</h1>
             </div>
-            <h1 class="text-2xl font-extrabold tracking-tighter italic">SHOWLEE</h1>
+            <!-- Colorblind Toggle -->
+            <div class="flex items-center gap-2 mt-2">
+                <label class="switch">
+                    <input type="checkbox" id="colorblindToggle">
+                    <span class="slider"></span>
+                </label>
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Colorblind Mode</span>
+            </div>
         </div>
         <div class="flex flex-col items-end">
             <div class="text-[10px] font-black tracking-widest text-indigo-400 uppercase">
@@ -179,6 +223,7 @@
     <main class="w-full max-w-2xl flex-grow">
         <div id="uploadContainer" class="hidden bg-slate-800/40 border-2 border-dashed border-slate-700 rounded-3xl p-12 text-center">
             <h3 class="text-xl font-bold mb-4">TV Database Missing</h3>
+            <p class="text-slate-400 mb-6 text-sm">Please select the TV metadata CSV file to start playing.</p>
             <label class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-xl cursor-pointer transition inline-block">
                 Load CSV File
                 <input type="file" id="fileInput" accept=".csv" class="hidden">
@@ -190,12 +235,11 @@
                 <img id="final-reveal-img" src="" alt="Poster" class="w-32 h-48 object-cover rounded-xl mx-auto mb-4 hidden shadow-2xl">
                 <h2 id="statusTitle" class="text-2xl font-black mb-1"></h2>
                 <p id="statusDesc" class="text-slate-400 mb-4"></p>
-                <button onclick="resetGame()" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-indigo-500 transition">
+                <button onclick="startNewGame()" class="bg-indigo-600 text-white font-bold py-2 px-6 rounded-xl hover:bg-indigo-500 transition">
                     PLAY AGAIN
                 </button>
             </div>
 
-            <!-- Dashboard -->
             <div class="summary-grid mb-8">
                 <div id="sum-genre" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Genre</div>
@@ -223,7 +267,6 @@
                 </div>
             </div>
 
-            <!-- Input and Hint -->
             <div id="inputSection" class="relative max-w-md mx-auto mb-8">
                 <div class="flex gap-2">
                     <div class="relative flex-grow">
@@ -246,7 +289,6 @@
                 </div>
             </div>
 
-            <!-- Headers -->
             <div class="game-grid mb-2 text-[9px] uppercase font-black text-slate-500 text-center tracking-widest">
                 <div>Poster</div>
                 <div>Genre</div>
@@ -257,7 +299,6 @@
                 <div>Score</div>
             </div>
 
-            <!-- Board -->
             <div id="gameBoard" class="flex flex-col gap-2 mb-10"></div>
         </div>
     </main>
@@ -281,6 +322,7 @@
         let yearGuessed = false;
         let discoveredGenres = new Set();
         let hintUsed = false;
+        let isGameOver = false;
         let streakData = { current: 0, best: 0 };
 
         const fileInput = document.getElementById('fileInput');
@@ -291,15 +333,25 @@
         const guessesLeftDisplay = document.getElementById('guessesLeft');
         const progressBarFill = document.getElementById('progressBarFill');
         const hintButton = document.getElementById('hintButton');
+        const colorblindToggle = document.getElementById('colorblindToggle');
 
         window.addEventListener('DOMContentLoaded', async () => {
-            const saved = localStorage.getItem('showlee_streak_vibrant_v2');
-            if (saved) {
-                streakData = JSON.parse(saved);
+            // Load Streaks
+            const savedStreaks = localStorage.getItem('showlee_streak_v2');
+            if (savedStreaks) {
+                streakData = JSON.parse(savedStreaks);
                 document.getElementById('currentStreak').textContent = streakData.current;
                 document.getElementById('bestStreak').textContent = streakData.best;
             }
-            
+
+            // Load Colorblind Mode Preference
+            const cbPref = localStorage.getItem('showlee_colorblind');
+            if (cbPref === 'true') {
+                document.body.classList.add('colorblind-mode');
+                colorblindToggle.checked = true;
+            }
+
+            // Load Data
             try {
                 const response = await fetch('tv_metadata_clean_2026-03-07.csv');
                 if (!response.ok) throw new Error('Not found');
@@ -308,6 +360,16 @@
                 if (tvShows.length > 0) initGame();
             } catch (err) {
                 document.getElementById('uploadContainer').classList.remove('hidden');
+            }
+        });
+
+        colorblindToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.add('colorblind-mode');
+                localStorage.setItem('showlee_colorblind', 'true');
+            } else {
+                document.body.classList.remove('colorblind-mode');
+                localStorage.setItem('showlee_colorblind', 'false');
             }
         });
 
@@ -322,9 +384,6 @@
             reader.readAsText(file);
         });
 
-        /**
-         * Robust CSV Parser that handles quoted strings with commas.
-         */
         function parseCSV(text) {
             const rows = [];
             const lines = text.split(/\r?\n/);
@@ -337,19 +396,15 @@
                 const line = lines[i].trim();
                 if (!line) continue;
 
-                // Simple state machine to split by comma while respecting quotes
                 const cells = [];
                 let currentCell = "";
                 let inQuotes = false;
                 for (let char of line) {
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) {
                         cells.push(currentCell.trim());
                         currentCell = "";
-                    } else {
-                        currentCell += char;
-                    }
+                    } else currentCell += char;
                 }
                 cells.push(currentCell.trim());
 
@@ -372,7 +427,7 @@
                         score: parseFloat(cells[getIdx('User_Score')]) || 0,
                         poster: cells[getIdx('Poster_URL')] ? cells[getIdx('Poster_URL')].replace(/"/g, '').trim() : ""
                     });
-                } catch (e) { console.warn("Error parsing row", i, e); }
+                } catch (e) {}
             }
             return rows;
         }
@@ -380,12 +435,23 @@
         function initGame() {
             document.getElementById('uploadContainer').classList.add('hidden');
             gameInterface.classList.remove('hidden');
-            resetGame();
+            
+            // Check for saved session
+            const savedSession = localStorage.getItem('showlee_session');
+            if (savedSession) {
+                const session = JSON.parse(savedSession);
+                // Ensure target show still exists in loaded data
+                const matchedTarget = tvShows.find(s => s.title === session.targetShow.title);
+                if (matchedTarget) {
+                    resumeGame(session);
+                    return;
+                }
+            }
+            startNewGame();
         }
 
-        function resetGame() {
+        function startNewGame() {
             const pool = tvShows.filter(s => s.poster && s.year > 1950 && s.score > 0);
-            if (pool.length === 0) return;
             targetShow = pool[Math.floor(Math.random() * pool.length)];
             
             guesses = [];
@@ -394,24 +460,75 @@
             yearGuessed = false;
             discoveredGenres = new Set();
             hintUsed = false;
+            isGameOver = false;
 
+            clearUI();
+            saveSession();
+        }
+
+        function resumeGame(session) {
+            targetShow = session.targetShow;
+            guesses = [];
+            minYearBound = session.minYearBound;
+            maxYearBound = session.maxYearBound;
+            yearGuessed = session.yearGuessed;
+            discoveredGenres = new Set(session.discoveredGenres);
+            hintUsed = session.hintUsed;
+            isGameOver = session.isGameOver;
+
+            clearUI();
+            
+            // Re-render all guesses
+            session.guesses.forEach(g => {
+                guesses.push(g);
+                renderRow(g, false); // No animation delay on resume
+                updateSummaryUI(g);
+            });
+
+            if (hintUsed) {
+                hintButton.disabled = true;
+            }
+
+            if (isGameOver) {
+                // If game was over, show the end screen
+                const won = guesses.length > 0 && guesses[guesses.length - 1].title === targetShow.title;
+                endGame(won, true);
+            } else {
+                updateGuessesLeft();
+            }
+        }
+
+        function clearUI() {
             gameBoard.innerHTML = "";
             showInput.value = "";
             autocompleteList.classList.add('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             
-            updateGuessesLeft();
-
             const summaryIds = ['sum-genre', 'sum-date', 'sum-seasons', 'sum-lang', 'sum-country', 'sum-rating'];
             summaryIds.forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
                 const valEl = el.querySelector('div:last-child');
-                valEl.textContent = id === 'sum-date' ? "Searching..." : "?";
-                if (id === 'sum-date') valEl.classList.add('italic', 'opacity-40');
+                valEl.textContent = id === 'sum-date' ? `${minYearBound} — ${maxYearBound}` : "?";
+                if (id === 'sum-date' && !yearGuessed) valEl.classList.add('italic', 'opacity-40');
             });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            updateGuessesLeft();
+        }
+
+        function saveSession() {
+            const session = {
+                targetShow,
+                guesses,
+                minYearBound,
+                maxYearBound,
+                yearGuessed,
+                discoveredGenres: Array.from(discoveredGenres),
+                hintUsed,
+                isGameOver
+            };
+            localStorage.setItem('showlee_session', JSON.stringify(session));
         }
 
         function updateGuessesLeft() {
@@ -419,11 +536,11 @@
             const left = MAX_GUESSES - count;
             guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
             progressBarFill.style.width = `${(count / MAX_GUESSES) * 100}%`;
-            hintButton.disabled = (count < 5 || hintUsed);
+            hintButton.disabled = (count < 5 || hintUsed || isGameOver);
         }
 
         function useHint() {
-            if (hintUsed || guesses.length < 5) return;
+            if (hintUsed || guesses.length < 5 || isGameOver) return;
             hintUsed = true;
             hintButton.disabled = true;
 
@@ -457,21 +574,24 @@
             } else if (chosenId === 'sum-rating') {
                 valEl.textContent = targetShow.score;
             }
+            saveSession();
         }
 
         function submitGuess(show) {
-            if (guesses.some(g => g.title === show.title)) return;
+            if (isGameOver || guesses.some(g => g.title === show.title)) return;
             guesses.push(show);
-            renderRow(show);
-            updateSummary(show);
+            renderRow(show, true);
+            updateSummaryUI(show);
             updateGuessesLeft();
             showInput.value = "";
             autocompleteList.classList.add('hidden');
+            
             if (show.title === targetShow.title) endGame(true);
             else if (guesses.length >= MAX_GUESSES) endGame(false);
+            else saveSession();
         }
 
-        function renderRow(guess) {
+        function renderRow(guess, animate = true) {
             const row = document.createElement('div');
             row.className = 'game-grid';
             
@@ -487,8 +607,11 @@
 
             fields.forEach((field, i) => {
                 const cell = document.createElement('div');
-                cell.className = 'cell flip';
-                cell.style.animationDelay = `${i * 100}ms`;
+                cell.className = 'cell';
+                if (animate) {
+                    cell.classList.add('flip');
+                    cell.style.animationDelay = `${i * 100}ms`;
+                }
 
                 if (field.type === 'title') {
                     cell.classList.add('poster-cell');
@@ -541,7 +664,7 @@
             gameBoard.prepend(row);
         }
 
-        function updateSummary(guess) {
+        function updateSummaryUI(guess) {
             const genreBox = document.getElementById('sum-genre');
             if (!genreBox.classList.contains('found')) {
                 const common = guess.genres.filter(g => targetShow.genres.includes(g));
@@ -585,20 +708,24 @@
             });
         }
 
-        function endGame(won) {
+        function endGame(won, isResumed = false) {
+            isGameOver = true;
             document.getElementById('inputSection').classList.add('hidden');
             const statusMsg = document.getElementById('statusMessage');
             statusMsg.classList.remove('hidden');
 
-            if (won) {
-                streakData.current++;
-                if (streakData.current > streakData.best) streakData.best = streakData.current;
-            } else streakData.current = 0;
+            if (!isResumed) {
+                if (won) {
+                    streakData.current++;
+                    if (streakData.current > streakData.best) streakData.best = streakData.current;
+                } else streakData.current = 0;
+                
+                localStorage.setItem('showlee_streak_v2', JSON.stringify(streakData));
+                document.getElementById('currentStreak').textContent = streakData.current;
+                document.getElementById('bestStreak').textContent = streakData.best;
+            }
             
-            localStorage.setItem('showlee_streak_vibrant_v2', JSON.stringify(streakData));
-            document.getElementById('currentStreak').textContent = streakData.current;
-            document.getElementById('bestStreak').textContent = streakData.best;
-            
+            // Fill in all remaining info
             const summaryUpdates = [
                 { id: 'sum-genre', val: targetShow.genres.join(", ") },
                 { id: 'sum-date', val: targetShow.year },
@@ -623,9 +750,11 @@
             }
 
             document.getElementById('statusTitle').textContent = won ? "VICTORY!" : "GAME OVER";
-            document.getElementById('statusTitle').style.color = won ? "#00FF00" : "#FF1a1a";
+            document.getElementById('statusTitle').style.color = won ? (document.body.classList.contains('colorblind-mode') ? "#3b82f6" : "#00FF00") : "#FF1a1a";
             document.getElementById('statusDesc').innerHTML = `The show was <strong>${targetShow.title}</strong>.`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            saveSession();
+            if (!isResumed) window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         showInput.addEventListener('input', (e) => {
