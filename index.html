@@ -14,10 +14,15 @@
             color: #f1f5f9;
         }
 
+        /* Vibrant Colors */
+        .correct { background-color: #00ff40 !important; border-color: #00cc33 !important; color: #000 !important; }
+        .partial { background-color: #ffcc00 !important; border-color: #e6b800 !important; color: #000 !important; }
+        .incorrect { background-color: #ff3333 !important; border-color: #cc0000 !important; color: #fff !important; }
+
         .guess-row {
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr;
-            gap: 6px;
+            grid-template-columns: 1.5fr 1fr 1fr 0.8fr 0.8fr 0.8fr 0.8fr; /* Added column for seasons */
+            gap: 8px;
             margin-bottom: 10px;
             perspective: 1000px;
         }
@@ -29,44 +34,41 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-weight: 700;
-            font-size: 0.6rem;
+            font-weight: 800;
+            font-size: 0.65rem;
             border: 2px solid #334155;
-            border-radius: 10px;
-            padding: 2px;
+            border-radius: 8px;
+            padding: 4px;
             transition: transform 0.6s;
             transform-style: preserve-3d;
             background: #1e293b;
             overflow: hidden;
             word-break: break-word;
-            position: relative;
         }
 
         .poster-cell {
             padding: 0;
             background-size: cover;
             background-position: center;
+            position: relative;
         }
 
         .poster-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 4px;
-            color: white !important; /* Keep title visible over posters */
+            color: white !important;
+            font-size: 0.6rem;
         }
 
         @media (min-width: 640px) {
-            .cell { font-size: 0.75rem; padding: 6px; }
+            .cell { font-size: 0.75rem; }
             .guess-row { gap: 10px; }
         }
-
-        .correct { background-color: #22c55e !important; border-color: #16a34a !important; color: #000 !important; }
-        .partial { background-color: #eab308 !important; border-color: #ca8a04 !important; color: #000 !important; }
-        .incorrect { background-color: #ef4444 !important; border-color: #dc2626 !important; }
 
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell {
@@ -82,15 +84,15 @@
             left: 0;
             right: 0;
             background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 0 0 12px 12px;
+            border: 1px solid #475569;
+            border-radius: 0 0 16px 16px;
             max-height: 300px;
             overflow-y: auto;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
         }
 
         .autocomplete-item {
-            padding: 12px 16px;
+            padding: 14px;
             cursor: pointer;
             border-bottom: 1px solid #334155;
             display: flex;
@@ -103,36 +105,27 @@
         .summary-box {
             background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 16px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 8px;
             text-align: center;
-            min-height: 85px;
+            aspect-ratio: 1/1; /* Uniform Size */
             display: flex;
             flex-direction: column;
             justify-content: center;
-            transition: all 0.3s ease;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .summary-box.found { border-color: #22c55e; background: #22c55e; color: #000; }
-        .summary-box.partial-found { border-color: #eab308; background: #eab308; color: #000; }
         
-        /* Ensure specific sub-elements in summary boxes respect the black text rule */
+        .summary-box.found { border-color: #00ff40; background: #00ff40; color: #000; }
+        .summary-box.partial-found { border-color: #ffcc00; background: #ffcc00; color: #000; }
         .summary-box.found div, .summary-box.partial-found div { color: #000 !important; }
-
-        #final-reveal-img {
-            width: 160px;
-            height: 240px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin: 0 auto 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-        }
 
         .progress-bar-container {
             width: 100%;
-            height: 8px;
+            height: 10px;
             background: #1e293b;
-            border-radius: 4px;
-            margin: 10px 0;
+            border-radius: 5px;
+            margin: 12px 0;
             overflow: hidden;
             border: 1px solid #334155;
         }
@@ -142,6 +135,15 @@
             background: #6366f1;
             width: 0%;
             transition: width 0.4s ease;
+        }
+
+        #hintButton {
+            transition: all 0.3s ease;
+        }
+        #hintButton:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            filter: grayscale(1);
         }
     </style>
 </head>
@@ -171,7 +173,7 @@
                 </div>
                 <div>
                     <h3 class="text-2xl font-bold mb-1">Data File Missing</h3>
-                    <p class="text-slate-400 text-sm mb-8">Please upload 10k_Poplar_Tv_Shows.csv manually</p>
+                    <p class="text-slate-400 text-sm mb-8">Please upload tv_metadata_clean_2026-03-07.csv manually</p>
                     <label class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-2xl cursor-pointer transition shadow-xl shadow-indigo-900/40 inline-block">
                         Select File
                         <input type="file" id="fileInput" accept=".csv" class="hidden">
@@ -182,7 +184,7 @@
 
         <div id="gameInterface" class="hidden">
             <div id="statusMessage" class="hidden mb-8 p-8 rounded-3xl bg-slate-800 border-2 border-slate-700 text-center shadow-2xl">
-                <img id="final-reveal-img" src="" alt="Poster" class="hidden">
+                <img id="final-reveal-img" src="" alt="Poster" class="w-40 h-60 object-cover rounded-xl mx-auto mb-4 hidden shadow-2xl">
                 <h2 id="statusTitle" class="text-3xl font-black mb-2"></h2>
                 <p id="statusDesc" class="text-slate-400 mb-6"></p>
                 <button onclick="resetGame()" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-indigo-500 transition shadow-lg">
@@ -190,34 +192,48 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+            <!-- Uniform Summary Boxes -->
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-8">
                 <div id="sum-genre" class="summary-box">
-                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Genres</div>
-                    <div class="text-xs font-bold">?</div>
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Genre</div>
+                    <div class="text-[10px] font-bold">?</div>
                 </div>
                 <div id="sum-date" class="summary-box">
-                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Release</div>
-                    <div class="text-xs font-bold italic text-slate-400">...</div>
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Year</div>
+                    <div class="text-[10px] font-bold italic text-slate-400">...</div>
+                </div>
+                <div id="sum-seasons" class="summary-box">
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Seasons</div>
+                    <div class="text-[10px] font-bold">?</div>
                 </div>
                 <div id="sum-lang" class="summary-box">
-                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Language</div>
-                    <div class="text-xs font-bold">?</div>
+                    <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Lang</div>
+                    <div class="text-[10px] font-bold">?</div>
                 </div>
                 <div id="sum-country" class="summary-box">
                     <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Country</div>
-                    <div class="text-xs font-bold">?</div>
+                    <div class="text-[10px] font-bold">?</div>
                 </div>
                 <div id="sum-rating" class="summary-box">
                     <div class="text-[9px] uppercase text-slate-500 font-black tracking-widest mb-1">Rating</div>
-                    <div class="text-xs font-bold">?</div>
+                    <div class="text-[10px] font-bold">?</div>
                 </div>
             </div>
 
-            <!-- Moved search bar here -->
+            <!-- Search Area -->
             <div id="inputSection" class="relative max-w-md mx-auto mb-12">
-                <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
-                    class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
-                <div id="autocompleteList" class="autocomplete-items hidden"></div>
+                <div class="flex gap-2">
+                    <div class="relative flex-grow">
+                        <input id="showInput" type="text" placeholder="Search for a show..." autocomplete="off"
+                            class="w-full bg-slate-800 border-2 border-slate-700 rounded-2xl px-6 py-4 focus:outline-none focus:border-indigo-500 transition shadow-xl">
+                        <div id="autocompleteList" class="autocomplete-items hidden"></div>
+                    </div>
+                    <!-- Hint Button -->
+                    <button id="hintButton" onclick="useHint()" disabled class="bg-amber-500 hover:bg-amber-400 text-black font-black px-4 rounded-2xl shadow-lg flex flex-col items-center justify-center text-[10px]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+                        HINT
+                    </button>
+                </div>
                 
                 <div class="mt-4 px-2">
                     <div class="progress-bar-container">
@@ -229,13 +245,14 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-6 gap-2 mb-3 text-[10px] uppercase font-black text-slate-500 text-center tracking-widest">
+            <div class="grid grid-cols-7 gap-2 mb-3 text-[9px] uppercase font-black text-slate-500 text-center tracking-widest">
                 <div class="col-span-1">Title</div>
                 <div>Genres</div>
                 <div>Year</div>
+                <div>Seas</div>
                 <div>Lang</div>
                 <div>Country</div>
-                <div>Rating</div>
+                <div>Score</div>
             </div>
 
             <div id="gameBoard" class="mb-10"></div>
@@ -243,29 +260,20 @@
     </main>
 
     <script>
-        const genreMap = {
-            10759: "Action", 16: "Animation", 35: "Comedy", 80: "Crime", 99: "Doc", 
-            18: "Drama", 10751: "Family", 10762: "Kids", 9648: "Mystery", 10763: "News", 
-            10764: "Reality", 10765: "Sci-Fi or Fantasy", 10766: "Soap", 10767: "Talk", 
-            10768: "War", 37: "Western"
-        };
-
         const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
 
         let tvShows = [];
         let targetShow;
         let guesses = [];
-        const MAX_GUESSES = 10; // Updated to 10
+        const MAX_GUESSES = 10;
         
         let minYearBound = 1900;
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
         let discoveredGenres = new Set();
+        let hintUsed = false;
 
-        let streakData = {
-            current: 0,
-            best: 0
-        };
+        let streakData = { current: 0, best: 0 };
 
         const fileInput = document.getElementById('fileInput');
         const gameInterface = document.getElementById('gameInterface');
@@ -274,6 +282,7 @@
         const autocompleteList = document.getElementById('autocompleteList');
         const guessesLeftDisplay = document.getElementById('guessesLeft');
         const progressBarFill = document.getElementById('progressBarFill');
+        const hintButton = document.getElementById('hintButton');
 
         function loadStreak() {
             const saved = localStorage.getItem('showlee_streak_data');
@@ -296,7 +305,7 @@
         window.addEventListener('DOMContentLoaded', async () => {
             loadStreak();
             try {
-                const response = await fetch('10k_Poplar_Tv_Shows.csv');
+                const response = await fetch('tv_metadata_clean_2026-03-07.csv');
                 if (!response.ok) throw new Error('File not found');
                 const text = await response.text();
                 tvShows = parseCSV(text);
@@ -321,40 +330,32 @@
         function parseCSV(text) {
             const rows = [];
             const lines = text.split(/\r?\n/);
+            // ID,Name,Year,Genres,Country,Language,Seasons,Networks,Rating,User_Score,Status,Poster_URL
             const headers = lines[0].split(',');
             const getIdx = (name) => headers.indexOf(name);
 
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i]) continue;
+                // Complex split to handle quotes
                 const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-                if (row.length < 13) continue;
+                if (row.length < 10) continue;
                 
                 try {
-                    const genreIds = row[getIdx('genre_ids')].match(/\d+/g);
-                    let genres = [];
-                    if (genreIds) {
-                        genreIds.forEach(id => {
-                            const mapped = genreMap[id];
-                            if (mapped) genres.push(mapped);
-                        });
-                    }
-                    if (genres.length === 0) genres = ["Other"];
-
-                    const date = row[getIdx('first_air_date')] || "N/A";
-                    const countryRaw = row[getIdx('origin_country')];
-                    const countryMatch = countryRaw.match(/[A-Z]{2}/);
+                    const genreStr = row[getIdx('Genres')].replace(/"/g, '');
+                    const genres = genreStr.split(',').map(g => g.trim()).filter(g => g && g !== 'N/A' && g !== '-');
                     
+                    const name = row[getIdx('Name')].replace(/"/g, '').trim();
+                    if (name === '[Deleted/Not Found]') continue;
+
                     rows.push({
-                        title: row[getIdx('name')].replace(/"/g, '').trim(),
-                        genres: [...new Set(genres)], 
-                        country: countryMatch ? countryMatch[0] : "??",
-                        lang: row[getIdx('original_language')] || "??",
-                        date: date,
-                        year: parseInt(date.substring(0, 4)) || 0,
-                        rating: parseFloat(row[getIdx('vote_average')]) || 0,
-                        poster: row[getIdx('poster_path')] || "",
-                        popularity: parseFloat(row[getIdx('popularity')]) || 0,
-                        votes: parseInt(row[getIdx('vote_count')]) || 0
+                        title: name,
+                        year: parseInt(row[getIdx('Year')]) || 0,
+                        genres: genres.length ? genres : ["Other"],
+                        country: row[getIdx('Country')].replace(/"/g, '') || "??",
+                        lang: row[getIdx('Language')] || "??",
+                        seasons: parseInt(row[getIdx('Seasons')]) || 0,
+                        rating: parseFloat(row[getIdx('User_Score')]) || 0, // Using User_Score for game logic
+                        poster: row[getIdx('Poster_URL')].replace(/"/g, '') || ""
                     });
                 } catch (e) { continue; }
             }
@@ -368,7 +369,8 @@
         }
 
         function resetGame() {
-            const candidates = tvShows.filter(s => s.popularity > 35 && s.votes > 200);
+            // Pick a reasonable target (has poster and score)
+            const candidates = tvShows.filter(s => s.poster && s.rating > 5);
             targetShow = candidates[Math.floor(Math.random() * candidates.length)];
             console.log("Solution:", targetShow.title);
 
@@ -377,6 +379,7 @@
             maxYearBound = new Date().getFullYear();
             yearGuessed = false;
             discoveredGenres = new Set();
+            hintUsed = false;
 
             gameBoard.innerHTML = "";
             showInput.value = "";
@@ -387,7 +390,7 @@
             
             updateGuessesLeft();
 
-            const summaryIds = ['sum-genre', 'sum-date', 'sum-lang', 'sum-country', 'sum-rating'];
+            const summaryIds = ['sum-genre', 'sum-date', 'sum-seasons', 'sum-lang', 'sum-country', 'sum-rating'];
             summaryIds.forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
@@ -404,16 +407,59 @@
             const left = MAX_GUESSES - count;
             guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
             
-            // Update progress bar
             const percentage = (count / MAX_GUESSES) * 100;
             progressBarFill.style.width = `${percentage}%`;
             
+            // Toggle hint button
+            if (count >= 5 && !hintUsed) hintButton.disabled = false;
+            else hintButton.disabled = true;
+
             if (left <= 3) {
-                guessesLeftDisplay.classList.replace('text-slate-500', 'text-orange-400');
-                progressBarFill.classList.add('bg-orange-500');
+                guessesLeftDisplay.classList.replace('text-slate-500', 'text-orange-500');
+                progressBarFill.classList.replace('bg-indigo-600', 'bg-orange-500');
             } else {
-                guessesLeftDisplay.classList.replace('text-orange-400', 'text-slate-500');
-                progressBarFill.classList.remove('bg-orange-500');
+                guessesLeftDisplay.classList.replace('text-orange-500', 'text-slate-500');
+                progressBarFill.classList.add('bg-indigo-600');
+            }
+        }
+
+        function useHint() {
+            if (hintUsed || guesses.length < 5) return;
+            hintUsed = true;
+            hintButton.disabled = true;
+
+            // Find an unsolved summary box
+            const unsolved = [];
+            if (!yearGuessed) unsolved.push('sum-date');
+            if (discoveredGenres.size < targetShow.genres.length) unsolved.push('sum-genre');
+            if (!document.getElementById('sum-seasons').classList.contains('found')) unsolved.push('sum-seasons');
+            if (!document.getElementById('sum-lang').classList.contains('found')) unsolved.push('sum-lang');
+            if (!document.getElementById('sum-country').classList.contains('found')) unsolved.push('sum-country');
+            if (!document.getElementById('sum-rating').classList.contains('found')) unsolved.push('sum-rating');
+
+            if (unsolved.length === 0) return;
+            const chosenId = unsolved[Math.floor(Math.random() * unsolved.length)];
+            
+            const el = document.getElementById(chosenId);
+            const valEl = el.querySelector('div:last-child');
+            el.classList.remove('partial-found');
+            el.classList.add('found');
+
+            if (chosenId === 'sum-genre') {
+                targetShow.genres.forEach(g => discoveredGenres.add(g));
+                valEl.textContent = targetShow.genres.join(", ");
+            } else if (chosenId === 'sum-date') {
+                yearGuessed = true;
+                valEl.textContent = targetShow.year;
+                valEl.classList.remove('italic', 'text-slate-400');
+            } else if (chosenId === 'sum-seasons') {
+                valEl.textContent = targetShow.seasons;
+            } else if (chosenId === 'sum-lang') {
+                valEl.textContent = languageNames.of(targetShow.lang) || targetShow.lang.toUpperCase();
+            } else if (chosenId === 'sum-country') {
+                valEl.textContent = targetShow.country;
+            } else if (chosenId === 'sum-rating') {
+                valEl.textContent = targetShow.rating;
             }
         }
 
@@ -436,6 +482,7 @@
                 { type: 'title', val: guess.title },
                 { type: 'genres', val: guess.genres },
                 { type: 'year', val: guess.year },
+                { type: 'seasons', val: guess.seasons },
                 { type: 'lang', val: guess.lang },
                 { type: 'country', val: guess.country },
                 { type: 'rating', val: guess.rating }
@@ -448,7 +495,7 @@
 
                 if (field.type === 'title') {
                     cell.classList.add('poster-cell');
-                    if (guess.poster) cell.style.backgroundImage = `url(https://image.tmdb.org/t/p/w200${guess.poster})`;
+                    if (guess.poster) cell.style.backgroundImage = `url(${guess.poster})`;
                     const overlay = document.createElement('div');
                     overlay.className = 'poster-overlay';
                     overlay.textContent = field.val;
@@ -467,6 +514,14 @@
                         if (Math.abs(field.val - targetShow.year) <= 2) cell.classList.add('partial');
                         else cell.classList.add('incorrect');
                         cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.year ? '↑' : '↓'}</span>`;
+                    }
+                } else if (field.type === 'seasons') {
+                    cell.textContent = field.val;
+                    if (field.val === targetShow.seasons) cell.classList.add('correct');
+                    else {
+                        if (Math.abs(field.val - targetShow.seasons) <= 1) cell.classList.add('partial');
+                        else cell.classList.add('incorrect');
+                        cell.innerHTML += `<span class="text-[10px] mt-1 opacity-60">${field.val < targetShow.seasons ? '↑' : '↓'}</span>`;
                     }
                 } else if (field.type === 'lang') {
                     cell.textContent = field.val.toUpperCase();
@@ -490,42 +545,37 @@
         }
 
         function updateSummary(guess) {
+            // Genre Logic
             const genreBox = document.getElementById('sum-genre');
             if (!genreBox.classList.contains('found')) {
                 const common = guess.genres.filter(g => targetShow.genres.includes(g));
                 common.forEach(g => discoveredGenres.add(g));
-                
                 if (discoveredGenres.size > 0) {
-                    const displayList = Array.from(discoveredGenres).sort().join(", ");
-                    genreBox.querySelector('div:last-child').textContent = displayList;
-                    
+                    genreBox.querySelector('div:last-child').textContent = Array.from(discoveredGenres).sort().join(", ");
                     if (discoveredGenres.size === targetShow.genres.length) {
                         genreBox.classList.remove('partial-found');
                         genreBox.classList.add('found');
-                    } else {
-                        genreBox.classList.add('partial-found');
-                    }
+                    } else genreBox.classList.add('partial-found');
                 }
             }
 
+            // Year logic
             if (!yearGuessed) {
-                const guessYear = guess.year;
-                if (guessYear === targetShow.year) {
+                if (guess.year === targetShow.year) {
                     yearGuessed = true;
-                    const dateBox = document.getElementById('sum-date');
-                    const dateVal = dateBox.querySelector('div:last-child');
-                    dateBox.classList.add('found');
-                    dateVal.textContent = targetShow.year;
-                    dateVal.classList.remove('italic', 'text-slate-400');
-                } else if (guessYear !== 0) {
-                    if (guessYear < targetShow.year) minYearBound = Math.max(minYearBound, guessYear);
-                    else if (guessYear > targetShow.year) maxYearBound = Math.min(maxYearBound, guessYear);
-                    const dateVal = document.getElementById('sum-date').querySelector('div:last-child');
-                    dateVal.textContent = `${minYearBound} — ${maxYearBound}`;
+                    const el = document.getElementById('sum-date');
+                    el.classList.add('found');
+                    el.querySelector('div:last-child').textContent = targetShow.year;
+                    el.querySelector('div:last-child').classList.remove('italic', 'text-slate-400');
+                } else if (guess.year !== 0) {
+                    if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year);
+                    else maxYearBound = Math.min(maxYearBound, guess.year);
+                    document.getElementById('sum-date').querySelector('div:last-child').textContent = `${minYearBound} — ${maxYearBound}`;
                 }
             }
 
             const keys = [
+                { id: 'sum-seasons', val: guess.seasons, target: targetShow.seasons, display: guess.seasons },
                 { id: 'sum-lang', val: guess.lang, target: targetShow.lang, display: languageNames.of(guess.lang) || guess.lang.toUpperCase() },
                 { id: 'sum-country', val: guess.country, target: targetShow.country, display: guess.country },
                 { id: 'sum-rating', val: guess.rating, target: targetShow.rating, display: guess.rating }
@@ -547,17 +597,15 @@
 
             if (won) {
                 streakData.current++;
-                if (streakData.current > streakData.best) {
-                    streakData.best = streakData.current;
-                }
-            } else {
-                streakData.current = 0;
-            }
+                if (streakData.current > streakData.best) streakData.best = streakData.current;
+            } else streakData.current = 0;
             saveStreak();
             
+            // Final Reveal
             const summaryUpdates = [
                 { id: 'sum-genre', val: targetShow.genres.join(", ") },
                 { id: 'sum-date', val: targetShow.year },
+                { id: 'sum-seasons', val: targetShow.seasons },
                 { id: 'sum-lang', val: languageNames.of(targetShow.lang) || targetShow.lang.toUpperCase() },
                 { id: 'sum-country', val: targetShow.country },
                 { id: 'sum-rating', val: targetShow.rating }
@@ -573,12 +621,12 @@
 
             if (targetShow.poster) {
                 const img = document.getElementById('final-reveal-img');
-                img.src = `https://image.tmdb.org/t/p/w500${targetShow.poster}`;
+                img.src = targetShow.poster;
                 img.classList.remove('hidden');
             }
 
             document.getElementById('statusTitle').textContent = won ? "VICTORY!" : "GAME OVER";
-            document.getElementById('statusTitle').style.color = won ? "#22c55e" : "#ef4444";
+            document.getElementById('statusTitle').style.color = won ? "#00ff40" : "#ff3333";
             document.getElementById('statusDesc').innerHTML = `The show was <strong>${targetShow.title}</strong>.`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -588,15 +636,24 @@
             if (val.length < 2) { autocompleteList.classList.add('hidden'); return; }
             const filtered = tvShows
                 .filter(s => s.title.toLowerCase().includes(val))
-                .sort((a,b) => (b.popularity * b.votes) - (a.popularity * a.votes))
+                .sort((a,b) => b.rating - a.rating)
                 .slice(0, 10);
+            
             autocompleteList.innerHTML = "";
             if (filtered.length > 0) {
                 autocompleteList.classList.remove('hidden');
                 filtered.forEach(item => {
                     const div = document.createElement('div');
                     div.className = 'autocomplete-item';
-                    div.innerHTML = `<div><div class="font-bold">${item.title}</div><div class="text-[10px] text-slate-500">${item.genres.slice(0,2).join(", ")}</div></div><span class="text-[11px] text-slate-500 font-medium">${item.year}</span>`;
+                    div.innerHTML = `
+                        <div class="flex flex-col">
+                            <span class="font-bold text-sm text-white">${item.title}</span>
+                            <span class="text-[11px] text-amber-400 font-bold uppercase tracking-wide">${item.genres.slice(0,2).join(" & ")}</span>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <span class="text-xs text-indigo-300 font-black">${item.year}</span>
+                            <span class="text-[9px] text-slate-500 uppercase">${item.country}</span>
+                        </div>`;
                     div.onclick = () => submitGuess(item);
                     autocompleteList.appendChild(div);
                 });
