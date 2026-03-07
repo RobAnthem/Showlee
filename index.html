@@ -112,6 +112,7 @@
             transition: all 0.3s ease;
         }
         .summary-box.found { border-color: #22c55e; background: #064e3b; }
+        .summary-box.partial-found { border-color: #eab308; background: #422006; }
 
         #final-reveal-img {
             width: 160px;
@@ -238,6 +239,7 @@
         let minYearBound = 1900;
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
+        let discoveredGenres = new Set();
 
         // Streak variables
         let streakData = {
@@ -356,6 +358,7 @@
             minYearBound = 1900;
             maxYearBound = new Date().getFullYear();
             yearGuessed = false;
+            discoveredGenres = new Set();
 
             gameBoard.innerHTML = "";
             showInput.value = "";
@@ -369,7 +372,7 @@
             const summaryIds = ['sum-genre', 'sum-date', 'sum-lang', 'sum-country', 'sum-rating'];
             summaryIds.forEach(id => {
                 const el = document.getElementById(id);
-                el.classList.remove('found');
+                el.classList.remove('found', 'partial-found');
                 const valEl = el.querySelector('div:last-child');
                 valEl.textContent = id === 'sum-date' ? "Searching..." : "?";
                 if (id === 'sum-date') valEl.classList.add('italic', 'text-slate-400');
@@ -458,6 +461,25 @@
         }
 
         function updateSummary(guess) {
+            // Genre Summary logic
+            const genreBox = document.getElementById('sum-genre');
+            if (!genreBox.classList.contains('found')) {
+                const common = guess.genres.filter(g => targetShow.genres.includes(g));
+                common.forEach(g => discoveredGenres.add(g));
+                
+                if (discoveredGenres.size > 0) {
+                    const displayList = Array.from(discoveredGenres).sort().join(", ");
+                    genreBox.querySelector('div:last-child').textContent = displayList;
+                    
+                    if (discoveredGenres.size === targetShow.genres.length) {
+                        genreBox.classList.remove('partial-found');
+                        genreBox.classList.add('found');
+                    } else {
+                        genreBox.classList.add('partial-found');
+                    }
+                }
+            }
+
             if (!yearGuessed) {
                 const guessYear = guess.year;
                 if (guessYear === targetShow.year) {
@@ -476,7 +498,6 @@
             }
 
             const keys = [
-                { id: 'sum-genre', val: guess.genres.sort().join(','), target: targetShow.genres.sort().join(','), display: guess.genres.join(", ") },
                 { id: 'sum-lang', val: guess.lang, target: targetShow.lang, display: languageNames.of(guess.lang) || guess.lang.toUpperCase() },
                 { id: 'sum-country', val: guess.country, target: targetShow.country, display: guess.country },
                 { id: 'sum-rating', val: guess.rating, target: targetShow.rating, display: guess.rating }
@@ -516,6 +537,7 @@
             ];
             summaryUpdates.forEach(upd => {
                 const el = document.getElementById(upd.id);
+                el.classList.remove('partial-found');
                 el.classList.add('found');
                 const valEl = el.querySelector('div:last-child');
                 valEl.textContent = upd.val;
