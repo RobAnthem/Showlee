@@ -56,6 +56,26 @@
             padding: 4px;
             box-sizing: border-box;
             border-radius: 2px;
+            position: relative;
+        }
+
+        /* Tooltip style */
+        .cell[data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2d2f35;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            white-space: nowrap;
+            z-index: 100;
+            pointer-events: none;
+            margin-bottom: 4px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
 
         .poster-cell {
@@ -172,6 +192,36 @@
             border-color: #1b8a32;
         }
         
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #2d2f35;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #d1a01d; }
+        input:checked + .slider:before { transform: translateX(16px); }
+
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell {
             0% { transform: rotateX(90deg); opacity: 0; }
@@ -194,6 +244,13 @@
                 <div class="flex">
                     <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active rounded-l-lg">Normal</button>
                     <button id="modeAnime" onclick="setMode('anime')" class="mode-btn rounded-r-lg">Anime</button>
+                </div>
+                <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800">
+                    <span class="text-[10px] font-black uppercase text-zinc-500">Emoji Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
+                        <span class="slider"></span>
+                    </label>
                 </div>
             </div>
 
@@ -295,6 +352,7 @@
         const MAX_GUESSES = 10;
         
         let currentGameMode = 'normal';
+        let emojiMode = false;
         let minYearBound = 1900;
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
@@ -305,6 +363,14 @@
 
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 } };
 
+        const GENRE_EMOJIS = {
+            'Action': '💥', 'Adventure': '🏹', 'Animation': '🎨', 'Comedy': '😂', 'Crime': '🚓',
+            'Documentary': '🎥', 'Drama': '🎭', 'Family': '👨‍👩‍👧', 'Fantasy': '🧙‍♂️', 'History': '📜',
+            'Horror': '👻', 'Music': '🎵', 'Mystery': '🕵️', 'News': '📰', 'Reality': '🏠',
+            'Romance': '💖', 'Sci-Fi': '🚀', 'Soap': '🧼', 'Talk': '🎙️', 'War': '🪖', 'Western': '🤠',
+            'Kids': '🧸', 'Politics': '🏛️', 'Action & Adventure': '💥', 'Sci-Fi & Fantasy': '🚀'
+        };
+
         const fileInput = document.getElementById('fileInput');
         const gameInterface = document.getElementById('gameInterface');
         const gameBoard = document.getElementById('gameBoard');
@@ -313,11 +379,18 @@
         const guessesLeftDisplay = document.getElementById('guessesLeft');
         const progressBarFill = document.getElementById('progressBarFill');
         const hintButton = document.getElementById('hintButton');
+        const emojiToggle = document.getElementById('emojiToggle');
 
         window.addEventListener('DOMContentLoaded', async () => {
             const savedStreaks = localStorage.getItem('showlee_streaks_v5');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
             updateStreakUI();
+
+            const savedEmojiMode = localStorage.getItem('showlee_emoji_mode');
+            if (savedEmojiMode !== null) {
+                emojiMode = savedEmojiMode === 'true';
+                emojiToggle.checked = emojiMode;
+            }
 
             try {
                 const response = await fetch('tv_metadata_clean_2026-03-07.csv');
@@ -329,6 +402,14 @@
                 document.getElementById('uploadContainer').classList.remove('hidden');
             }
         });
+
+        function toggleEmojiMode(enabled) {
+            emojiMode = enabled;
+            localStorage.setItem('showlee_emoji_mode', enabled);
+            // Re-render board with new mode
+            gameBoard.innerHTML = "";
+            guesses.forEach(g => renderRow(g, false));
+        }
 
         function setMode(mode) {
             if (mode === currentGameMode) return;
@@ -348,17 +429,6 @@
             document.getElementById('currentStreak').textContent = s.current;
             document.getElementById('bestStreak').textContent = s.best;
         }
-
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                tvShows = parseCSV(ev.target.result);
-                if (tvShows.length > 0) initGame();
-            };
-            reader.readAsText(file);
-        });
 
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
@@ -433,7 +503,6 @@
             
             clearUI();
             
-            // Re-apply summary year state visually
             const yearEl = document.getElementById('sum-date');
             if (yearGuessed) {
                 yearEl.classList.add('found');
@@ -548,7 +617,16 @@
                     c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
                 } else if (f.type === 'g' || f.type === 'n') {
                     const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
-                    c.textContent = f.val.slice(0, 2).join(", ");
+                    
+                    if (f.type === 'g' && emojiMode) {
+                        const emojis = f.val.map(g => GENRE_EMOJIS[g] || '❓');
+                        c.textContent = emojis.slice(0, 2).join(" ");
+                        c.setAttribute('data-tooltip', f.val.join(", "));
+                        c.style.fontSize = '1.1rem';
+                    } else {
+                        c.textContent = f.val.slice(0, 2).join(", ");
+                    }
+
                     const common = f.val.filter(x => targetArr.includes(x));
                     if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial');
