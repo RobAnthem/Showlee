@@ -464,17 +464,17 @@
         function startNewGame() {
             const pool = tvShows.filter(s => {
                 const isAnime = s.country === 'JP' && s.genres.includes('Animation');
-                const isUS = s.country === 'US';
+                const isEnglish = s.lang === 'en';
                 const isVeryFamous = s.score > 7.5; // Threshold for "well known" global hits
 
                 if (currentGameMode === 'anime') {
                     return isAnime && s.poster && s.score > 0;
                 } else if (currentGameMode === 'normal') {
-                    // Normal = US OR Extremely high score global hits
-                    return (isUS || isVeryFamous) && !isAnime && s.poster && s.year > 1960;
+                    // Normal = Only English language shows (US/UK/Canada/etc) + global hits that were produced in English
+                    return isEnglish && !isAnime && s.poster && s.year > 1960 && (s.country === 'US' || isVeryFamous);
                 } else {
-                    // Foreign = All others (not US, not Anime)
-                    return !isUS && !isAnime && s.poster && s.score > 0;
+                    // Foreign/International = All non-English language productions (excluding Japanese Anime)
+                    return !isEnglish && !isAnime && s.poster && s.score > 0;
                 }
             });
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
