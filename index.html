@@ -78,12 +78,11 @@
         .progress-bar-container { width: 100%; height: 8px; background: #1a1c1e; margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2d2f35; }
         .progress-bar-fill { height: 100%; background: #d1a01d; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .mode-btn, .diff-btn {
+        .mode-btn {
             padding: 6px 12px; font-size: 9px; font-weight: 700; text-transform: uppercase;
             border: 1px solid #404249; background: #1a1c1e; transition: all 0.2s;
         }
-        .mode-btn.active, .diff-btn.active { background: #d1a01d; color: black; border-color: #d1a01d; }
-        .diff-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .mode-btn.active { background: #d1a01d; color: black; border-color: #d1a01d; }
 
         #hintButton.hint-ready { background-color: #1b8a32 !important; border-color: #146425 !important; color: white !important; }
 
@@ -94,11 +93,56 @@
         input:checked + .slider { background-color: #d1a01d; }
         input:checked + .slider:before { transform: translateX(16px); }
 
+        /* Modal Styles */
+        #difficultyModal { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+        .diff-card {
+            background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer;
+        }
+        .diff-card:hover { border-color: #d1a01d; transform: translateY(-2px); }
+
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
+
+    <!-- Difficulty Popup -->
+    <div id="difficultyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
+        <div class="w-full max-w-lg bg-[#0b0c0d] border-2 border-zinc-800 rounded-2xl p-8 shadow-2xl">
+            <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Choose Your Difficulty</h3>
+            <p class="text-zinc-500 text-xs mb-8 font-bold uppercase tracking-widest">Locked until your streak ends</p>
+            
+            <div class="grid grid-cols-1 gap-4">
+                <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
+                    <div>
+                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">EASY</h4>
+                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 1,500 most popular shows</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 flex items-center justify-center group-hover:border-[#d1a01d]">
+                        <div class="w-3 h-3 bg-[#d1a01d] rounded-full scale-0 group-hover:scale-100 transition"></div>
+                    </div>
+                </div>
+                <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
+                    <div>
+                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">NORMAL</h4>
+                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 3,000 most popular shows</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 flex items-center justify-center group-hover:border-[#d1a01d]">
+                        <div class="w-3 h-3 bg-[#d1a01d] rounded-full scale-0 group-hover:scale-100 transition"></div>
+                    </div>
+                </div>
+                <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
+                    <div>
+                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">IMPOSSIBLE</h4>
+                        <p class="text-zinc-500 text-[10px] font-bold uppercase">All available shows in database</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full border-2 border-zinc-700 flex items-center justify-center group-hover:border-[#d1a01d]">
+                        <div class="w-3 h-3 bg-[#d1a01d] rounded-full scale-0 group-hover:scale-100 transition"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
         <div class="flex items-center gap-3 mb-6">
@@ -108,7 +152,7 @@
             <h1 class="text-4xl font-black tracking-tighter italic">SHOWLEE</h1>
         </div>
         
-        <div class="w-full grid grid-cols-1 md:grid-cols-3 items-end gap-4 px-2">
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 items-end gap-4 px-2">
             <div class="flex flex-col gap-3">
                 <div class="flex flex-col gap-1">
                     <span class="text-[9px] font-black uppercase text-zinc-500">Category</span>
@@ -120,18 +164,10 @@
                 </div>
             </div>
 
-            <div class="flex flex-col gap-1 items-center">
-                <span class="text-[9px] font-black uppercase text-zinc-500">Difficulty</span>
-                <div class="flex overflow-hidden rounded-lg">
-                    <button id="diffEasy" onclick="setDifficulty('easy')" class="diff-btn">Easy</button>
-                    <button id="diffNormal" onclick="setDifficulty('normal')" class="diff-btn active">Normal</button>
-                    <button id="diffHard" onclick="setDifficulty('hard')" class="diff-btn">Impossible</button>
-                </div>
-            </div>
-
             <div class="flex flex-col items-end">
                 <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
-                    Streak (<span id="streakModeLabel">Mainstream</span>)
+                    Streak (<span id="streakModeLabel">Mainstream</span>) 
+                    <span id="diffIndicator" class="ml-2 text-zinc-700">| NORMAL</span>
                 </div>
                 <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
                 <div class="text-[10px] text-zinc-600 uppercase mt-1 font-bold">
@@ -165,7 +201,7 @@
                 <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 shadow-xl hidden">
                 <h2 id="statusTitle" class="text-3xl font-black mb-2 tracking-tighter italic"></h2>
                 <p id="statusDesc" class="text-zinc-400 text-sm mb-6"></p>
-                <button onclick="startNewGame()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
+                <button onclick="handleNextShowClick()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
                     Next Show
                 </button>
             </div>
@@ -187,12 +223,12 @@
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Netw</span>
                     <span class="text-[11px] font-black">?</span>
                 </div>
-                <div id="sum-lang" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Lang</span>
+                <div id="sum-origin" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Origin</span>
                     <span class="text-[11px] font-black">?</span>
                 </div>
-                <div id="sum-country" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Ctry</span>
+                <div id="sum-content-rating" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Rating</span>
                     <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-rating" class="summary-box">
@@ -247,6 +283,7 @@
         let discoveredNetworks = new Set();
         let hintUsed = false;
         let isGameOver = false;
+        let lastGameWon = false;
 
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
@@ -309,6 +346,7 @@
                     lang: (cells[getIdx('Language')] || "").replace(/"/g, '').toLowerCase() || "??",
                     seasons: parseInt(cells[getIdx('Seasons')]) || 0,
                     networks: (cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== '-'),
+                    contentRating: (cells[getIdx('Rating')] || "").replace(/"/g, '') || "NR",
                     score: parseFloat(cells[getIdx('Vote_Average')]) || 0,
                     votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
                     poster: (cells[getIdx('Poster_URL')] || "").replace(/"/g, '').trim()
@@ -322,7 +360,10 @@
             document.getElementById('gameInterface').classList.remove('hidden');
             const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
             if (saved) resumeGame(JSON.parse(saved));
-            else startNewGame();
+            else {
+                currentDifficulty = 'easy'; 
+                startNewGame();
+            }
         }
 
         function toggleEmojiMode(enabled) {
@@ -339,14 +380,13 @@
             
             const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
             if (saved) resumeGame(JSON.parse(saved));
-            else startNewGame();
-        }
-
-        function setDifficulty(diff) {
-            if (isGameOver) return; // Don't switch while in summary screen
-            if (streaks[currentGameMode].current > 0) return; // Locked by streak
-            currentDifficulty = diff;
-            startNewGame();
+            else {
+                if (streaks[currentGameMode].current === 0) {
+                    showDifficultyPopup();
+                } else {
+                    startNewGame();
+                }
+            }
         }
 
         function updateStreakUI() {
@@ -360,19 +400,29 @@
             
             const labelMap = { normal: 'Mainstream', anime: 'Anime', foreign: 'International' };
             document.getElementById('streakModeLabel').textContent = labelMap[currentGameMode];
-            
-            // Handle Difficulty UI
-            ['Easy', 'Normal', 'Hard'].forEach(d => {
-                const el = document.getElementById(`diff${d}`);
-                const diffKey = d.toLowerCase();
-                el.classList.toggle('active', currentDifficulty === diffKey);
-                // Disable if streak > 0
-                el.disabled = (s.current > 0);
-            });
+            document.getElementById('diffIndicator').textContent = `| ${currentDifficulty.toUpperCase()}`;
+        }
+
+        function handleNextShowClick() {
+            const s = streaks[currentGameMode];
+            if (s.current === 0) {
+                showDifficultyPopup();
+            } else {
+                startNewGame();
+            }
+        }
+
+        function showDifficultyPopup() {
+            document.getElementById('difficultyModal').classList.remove('hidden');
+        }
+
+        function selectDifficulty(diff) {
+            currentDifficulty = diff;
+            document.getElementById('difficultyModal').classList.add('hidden');
+            startNewGame();
         }
 
         function startNewGame() {
-            // Filter by category
             let pool = tvShows.filter(s => {
                 const isAnime = s.genres.includes('Animation') && s.country === 'JP';
                 const isEnglish = s.lang === 'en';
@@ -381,18 +431,16 @@
                 return !isEnglish && !isAnime;
             });
 
-            // Sort by popularity for difficulty slicing
             pool.sort((a, b) => b.votes - a.votes);
 
-            // Apply Difficulty Slice
             if (currentDifficulty === 'easy') pool = pool.slice(0, 1500);
             else if (currentDifficulty === 'normal') pool = pool.slice(0, 3000);
-            // hard/impossible is the whole pool
 
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
             guesses = []; minYearBound = 1900; maxYearBound = new Date().getFullYear();
             yearGuessed = false; discoveredGenres = new Set(); discoveredNetworks = new Set();
-            hintUsed = false; isGameOver = false;
+            hintUsed = false; isGameOver = false; lastGameWon = false;
+            
             clearUI();
             updateStreakUI();
             saveSession();
@@ -400,7 +448,7 @@
 
         function resumeGame(session) {
             targetShow = session.targetShow;
-            currentDifficulty = session.difficulty || 'normal';
+            currentDifficulty = session.difficulty || 'easy';
             guesses = []; 
             minYearBound = session.minYearBound || 1900; 
             maxYearBound = session.maxYearBound || new Date().getFullYear();
@@ -438,7 +486,7 @@
             document.getElementById('autocompleteList').classList.add('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
-            ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-lang', 'sum-country', 'sum-rating'].forEach(id => {
+            ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating'].forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
                 const v = el.querySelector('span:last-child');
@@ -474,7 +522,7 @@
             document.getElementById('hintButton').disabled = true;
             document.getElementById('hintButton').classList.remove('hint-ready');
 
-            const unsolved = ['sum-date', 'sum-genre', 'sum-seasons', 'sum-network', 'sum-lang', 'sum-country', 'sum-rating']
+            const unsolved = ['sum-date', 'sum-genre', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating']
                 .filter(id => !document.getElementById(id).classList.contains('found'));
             
             if (unsolved.length === 0) return;
@@ -487,8 +535,8 @@
             else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
             else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
             else if (cid === 'sum-network') { v.textContent = targetShow.networks[0]; el.classList.add('found'); }
-            else if (cid === 'sum-lang') { v.textContent = languageNames.of(targetShow.lang) || targetShow.lang; el.classList.add('found'); }
-            else if (cid === 'sum-country') { v.textContent = targetShow.country; el.classList.add('found'); }
+            else if (cid === 'sum-origin') { v.textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`; el.classList.add('found'); }
+            else if (cid === 'sum-content-rating') { v.textContent = targetShow.contentRating; el.classList.add('found'); }
             else if (cid === 'sum-rating') { v.textContent = targetShow.score; el.classList.add('found'); }
             saveSession();
         }
@@ -514,14 +562,15 @@
         function renderRow(guess, animate) {
             const row = document.createElement('div');
             row.className = 'game-grid';
+            
             const config = [
                 { type: 'p', val: guess.title },
                 { type: 'g', val: guess.genres },
                 { type: 'y', val: guess.year },
                 { type: 's', val: guess.seasons },
                 { type: 'n', val: guess.networks },
-                { type: 'l', val: guess.lang },
-                { type: 'c', val: guess.country },
+                { type: 'o', val: { lang: guess.lang, country: guess.country } },
+                { type: 'cr', val: guess.contentRating },
                 { type: 'r', val: guess.score }
             ];
 
@@ -552,6 +601,18 @@
                     if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial');
                     else c.classList.add('incorrect');
+                } else if (f.type === 'o') {
+                    // Origin: Both language and country must match
+                    c.innerHTML = `<span class="text-[8px] opacity-60">${f.val.lang.toUpperCase()}</span><span>${f.val.country}</span>`;
+                    const langMatch = f.val.lang === targetShow.lang;
+                    const countryMatch = f.val.country === targetShow.country;
+                    if (langMatch && countryMatch) c.classList.add('correct');
+                    else if (langMatch || countryMatch) c.classList.add('partial');
+                    else c.classList.add('incorrect');
+                } else if (f.type === 'cr') {
+                    // Content Rating
+                    c.textContent = f.val;
+                    c.classList.add(f.val === targetShow.contentRating ? 'correct' : 'incorrect');
                 } else if (f.type === 'y' || f.type === 's' || f.type === 'r') {
                     const tv = f.type === 'y' ? targetShow.year : f.type === 's' ? targetShow.seasons : targetShow.score;
                     const range = f.type === 'y' ? 5 : f.type === 's' ? 1 : 0.5;
@@ -562,10 +623,6 @@
                         const arrow = f.val < tv ? '▲' : '▼';
                         c.innerHTML += `<div class="text-[8px] font-black opacity-60">${arrow}</div>`;
                     }
-                } else {
-                    const tv = f.type === 'l' ? targetShow.lang : targetShow.country;
-                    c.textContent = f.type === 'l' ? f.val.toUpperCase() : f.val;
-                    c.classList.add(f.val === tv ? 'correct' : 'incorrect');
                 }
                 row.appendChild(c);
             });
@@ -599,27 +656,43 @@
                     const v = el.querySelector('span:last-child');
                     v.textContent = targetShow.year; v.className = "text-[11px] font-black";
                 } else if (guess.year > 0) {
-                    // Update bounds exclusively
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
                     else maxYearBound = Math.min(maxYearBound, guess.year - 1);
-                    
                     document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
                     if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
                 }
             }
 
-            const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-lang', guess.lang, targetShow.lang], ['sum-country', guess.country, targetShow.country], ['sum-rating', guess.score, targetShow.score]];
+            if (guess.lang === targetShow.lang || guess.country === targetShow.country) {
+                const oBox = document.getElementById('sum-origin');
+                if (guess.lang === targetShow.lang && guess.country === targetShow.country) {
+                    oBox.classList.add('found');
+                    oBox.querySelector('span:last-child').textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`;
+                } else {
+                    oBox.classList.add('partial-found');
+                    oBox.querySelector('span:last-child').textContent = guess.lang === targetShow.lang ? targetShow.lang.toUpperCase() : targetShow.country;
+                }
+            }
+
+            if (guess.contentRating === targetShow.contentRating) {
+                const crBox = document.getElementById('sum-content-rating');
+                crBox.classList.add('found');
+                crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
+            }
+
+            const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-rating', guess.score, targetShow.score]];
             map.forEach(m => {
                 const el = document.getElementById(m[0]);
                 if (m[1] === m[2]) {
                     el.classList.add('found');
-                    el.querySelector('span:last-child').textContent = m[0] === 'sum-lang' ? (languageNames.of(m[1]) || m[1]) : m[1];
+                    el.querySelector('span:last-child').textContent = m[1];
                 }
             });
         }
 
         function endGame(won, resumed, customTitle) {
             isGameOver = true;
+            lastGameWon = won;
             document.getElementById('inputSection').classList.add('hidden');
             const sm = document.getElementById('statusMessage');
             sm.classList.remove('hidden');
@@ -646,7 +719,6 @@
             const al = document.getElementById('autocompleteList');
             if (v.length < 2) { al.classList.add('hidden'); return; }
             
-            // Search all shows, but prioritize by votes for relevance
             const matches = tvShows
                 .filter(s => s.title.toLowerCase().includes(v))
                 .sort((a,b) => b.votes - a.votes)
