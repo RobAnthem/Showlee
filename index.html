@@ -19,7 +19,7 @@
         .partial { background-color: #FFD700 !important; border-color: #CCAC00 !important; color: #000 !important; }
         .incorrect { background-color: #FF1a1a !important; border-color: #CC0000 !important; color: #fff !important; }
 
-        /* Colorblind Mode Overrides (High Contrast Blue/Orange/Slate) */
+        /* Colorblind Mode Overrides */
         body.colorblind-mode .correct { background-color: #3b82f6 !important; border-color: #1d4ed8 !important; color: #fff !important; }
         body.colorblind-mode .partial { background-color: #f97316 !important; border-color: #c2410c !important; color: #fff !important; }
         body.colorblind-mode .incorrect { background-color: #475569 !important; border-color: #1e293b !important; color: #94a3b8 !important; }
@@ -29,20 +29,20 @@
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
             width: 100%;
         }
 
         .cell {
-            aspect-ratio: 1/1;
+            aspect-ratio: 1/1.1;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             font-weight: 800;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             border: 2px solid #334155;
             border-radius: 8px;
             padding: 4px;
@@ -67,20 +67,20 @@
             justify-content: center;
             padding: 4px;
             color: white !important;
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             line-height: 1.1;
         }
 
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
         }
 
         .summary-box {
             background: #1e293b;
             border: 2px solid #334155;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 4px;
             text-align: center;
             aspect-ratio: 1/1; 
@@ -165,7 +165,6 @@
             display: block;
         }
 
-        /* Toggle Switch Styling */
         .switch {
             position: relative;
             display: inline-block;
@@ -196,7 +195,7 @@
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
-    <header class="w-full max-w-2xl flex justify-between items-center py-4 border-b border-slate-700 mb-6">
+    <header class="w-full max-w-3xl flex justify-between items-center py-4 border-b border-slate-700 mb-6">
         <div class="flex flex-col">
             <div class="flex items-center gap-2">
                 <div class="bg-indigo-600 p-2 rounded-lg">
@@ -204,7 +203,6 @@
                 </div>
                 <h1 class="text-2xl font-extrabold tracking-tighter italic">SHOWLEE</h1>
             </div>
-            <!-- Colorblind Toggle -->
             <div class="flex items-center gap-2 mt-2">
                 <label class="switch">
                     <input type="checkbox" id="colorblindToggle">
@@ -220,7 +218,7 @@
         </div>
     </header>
 
-    <main class="w-full max-w-2xl flex-grow">
+    <main class="w-full max-w-3xl flex-grow">
         <div id="uploadContainer" class="hidden bg-slate-800/40 border-2 border-dashed border-slate-700 rounded-3xl p-12 text-center">
             <h3 class="text-xl font-bold mb-4">TV Database Missing</h3>
             <p class="text-slate-400 mb-6 text-sm">Please select the TV metadata CSV file to start playing.</p>
@@ -243,27 +241,31 @@
             <div class="summary-grid mb-8">
                 <div id="sum-genre" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Genre</div>
-                    <div class="text-[10px] font-bold">?</div>
+                    <div class="text-[9px] font-bold">?</div>
                 </div>
                 <div id="sum-date" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Year</div>
-                    <div class="text-[10px] font-bold italic opacity-40">...</div>
+                    <div class="text-[9px] font-bold italic opacity-40">...</div>
                 </div>
                 <div id="sum-seasons" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Seas</div>
-                    <div class="text-[10px] font-bold">?</div>
+                    <div class="text-[9px] font-bold">?</div>
+                </div>
+                <div id="sum-network" class="summary-box">
+                    <div class="text-[8px] uppercase opacity-60 font-black mb-1">Netw</div>
+                    <div class="text-[9px] font-bold">?</div>
                 </div>
                 <div id="sum-lang" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Lang</div>
-                    <div class="text-[10px] font-bold">?</div>
+                    <div class="text-[9px] font-bold">?</div>
                 </div>
                 <div id="sum-country" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Ctry</div>
-                    <div class="text-[10px] font-bold">?</div>
+                    <div class="text-[9px] font-bold">?</div>
                 </div>
                 <div id="sum-rating" class="summary-box">
                     <div class="text-[8px] uppercase opacity-60 font-black mb-1">Score</div>
-                    <div class="text-[10px] font-bold">?</div>
+                    <div class="text-[9px] font-bold">?</div>
                 </div>
             </div>
 
@@ -289,11 +291,12 @@
                 </div>
             </div>
 
-            <div class="game-grid mb-2 text-[9px] uppercase font-black text-slate-500 text-center tracking-widest">
+            <div class="game-grid mb-2 text-[8px] uppercase font-black text-slate-500 text-center tracking-widest">
                 <div>Poster</div>
                 <div>Genre</div>
                 <div>Year</div>
                 <div>Seas</div>
+                <div>Network</div>
                 <div>Lang</div>
                 <div>Ctry</div>
                 <div>Score</div>
@@ -303,7 +306,7 @@
         </div>
     </main>
 
-    <footer class="w-full max-w-2xl tmdb-attribution">
+    <footer class="w-full max-w-3xl tmdb-attribution">
         <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">
             <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="tmdb-logo">
         </a>
@@ -321,6 +324,7 @@
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
         let discoveredGenres = new Set();
+        let discoveredNetworks = new Set();
         let hintUsed = false;
         let isGameOver = false;
         let streakData = { current: 0, best: 0 };
@@ -336,22 +340,19 @@
         const colorblindToggle = document.getElementById('colorblindToggle');
 
         window.addEventListener('DOMContentLoaded', async () => {
-            // Load Streaks
-            const savedStreaks = localStorage.getItem('showlee_streak_v2');
+            const savedStreaks = localStorage.getItem('showlee_streak_v3');
             if (savedStreaks) {
                 streakData = JSON.parse(savedStreaks);
                 document.getElementById('currentStreak').textContent = streakData.current;
                 document.getElementById('bestStreak').textContent = streakData.best;
             }
 
-            // Load Colorblind Mode Preference
             const cbPref = localStorage.getItem('showlee_colorblind');
             if (cbPref === 'true') {
                 document.body.classList.add('colorblind-mode');
                 colorblindToggle.checked = true;
             }
 
-            // Load Data
             try {
                 const response = await fetch('tv_metadata_clean_2026-03-07.csv');
                 if (!response.ok) throw new Error('Not found');
@@ -417,6 +418,9 @@
                     const genreStr = cells[getIdx('Genres')] || "";
                     const genres = genreStr.replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== 'N/A' && g !== '-');
                     
+                    const networkStr = cells[getIdx('Networks')] || "";
+                    const networks = networkStr.replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== 'N/A' && n !== '-');
+
                     rows.push({
                         title: name,
                         year: parseInt(cells[getIdx('Year')]) || 0,
@@ -424,6 +428,7 @@
                         country: cells[getIdx('Country')]?.replace(/"/g, '') || "??",
                         lang: cells[getIdx('Language')]?.replace(/"/g, '') || "??",
                         seasons: parseInt(cells[getIdx('Seasons')]) || 0,
+                        networks: networks.length ? networks : ["Other"],
                         score: parseFloat(cells[getIdx('User_Score')]) || 0,
                         poster: cells[getIdx('Poster_URL')] ? cells[getIdx('Poster_URL')].replace(/"/g, '').trim() : ""
                     });
@@ -436,8 +441,7 @@
             document.getElementById('uploadContainer').classList.add('hidden');
             gameInterface.classList.remove('hidden');
             
-            // Check for saved session
-            const savedSession = localStorage.getItem('showlee_session');
+            const savedSession = localStorage.getItem('showlee_session_v3');
             if (savedSession) {
                 const session = JSON.parse(savedSession);
                 const matchedTarget = tvShows.find(s => s.title === session.targetShow.title);
@@ -458,6 +462,7 @@
             maxYearBound = new Date().getFullYear();
             yearGuessed = false;
             discoveredGenres = new Set();
+            discoveredNetworks = new Set();
             hintUsed = false;
             isGameOver = false;
 
@@ -472,6 +477,7 @@
             maxYearBound = session.maxYearBound;
             yearGuessed = session.yearGuessed;
             discoveredGenres = new Set(session.discoveredGenres);
+            discoveredNetworks = new Set(session.discoveredNetworks || []);
             hintUsed = session.hintUsed;
             isGameOver = session.isGameOver;
 
@@ -500,7 +506,7 @@
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             
-            const summaryIds = ['sum-genre', 'sum-date', 'sum-seasons', 'sum-lang', 'sum-country', 'sum-rating'];
+            const summaryIds = ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-lang', 'sum-country', 'sum-rating'];
             summaryIds.forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
@@ -520,10 +526,11 @@
                 maxYearBound,
                 yearGuessed,
                 discoveredGenres: Array.from(discoveredGenres),
+                discoveredNetworks: Array.from(discoveredNetworks),
                 hintUsed,
                 isGameOver
             };
-            localStorage.setItem('showlee_session', JSON.stringify(session));
+            localStorage.setItem('showlee_session_v3', JSON.stringify(session));
         }
 
         function updateGuessesLeft() {
@@ -531,17 +538,18 @@
             const left = MAX_GUESSES - count;
             guessesLeftDisplay.textContent = `${left} ${left === 1 ? 'guess' : 'guesses'} remaining`;
             progressBarFill.style.width = `${(count / MAX_GUESSES) * 100}%`;
-            hintButton.disabled = (count < 5 || hintUsed || isGameOver);
+            hintButton.disabled = (count < 4 || hintUsed || isGameOver);
         }
 
         function useHint() {
-            if (hintUsed || guesses.length < 5 || isGameOver) return;
+            if (hintUsed || guesses.length < 4 || isGameOver) return;
             hintUsed = true;
             hintButton.disabled = true;
 
             const unsolved = [];
             if (!yearGuessed) unsolved.push('sum-date');
             if (discoveredGenres.size < targetShow.genres.length) unsolved.push('sum-genre');
+            if (discoveredNetworks.size < targetShow.networks.length) unsolved.push('sum-network');
             if (!document.getElementById('sum-seasons').classList.contains('found')) unsolved.push('sum-seasons');
             if (!document.getElementById('sum-lang').classList.contains('found')) unsolved.push('sum-lang');
             if (!document.getElementById('sum-country').classList.contains('found')) unsolved.push('sum-country');
@@ -556,6 +564,9 @@
             if (chosenId === 'sum-genre') {
                 targetShow.genres.forEach(g => discoveredGenres.add(g));
                 valEl.textContent = targetShow.genres.join(", ");
+            } else if (chosenId === 'sum-network') {
+                targetShow.networks.forEach(n => discoveredNetworks.add(n));
+                valEl.textContent = targetShow.networks.join(", ");
             } else if (chosenId === 'sum-date') {
                 yearGuessed = true;
                 valEl.textContent = targetShow.year;
@@ -595,6 +606,7 @@
                 { type: 'genres', val: guess.genres },
                 { type: 'year', val: guess.year },
                 { type: 'seasons', val: guess.seasons },
+                { type: 'networks', val: guess.networks },
                 { type: 'lang', val: guess.lang },
                 { type: 'country', val: guess.country },
                 { type: 'score', val: guess.score }
@@ -605,7 +617,7 @@
                 cell.className = 'cell';
                 if (animate) {
                     cell.classList.add('flip');
-                    cell.style.animationDelay = `${i * 100}ms`;
+                    cell.style.animationDelay = `${i * 80}ms`;
                 }
 
                 if (field.type === 'title') {
@@ -620,6 +632,12 @@
                     cell.textContent = field.val.join(", ");
                     const common = field.val.filter(g => targetShow.genres.includes(g));
                     if (common.length === targetShow.genres.length && field.val.length === targetShow.genres.length) cell.classList.add('correct');
+                    else if (common.length > 0) cell.classList.add('partial');
+                    else cell.classList.add('incorrect');
+                } else if (field.type === 'networks') {
+                    cell.textContent = field.val.join(", ");
+                    const common = field.val.filter(n => targetShow.networks.includes(n));
+                    if (common.length === targetShow.networks.length && field.val.length === targetShow.networks.length) cell.classList.add('correct');
                     else if (common.length > 0) cell.classList.add('partial');
                     else cell.classList.add('incorrect');
                 } else if (field.type === 'year') {
@@ -673,6 +691,19 @@
                 }
             }
 
+            const netBox = document.getElementById('sum-network');
+            if (!netBox.classList.contains('found')) {
+                const common = guess.networks.filter(n => targetShow.networks.includes(n));
+                common.forEach(n => discoveredNetworks.add(n));
+                if (discoveredNetworks.size > 0) {
+                    netBox.querySelector('div:last-child').textContent = Array.from(discoveredNetworks).sort().join(", ");
+                    if (discoveredNetworks.size === targetShow.networks.length) {
+                        netBox.classList.remove('partial-found');
+                        netBox.classList.add('found');
+                    } else netBox.classList.add('partial-found');
+                }
+            }
+
             if (!yearGuessed) {
                 if (guess.year === targetShow.year) {
                     yearGuessed = true;
@@ -715,7 +746,7 @@
                     if (streakData.current > streakData.best) streakData.best = streakData.current;
                 } else streakData.current = 0;
                 
-                localStorage.setItem('showlee_streak_v2', JSON.stringify(streakData));
+                localStorage.setItem('showlee_streak_v3', JSON.stringify(streakData));
                 document.getElementById('currentStreak').textContent = streakData.current;
                 document.getElementById('bestStreak').textContent = streakData.best;
             }
@@ -724,6 +755,7 @@
                 { id: 'sum-genre', val: targetShow.genres.join(", ") },
                 { id: 'sum-date', val: targetShow.year },
                 { id: 'sum-seasons', val: targetShow.seasons },
+                { id: 'sum-network', val: targetShow.networks.join(", ") },
                 { id: 'sum-lang', val: languageNames.of(targetShow.lang) || targetShow.lang.toUpperCase() },
                 { id: 'sum-country', val: targetShow.country },
                 { id: 'sum-rating', val: targetShow.score }
