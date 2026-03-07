@@ -14,34 +14,34 @@
             color: #ffffff;
         }
 
-        /* Vibrant Color Scheme with Black Text for Green/Blue */
+        /* Dark Deep Colors with Black Text for Green/Blue */
         .correct { 
-            background-color: #00ff88 !important; 
-            border-color: #00ff88 !important; 
+            background-color: #008044 !important; /* Dark Green */
+            border-color: #008044 !important; 
             color: #000000 !important; 
             text-shadow: none;
         }
         .partial { 
-            background-color: #33ccff !important; 
-            border-color: #33ccff !important; 
+            background-color: #004d99 !important; /* Dark Blue */
+            border-color: #004d99 !important; 
             color: #000000 !important; 
             text-shadow: none;
         }
         .incorrect { 
-            background-color: #3a3a3c !important; 
-            border-color: #3a3a3c !important; 
+            background-color: #800000 !important; /* Dark Red */
+            border-color: #800000 !important; 
             color: #ffffff !important; 
         }
 
-        /* Colorblind mode override: Intense Orange and Sky Blue */
+        /* Colorblind mode override - Using accessible high-contrast shades */
         body.colorblind-mode .correct { 
-            background-color: #f5793a !important; 
-            border-color: #f5793a !important; 
+            background-color: #d55e00 !important; 
+            border-color: #d55e00 !important; 
             color: #000000 !important;
         }
         body.colorblind-mode .partial { 
-            background-color: #85c0f9 !important; 
-            border-color: #85c0f9 !important; 
+            background-color: #56b4e9 !important; 
+            border-color: #56b4e9 !important; 
             color: #000000 !important;
         }
         
@@ -91,12 +91,11 @@
             padding: 4px;
             font-size: 0.6rem;
             text-align: center;
-            color: inherit; /* Inherits black if parent is correct/partial */
+            color: inherit;
         }
         
-        /* Ensure text in poster overlays also turns black when correct/partial */
         .correct .poster-overlay, .partial .poster-overlay {
-            background: rgba(255,255,255,0.1); /* Lighter overlay to show poster while keeping text black */
+            background: rgba(255,255,255,0.1); 
             color: #000000 !important;
         }
 
@@ -122,17 +121,16 @@
         }
         
         .summary-box.found { 
-            border-color: #00ff88; 
-            background: #00ff88; 
+            border-color: #008044; 
+            background: #008044; 
             color: #000000;
         }
         .summary-box.partial-found { 
-            border-color: #33ccff; 
-            background: #33ccff; 
+            border-color: #004d99; 
+            background: #004d99; 
             color: #000000;
         }
         
-        /* Summary labels when box is filled */
         .summary-box.found span, .summary-box.partial-found span {
             color: rgba(0,0,0,0.7);
         }
