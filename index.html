@@ -63,11 +63,60 @@
             justify-content: center; min-height: 64px;
         }
         
-        /* Labels turn black on found (green) or partial (yellow) boxes */
-        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { color: rgba(0,0,0,0.7) !important; }
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
         
+        .emoji-clue-container {
+            width: 100%;
+            max-width: 620px;
+            background: #1a1c1e;
+            border: 2px solid #2d2f35;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 80px;
+        }
+
+        .emoji-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .emoji-item {
+            font-size: 1.4rem;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0b0c0d;
+            border-radius: 6px;
+            border: 1px solid #2d2f35;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0.1;
+            filter: grayscale(1);
+            transform: scale(0.9);
+        }
+
+        .emoji-item.revealed {
+            opacity: 1;
+            filter: grayscale(0);
+            transform: scale(1);
+            border-color: #d1a01d;
+            background: #2d2f35;
+        }
+
+        .loading-dots:after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+        @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); } 40% { color: #d1a01d; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); } 60% { text-shadow: .25em 0 0 #d1a01d, .5em 0 0 rgba(0,0,0,0); } 80%, 100% { text-shadow: .25em 0 0 #d1a01d, .5em 0 0 #d1a01d; } }
+
         .autocomplete-items {
             position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
             background: #1a1c1e; border: 1px solid #404249; max-height: 250px;
@@ -86,51 +135,11 @@
         }
         .mode-btn.active { background: #d1a01d; color: black; border-color: #d1a01d; }
 
-        #hintButton.hint-ready { background-color: #1b8a32 !important; border-color: #146425 !important; color: white !important; }
-
-        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2d2f35; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #d1a01d; }
-        input:checked + .slider:before { transform: translateX(16px); }
-
-        #difficultyModal { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
-        .diff-card { background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer; }
-        .diff-card:hover { border-color: #d1a01d; transform: translateY(-2px); }
-
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
-
-    <div id="difficultyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
-        <div class="w-full max-w-lg bg-[#0b0c0d] border-2 border-zinc-800 rounded-2xl p-8 shadow-2xl">
-            <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Choose Your Difficulty</h3>
-            <p class="text-zinc-500 text-xs mb-8 font-bold uppercase tracking-widest">Locked until your streak ends</p>
-            <div class="grid grid-cols-1 gap-4">
-                <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
-                    <div>
-                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">EASY</h4>
-                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 1,500 most popular shows</p>
-                    </div>
-                </div>
-                <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
-                    <div>
-                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">NORMAL</h4>
-                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 3,000 most popular shows</p>
-                    </div>
-                </div>
-                <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
-                    <div>
-                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">IMPOSSIBLE</h4>
-                        <p class="text-zinc-500 text-[10px] font-bold uppercase">All available shows in database</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
         <div class="flex items-center gap-3 mb-6">
@@ -155,7 +164,6 @@
             <div class="flex flex-col items-end">
                 <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
                     Streak (<span id="streakModeLabel">Mainstream</span>) 
-                    <span id="diffIndicator" class="ml-2 text-zinc-700">| NORMAL</span>
                 </div>
                 <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
                 <div class="text-[10px] text-zinc-600 uppercase mt-1 font-bold">
@@ -163,45 +171,45 @@
                 </div>
             </div>
         </div>
-        
-        <div class="w-full mt-4 flex justify-start px-2">
-            <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800">
-                <span class="text-[9px] font-black uppercase text-zinc-500">Emoji Mode</span>
-                <label class="switch">
-                    <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
     </header>
 
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
-        <div id="uploadContainer" class="hidden text-center py-16 border-2 border-dashed border-zinc-800 rounded-xl w-full bg-[#1a1c1e]">
-            <p class="text-zinc-400 mb-6 font-bold uppercase tracking-tight">Database Not Loaded</p>
-            <label class="bg-[#d1a01d] text-black font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-yellow-600 transition shadow-lg">
-                LOAD CSV
-                <input type="file" id="fileInput" accept=".csv" class="hidden">
-            </label>
+        <!-- Error State UI -->
+        <div id="noDataPage" class="hidden flex flex-col items-center justify-center text-center p-12 bg-[#1a1c1e] border-2 border-zinc-800 rounded-2xl max-w-md">
+            <div class="bg-zinc-800/50 p-6 rounded-full mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1a01d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-black mb-4 tracking-tighter uppercase italic">No Data Detected</h2>
+            <p class="text-zinc-400 text-sm mb-8 leading-relaxed">
+                The show database (CSV) is currently hosted externally. Please make sure the file <code class="text-[#d1a01d] font-bold">enriched_shows_2026-03-07.csv</code> is available in the root directory.
+            </p>
+            <div class="w-full bg-black/40 p-4 rounded-lg text-[10px] text-left border border-zinc-700">
+                <span class="text-zinc-500 font-black uppercase">Technical Info:</span><br>
+                <span class="text-zinc-300">HTTP 404: File not found in local artifacts.</span>
+            </div>
         </div>
 
-        <div id="gameInterface" class="hidden w-full flex flex-col items-center">
+        <div id="gameInterface" class="w-full flex flex-col items-center">
             <div id="statusMessage" class="hidden mb-8 p-8 border-2 border-[#d1a01d] w-full text-center bg-[#1a1c1e] rounded-xl shadow-2xl">
                 <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 shadow-xl hidden">
                 <h2 id="statusTitle" class="text-3xl font-black mb-2 tracking-tighter italic"></h2>
                 <p id="statusDesc" class="text-zinc-400 text-sm mb-6"></p>
-                <button onclick="handleNextShowClick()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
+                <button onclick="startNewGame()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
                     Next Show
                 </button>
             </div>
 
-            <div class="summary-grid mb-8">
+            <div class="summary-grid mb-4">
                 <div id="sum-genre" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
-                    <span class="text-[10px] font-black leading-tight">?</span>
+                    <span class="text-[10px] font-black">?</span>
                 </div>
                 <div id="sum-date" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Year</span>
-                    <span class="text-[11px] font-black text-zinc-600">...</span>
+                    <span class="text-[11px] font-black">?</span>
                 </div>
                 <div id="sum-seasons" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Seas</span>
@@ -225,11 +233,16 @@
                 </div>
             </div>
 
+            <div id="emojiClueContainer" class="emoji-clue-container">
+                <div id="emojiLoading" class="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1 loading-dots">Loading Emojis</div>
+                <div id="emojiLabel" class="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-3 hidden">Show Clues</div>
+                <div id="emojiRow" class="emoji-row"></div>
+            </div>
+
             <div id="inputSection" class="w-full max-w-md mb-10">
                 <div class="relative flex gap-2">
                     <input id="showInput" type="text" placeholder="Type a TV show name..." autocomplete="off"
                         class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder-zinc-600 min-w-0">
-                    <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-4 rounded-lg text-[10px] uppercase disabled:opacity-30 hover:bg-zinc-800 transition whitespace-nowrap">Hint</button>
                     <button id="surrenderButton" onclick="surrender()" class="bg-[#c41e1e]/10 border-2 border-[#c41e1e]/40 text-[#c41e1e] font-black px-4 rounded-lg text-[10px] uppercase hover:bg-[#c41e1e]/20 transition whitespace-nowrap">Surrender</button>
                     <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
                 </div>
@@ -245,68 +258,90 @@
         </div>
     </main>
 
-    <footer class="w-full max-w-2xl py-10 mt-auto border-t border-zinc-900 flex flex-col items-center gap-6">
-        <div class="flex flex-col items-center text-center px-4">
-            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-5 mb-4 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-            <p class="text-[9px] text-zinc-600 leading-relaxed uppercase tracking-[0.15em] font-black max-w-xs">
-                This product uses the TMDB API but is not endorsed or certified by TMDB.
-            </p>
-        </div>
-    </footer>
-
     <script>
-        const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
+        const apiKey = "AIzaSyCRK5hUfai9cZjo5d0fuISjM71HJpzJEX8"; 
         let tvShows = [];
         let targetShow;
         let guesses = [];
+        let emojiClues = [];
         const MAX_GUESSES = 10;
-        
         let currentGameMode = 'normal';
-        let currentDifficulty = 'normal';
-        let emojiMode = false;
-        let minYearBound = 1900;
-        let maxYearBound = new Date().getFullYear();
-        let yearGuessed = false;
-        let discoveredGenres = new Set();
-        let discoveredNetworks = new Set();
-        let hintUsed = false;
         let isGameOver = false;
-
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
-        const GENRE_EMOJIS = {
-            'Action': '💥', 'Adventure': '🏹', 'Animation': '🎨', 'Comedy': '😂', 'Crime': '🚓',
-            'Documentary': '🎥', 'Drama': '🎭', 'Family': '👨‍👩‍👧', 'Fantasy': '🧙‍♂️', 'History': '📜',
-            'Horror': '👻', 'Music': '🎵', 'Mystery': '🕵️', 'News': '📰', 'Reality': '🏠',
-            'Romance': '💖', 'Sci-Fi': '🚀', 'Soap': '🧼', 'Talk': '🎙️', 'War': '🪖', 'Western': '🤠',
-            'Kids': '🧸', 'Politics': '🏛️', 'Action & Adventure': '💥', 'Sci-Fi & Fantasy': '🚀'
-        };
-
         window.addEventListener('DOMContentLoaded', async () => {
-            const savedStreaks = localStorage.getItem('showlee_streaks_v6');
+            const savedStreaks = localStorage.getItem('showlee_streaks_v7');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
             updateStreakUI();
 
-            const savedEmojiMode = localStorage.getItem('showlee_emoji_mode');
-            if (savedEmojiMode !== null) {
-                emojiMode = savedEmojiMode === 'true';
-                document.getElementById('emojiToggle').checked = emojiMode;
-            }
-
             try {
-                const response = await fetch('enriched_shows_2026-03-07.csv');
-                if (!response.ok) throw new Error();
+                // Fetch CSV relative to the current URL
+                const csvUrl = new URL('enriched_shows_2026-03-07.csv', window.location.href).href;
+                const response = await fetch(csvUrl);
+                
+                if (!response.ok) {
+                    showNoDataPage();
+                    return;
+                }
+                
                 const text = await response.text();
                 tvShows = parseCSV(text);
-                if (tvShows.length > 0) initGame();
+                
+                if (tvShows.length > 0) {
+                    startNewGame();
+                } else {
+                    showNoDataPage();
+                }
             } catch (err) {
-                document.getElementById('uploadContainer').classList.remove('hidden');
+                console.error("Database fetch failed:", err);
+                showNoDataPage();
             }
         });
+
+        function showNoDataPage() {
+            document.getElementById('gameInterface').classList.add('hidden');
+            document.getElementById('noDataPage').classList.remove('hidden');
+        }
+
+        async function fetchEmojiClues(showTitle, showYear, retryCount = 0) {
+            const systemPrompt = "You are a TV show expert. Provide exactly 10 emojis that represent the requested TV show. Respond ONLY with a JSON array of 10 strings, where each string is a single emoji. Do not include any text outside the JSON.";
+            const userQuery = `TV Show: ${showTitle} (${showYear})`;
+            
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                        generationConfig: { responseMimeType: "application/json" }
+                    })
+                });
+
+                if (!response.ok) throw new Error('API Error');
+
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const emojis = JSON.parse(text);
+                
+                if (Array.isArray(emojis) && emojis.length >= 10) {
+                    emojiClues = emojis.slice(0, 10);
+                    renderEmojis();
+                } else {
+                    throw new Error('Invalid format');
+                }
+            } catch (err) {
+                if (retryCount < 5) {
+                    const delay = Math.pow(2, retryCount) * 1000;
+                    setTimeout(() => fetchEmojiClues(showTitle, showYear, retryCount + 1), delay);
+                }
+            }
+        }
 
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
             if (lines.length < 2) return [];
+            
             const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
             const getIdx = (n) => headers.indexOf(n);
             const rows = [];
@@ -314,6 +349,7 @@
             for (let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (!line) continue;
+                
                 const cells = [];
                 let cell = "", inQuotes = false;
                 for (let char of line) {
@@ -322,91 +358,39 @@
                     else cell += char;
                 }
                 cells.push(cell.trim());
-                if (cells.length < headers.length - 1) continue;
+
+                const nameIdx = getIdx('Name');
+                const yearIdx = getIdx('Year');
+                const genreIdx = getIdx('Genres');
+                const countryIdx = getIdx('Country');
+                const langIdx = getIdx('Language');
+                const seasonIdx = getIdx('Seasons');
+                const networkIdx = getIdx('Networks');
+                const ratingIdx = getIdx('Rating');
+                const scoreIdx = getIdx('Vote_Average');
+                const voteIdx = getIdx('Vote_Count');
+                const posterIdx = getIdx('Poster_URL');
 
                 rows.push({
-                    id: cells[getIdx('ID')],
-                    title: (cells[getIdx('Name')] || "").replace(/"/g, ''),
-                    year: parseInt(cells[getIdx('Year')]) || 0,
-                    genres: (cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== '-'),
-                    country: (cells[getIdx('Country')] || "").replace(/"/g, '') || "??",
-                    lang: (cells[getIdx('Language')] || "").replace(/"/g, '').toLowerCase() || "??",
-                    seasons: parseInt(cells[getIdx('Seasons')]) || 0,
-                    networks: (cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== '-'),
-                    contentRating: (cells[getIdx('Rating')] || "").replace(/"/g, '') || "NR",
-                    score: parseFloat(cells[getIdx('Vote_Average')]) || 0,
-                    votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
-                    poster: (cells[getIdx('Poster_URL')] || "").replace(/"/g, '').trim()
+                    title: (cells[nameIdx] || "").replace(/"/g, ''),
+                    year: parseInt(cells[yearIdx]) || 0,
+                    genres: (cells[genreIdx] || "").replace(/"/g, '').split(',').map(g => g.trim()),
+                    country: (cells[countryIdx] || "").replace(/"/g, ''),
+                    lang: (cells[langIdx] || "").replace(/"/g, '').toLowerCase(),
+                    seasons: parseInt(cells[seasonIdx]) || 0,
+                    networks: (cells[networkIdx] || "").replace(/"/g, '').split(',').map(n => n.trim()),
+                    contentRating: (cells[ratingIdx] || "").replace(/"/g, ''),
+                    score: parseFloat(cells[scoreIdx]) || 0,
+                    votes: parseInt(cells[voteIdx]) || 0,
+                    poster: (cells[posterIdx] || "").replace(/"/g, '').trim()
                 });
             }
             return rows;
         }
 
-        function initGame() {
-            document.getElementById('uploadContainer').classList.add('hidden');
-            document.getElementById('gameInterface').classList.remove('hidden');
-            const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
-            if (saved) resumeGame(JSON.parse(saved));
-            else {
-                currentDifficulty = 'easy'; 
-                startNewGame();
-            }
-        }
-
-        function toggleEmojiMode(enabled) {
-            emojiMode = enabled;
-            localStorage.setItem('showlee_emoji_mode', enabled);
-            document.getElementById('gameBoard').innerHTML = "";
-            guesses.forEach(g => renderRow(g, false));
-        }
-
-        function setMode(mode) {
-            if (mode === currentGameMode) return;
-            currentGameMode = mode;
-            updateStreakUI();
-            
-            const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
-            if (saved) resumeGame(JSON.parse(saved));
-            else {
-                if (streaks[currentGameMode].current === 0) {
-                    showDifficultyPopup();
-                } else {
-                    startNewGame();
-                }
-            }
-        }
-
-        function updateStreakUI() {
-            const s = streaks[currentGameMode] || { current: 0, best: 0 };
-            document.getElementById('currentStreak').textContent = s.current;
-            document.getElementById('bestStreak').textContent = s.best;
-            
-            document.getElementById('modeNormal').classList.toggle('active', currentGameMode === 'normal');
-            document.getElementById('modeAnime').classList.toggle('active', currentGameMode === 'anime');
-            document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
-            
-            const labelMap = { normal: 'Mainstream', anime: 'Anime', foreign: 'International' };
-            document.getElementById('streakModeLabel').textContent = labelMap[currentGameMode];
-            document.getElementById('diffIndicator').textContent = `| ${currentDifficulty.toUpperCase()}`;
-        }
-
-        function handleNextShowClick() {
-            const s = streaks[currentGameMode];
-            if (s.current === 0) showDifficultyPopup();
-            else startNewGame();
-        }
-
-        function showDifficultyPopup() {
-            document.getElementById('difficultyModal').classList.remove('hidden');
-        }
-
-        function selectDifficulty(diff) {
-            currentDifficulty = diff;
-            document.getElementById('difficultyModal').classList.add('hidden');
-            startNewGame();
-        }
-
         function startNewGame() {
+            if (tvShows.length === 0) return;
+
             let pool = tvShows.filter(s => {
                 const isAnime = s.genres.includes('Animation') && s.country === 'JP';
                 const isEnglish = s.lang === 'en';
@@ -414,151 +398,101 @@
                 if (currentGameMode === 'normal') return isEnglish && !isAnime;
                 return !isEnglish && !isAnime;
             });
-
+            
             pool.sort((a, b) => b.votes - a.votes);
+            pool = pool.slice(0, 2000);
 
-            if (currentDifficulty === 'easy') pool = pool.slice(0, 1500);
-            else if (currentDifficulty === 'normal') pool = pool.slice(0, 3000);
-
-            targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
-            guesses = []; minYearBound = 1900; maxYearBound = new Date().getFullYear();
-            yearGuessed = false; discoveredGenres = new Set(); discoveredNetworks = new Set();
-            hintUsed = false; isGameOver = false;
-            
-            clearUI();
-            updateStreakUI();
-            saveSession();
-        }
-
-        function resumeGame(session) {
-            targetShow = session.targetShow;
-            currentDifficulty = session.difficulty || 'easy';
-            guesses = []; 
-            minYearBound = session.minYearBound || 1900; 
-            maxYearBound = session.maxYearBound || new Date().getFullYear();
-            yearGuessed = session.yearGuessed; 
-            discoveredGenres = new Set(session.discoveredGenres);
-            discoveredNetworks = new Set(session.discoveredNetworks);
-            hintUsed = session.hintUsed; 
-            isGameOver = session.isGameOver;
-            
-            clearUI();
-            updateStreakUI();
-            
-            const yearEl = document.getElementById('sum-date');
-            if (yearGuessed) {
-                yearEl.classList.add('found');
-                yearEl.querySelector('span:last-child').textContent = targetShow.year;
-                yearEl.querySelector('span:last-child').className = "text-[11px] font-black";
-            } else {
-                yearEl.querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
+            if (pool.length === 0) {
+                pool = tvShows.slice(0, 100);
             }
 
-            session.guesses.forEach(g => {
-                guesses.push(g);
-                renderRow(g, false);
-                updateSummaryUI(g);
-            });
-
-            if (isGameOver) endGame(guesses.length > 0 && guesses[guesses.length-1].title === targetShow.title, true);
-            else updateGuessesLeft();
+            targetShow = pool[Math.floor(Math.random() * pool.length)];
+            guesses = [];
+            isGameOver = false;
+            emojiClues = [];
+            
+            clearUI();
+            fetchEmojiClues(targetShow.title, targetShow.year);
         }
 
         function clearUI() {
             document.getElementById('gameBoard').innerHTML = "";
             document.getElementById('showInput').value = "";
-            document.getElementById('autocompleteList').classList.add('hidden');
-            document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
+            document.getElementById('inputSection').classList.remove('hidden');
+            document.getElementById('emojiLoading').classList.remove('hidden');
+            document.getElementById('emojiLabel').classList.add('hidden');
+            document.getElementById('emojiRow').innerHTML = "";
+            document.getElementById('progressBarFill').style.width = "0%";
+            document.getElementById('guessesLeft').textContent = "10 CHANCES LEFT";
+            
             ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating'].forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
-                const v = el.querySelector('span:last-child');
-                v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
-                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : (id === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black");
+                el.querySelector('span:last-child').textContent = "?";
             });
-            updateGuessesLeft();
         }
 
-        function saveSession() {
-            localStorage.setItem(`showlee_session_v6_${currentGameMode}`, JSON.stringify({
-                targetShow, guesses, minYearBound, maxYearBound, yearGuessed,
-                discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
-                hintUsed, isGameOver, difficulty: currentDifficulty
-            }));
-        }
-
-        function updateGuessesLeft() {
-            if (isGameOver) return;
-            const left = MAX_GUESSES - guesses.length;
-            document.getElementById('guessesLeft').textContent = `${left} CHANCES LEFT`;
-            document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
+        function renderEmojis() {
+            const container = document.getElementById('emojiRow');
+            const loading = document.getElementById('emojiLoading');
+            const label = document.getElementById('emojiLabel');
             
-            const canHint = guesses.length >= 4 && !hintUsed;
-            const btn = document.getElementById('hintButton');
-            btn.disabled = !canHint;
-            btn.classList.toggle('hint-ready', canHint);
-        }
-
-        function useHint() {
-            if (hintUsed || guesses.length < 4 || isGameOver) return;
-            hintUsed = true;
-            document.getElementById('hintButton').disabled = true;
-            document.getElementById('hintButton').classList.remove('hint-ready');
-
-            const unsolved = ['sum-date', 'sum-genre', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating']
-                .filter(id => !document.getElementById(id).classList.contains('found'));
+            if (emojiClues.length === 0) return;
             
-            if (unsolved.length === 0) return;
-            const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
-            const el = document.getElementById(cid);
-            const v = el.querySelector('span:last-child');
-            v.className = cid === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black";
+            loading.classList.add('hidden');
+            label.classList.remove('hidden');
+            container.innerHTML = "";
             
-            if (cid === 'sum-genre') { v.textContent = targetShow.genres.join(", "); el.classList.add('found'); }
-            else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
-            else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
-            else if (cid === 'sum-network') { v.textContent = targetShow.networks[0]; el.classList.add('found'); }
-            else if (cid === 'sum-origin') { v.textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`; el.classList.add('found'); }
-            else if (cid === 'sum-content-rating') { v.textContent = targetShow.contentRating; el.classList.add('found'); }
-            else if (cid === 'sum-rating') { v.textContent = targetShow.score; el.classList.add('found'); }
-            saveSession();
+            const numToReveal = Math.min(guesses.length + 1, 10);
+            
+            emojiClues.forEach((emoji, idx) => {
+                const div = document.createElement('div');
+                div.className = 'emoji-item';
+                div.textContent = emoji;
+                if (idx < numToReveal) div.classList.add('revealed');
+                container.appendChild(div);
+            });
         }
 
         function submitGuess(show) {
             if (isGameOver || guesses.some(g => g.title === show.title)) return;
             guesses.push(show);
-            renderRow(show, true);
+            renderRow(show);
             updateSummaryUI(show);
-            updateGuessesLeft();
+            renderEmojis();
+            
+            const left = MAX_GUESSES - guesses.length;
+            document.getElementById('guessesLeft').textContent = `${left} CHANCES LEFT`;
+            document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
             document.getElementById('showInput').value = "";
             document.getElementById('autocompleteList').classList.add('hidden');
+
             if (show.title === targetShow.title) endGame(true);
             else if (guesses.length >= MAX_GUESSES) endGame(false);
-            else saveSession();
         }
 
-        function renderRow(guess, animate) {
+        function renderRow(guess) {
             const row = document.createElement('div');
             row.className = 'game-grid';
             
-            const config = [
-                { type: 'p', val: guess.title },
-                { type: 'g', val: guess.genres },
-                { type: 'y', val: guess.year },
-                { type: 's', val: guess.seasons },
-                { type: 'n', val: guess.networks },
-                { type: 'o', val: { lang: guess.lang, country: guess.country } },
-                { type: 'cr', val: guess.contentRating },
-                { type: 'r', val: guess.score }
+            const fields = [
+                { type: 'title', val: guess.title },
+                { type: 'array', val: guess.genres, target: targetShow.genres },
+                { type: 'num', val: guess.year, target: targetShow.year, range: 5 },
+                { type: 'num', val: guess.seasons, target: targetShow.seasons, range: 1 },
+                { type: 'array', val: guess.networks, target: targetShow.networks },
+                { type: 'origin', val: guess, target: targetShow },
+                { type: 'exact', val: guess.contentRating, target: targetShow.contentRating },
+                { type: 'num', val: guess.score, target: targetShow.score, range: 0.5 }
             ];
 
-            config.forEach((f, i) => {
+            fields.forEach((f, i) => {
                 const c = document.createElement('div');
-                c.className = 'cell';
-                if (animate) { c.classList.add('flip'); c.style.animationDelay = `${i * 60}ms`; }
+                c.className = 'cell flip';
+                c.style.animationDelay = `${i * 50}ms`;
                 
-                if (f.type === 'p') {
+                if (f.type === 'title') {
                     c.classList.add('poster-cell');
                     if (guess.poster) c.style.backgroundImage = `url(${guess.poster})`;
                     const o = document.createElement('div');
@@ -566,39 +500,29 @@
                     o.textContent = f.val;
                     c.appendChild(o);
                     c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
-                } else if (f.type === 'g' || f.type === 'n') {
-                    const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
-                    if (f.type === 'g' && emojiMode) {
-                        const emojis = f.val.map(g => GENRE_EMOJIS[g] || '❓');
-                        c.textContent = emojis.slice(0, 2).join(" ");
-                        c.style.fontSize = '1.1rem';
-                    } else {
-                        c.textContent = f.val.slice(0, 2).join(", ");
-                    }
-                    const common = f.val.filter(x => targetArr.includes(x));
-                    if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
+                } else if (f.type === 'array') {
+                    c.textContent = (f.val && f.val.length) ? f.val[0] : "-";
+                    const common = f.val.filter(x => f.target.includes(x));
+                    if (common.length === f.target.length && f.val.length === f.target.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial');
                     else c.classList.add('incorrect');
-                } else if (f.type === 'o') {
-                    c.innerHTML = `<span class="text-[8px] opacity-60">${f.val.lang.toUpperCase()}</span><span>${f.val.country}</span>`;
-                    const langMatch = f.val.lang === targetShow.lang;
-                    const countryMatch = f.val.country === targetShow.country;
-                    if (langMatch && countryMatch) c.classList.add('correct');
-                    else if (langMatch || countryMatch) c.classList.add('partial');
-                    else c.classList.add('incorrect');
-                } else if (f.type === 'cr') {
-                    c.textContent = f.val;
-                    c.classList.add(f.val === targetShow.contentRating ? 'correct' : 'incorrect');
-                } else if (f.type === 'y' || f.type === 's' || f.type === 'r') {
-                    const tv = f.type === 'y' ? targetShow.year : f.type === 's' ? targetShow.seasons : targetShow.score;
-                    const range = f.type === 'y' ? 5 : f.type === 's' ? 1 : 0.5;
-                    c.innerHTML = `<div class="w-full">${f.val}</div>`;
-                    if (f.val === tv) c.classList.add('correct');
+                } else if (f.type === 'num') {
+                    c.innerHTML = `<div>${f.val}</div>`;
+                    if (f.val === f.target) c.classList.add('correct');
                     else {
-                        c.classList.add(Math.abs(f.val - tv) <= range ? 'partial' : 'incorrect');
-                        const arrow = f.val < tv ? '▲' : '▼';
-                        c.innerHTML += `<div class="text-[8px] font-black opacity-60">${arrow}</div>`;
+                        c.classList.add(Math.abs(f.val - f.target) <= f.range ? 'partial' : 'incorrect');
+                        c.innerHTML += `<div class="text-[8px] opacity-60">${f.val < f.target ? '▲' : '▼'}</div>`;
                     }
+                } else if (f.type === 'origin') {
+                    c.textContent = f.val.country || "??";
+                    const lMatch = f.val.lang === f.target.lang;
+                    const cMatch = f.val.country === f.target.country;
+                    if (lMatch && cMatch) c.classList.add('correct');
+                    else if (lMatch || cMatch) c.classList.add('partial');
+                    else c.classList.add('incorrect');
+                } else {
+                    c.textContent = f.val || "NR";
+                    c.classList.add(f.val === f.target ? 'correct' : 'incorrect');
                 }
                 row.appendChild(c);
             });
@@ -606,126 +530,101 @@
         }
 
         function updateSummaryUI(guess) {
-            // Genre Summary logic
-            const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
-            commonG.forEach(x => discoveredGenres.add(x));
-            if (discoveredGenres.size > 0) {
-                const gBox = document.getElementById('sum-genre');
-                gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
-                gBox.classList.remove('found', 'partial-found');
-                gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
+            if (guess.genres.some(g => targetShow.genres.includes(g))) {
+                const el = document.getElementById('sum-genre');
+                const common = guess.genres.filter(g => targetShow.genres.includes(g));
+                el.querySelector('span:last-child').textContent = common[0];
+                el.classList.add(common.length === targetShow.genres.length ? 'found' : 'partial-found');
             }
-
-            // Network Summary logic
-            const commonN = guess.networks.filter(x => targetShow.networks.includes(x));
-            commonN.forEach(x => discoveredNetworks.add(x));
-            if (discoveredNetworks.size > 0) {
-                const nBox = document.getElementById('sum-network');
-                nBox.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
-                nBox.classList.remove('found', 'partial-found');
-                nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
+            if (guess.year === targetShow.year) {
+                const el = document.getElementById('sum-date');
+                el.classList.add('found');
+                el.querySelector('span:last-child').textContent = targetShow.year;
             }
-
-            // Year Summary logic
-            if (!yearGuessed) {
-                if (guess.year === targetShow.year) {
-                    yearGuessed = true;
-                    const el = document.getElementById('sum-date');
-                    el.classList.add('found');
-                    const v = el.querySelector('span:last-child');
-                    v.textContent = targetShow.year; v.className = "text-[11px] font-black";
-                } else if (guess.year > 0) {
-                    if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
-                    else maxYearBound = Math.min(maxYearBound, guess.year - 1);
-                    document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
-                    if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
-                }
+            if (guess.seasons === targetShow.seasons) {
+                const el = document.getElementById('sum-seasons');
+                el.classList.add('found');
+                el.querySelector('span:last-child').textContent = targetShow.seasons;
             }
-
-            // Origin Summary logic (Locked once Green)
-            const oBox = document.getElementById('sum-origin');
-            if (!oBox.classList.contains('found')) {
-                const langMatch = guess.lang === targetShow.lang;
-                const countryMatch = guess.country === targetShow.country;
-                if (langMatch && countryMatch) {
-                    oBox.classList.remove('partial-found');
-                    oBox.classList.add('found');
-                    oBox.querySelector('span:last-child').textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`;
-                } else if (langMatch || countryMatch) {
-                    oBox.classList.add('partial-found');
-                    oBox.querySelector('span:last-child').textContent = langMatch ? targetShow.lang.toUpperCase() : targetShow.country;
-                }
+            if (guess.networks.some(n => targetShow.networks.includes(n))) {
+                const el = document.getElementById('sum-network');
+                el.classList.add('found');
+                el.querySelector('span:last-child').textContent = targetShow.networks[0];
             }
-
-            // Content Rating Summary logic
+            if (guess.country === targetShow.country) {
+                const el = document.getElementById('sum-origin');
+                el.classList.add('found');
+                el.querySelector('span:last-child').textContent = targetShow.country;
+            }
             if (guess.contentRating === targetShow.contentRating) {
-                const crBox = document.getElementById('sum-content-rating');
-                crBox.classList.add('found');
-                crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
+                const el = document.getElementById('sum-content-rating');
+                el.classList.add('found');
+                el.querySelector('span:last-child').textContent = targetShow.contentRating;
             }
-
-            // Seasons and Rating Summary logic
-            const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-rating', guess.score, targetShow.score]];
-            map.forEach(m => {
-                const el = document.getElementById(m[0]);
-                if (m[1] === m[2]) {
-                    el.classList.add('found');
-                    el.querySelector('span:last-child').textContent = m[1];
-                }
-            });
+            if (guess.score === targetShow.score) {
+                const el = document.getElementById('sum-rating');
+                el.classList.add('found');
+                el.querySelector('span:last-child').textContent = targetShow.score;
+            }
         }
 
-        function endGame(won, resumed, customTitle) {
+        function endGame(won) {
             isGameOver = true;
             document.getElementById('inputSection').classList.add('hidden');
             const sm = document.getElementById('statusMessage');
             sm.classList.remove('hidden');
-            if (!resumed) {
-                const s = streaks[currentGameMode];
-                if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
-                else s.current = 0;
-                localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
-                updateStreakUI();
-            }
+            
+            document.querySelectorAll('.emoji-item').forEach(item => item.classList.add('revealed'));
+
+            const s = streaks[currentGameMode];
+            if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
+            else s.current = 0;
+            localStorage.setItem('showlee_streaks_v7', JSON.stringify(streaks));
+            updateStreakUI();
+
             if (targetShow.poster) {
                 const img = document.getElementById('final-reveal-img');
                 img.src = targetShow.poster; img.classList.remove('hidden');
             }
-            const st = document.getElementById('statusTitle');
-            st.textContent = customTitle || (won ? "VICTORY" : "GAME OVER");
-            st.className = won ? "text-3xl font-black mb-2 tracking-tighter italic text-[#1b8a32]" : "text-3xl font-black mb-2 tracking-tighter italic text-[#c41e1e]";
+            document.getElementById('statusTitle').textContent = won ? "VICTORY" : "GAME OVER";
             document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
-            saveSession();
+        }
+
+        function setMode(mode) {
+            currentGameMode = mode;
+            updateStreakUI();
+            startNewGame();
+        }
+
+        function updateStreakUI() {
+            const s = streaks[currentGameMode];
+            document.getElementById('currentStreak').textContent = s.current;
+            document.getElementById('bestStreak').textContent = s.best;
+            document.getElementById('modeNormal').classList.toggle('active', currentGameMode === 'normal');
+            document.getElementById('modeAnime').classList.toggle('active', currentGameMode === 'anime');
+            document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
+            document.getElementById('streakModeLabel').textContent = currentGameMode === 'normal' ? 'Mainstream' : (currentGameMode === 'anime' ? 'Anime' : 'International');
         }
 
         document.getElementById('showInput').addEventListener('input', (e) => {
             const v = e.target.value.toLowerCase();
             const al = document.getElementById('autocompleteList');
             if (v.length < 2) { al.classList.add('hidden'); return; }
-            const matches = tvShows
-                .filter(s => s.title.toLowerCase().includes(v))
-                .sort((a,b) => b.votes - a.votes)
-                .slice(0, 8);
+            const matches = tvShows.filter(s => s.title.toLowerCase().includes(v)).slice(0, 8);
             al.innerHTML = "";
             if (matches.length) {
                 al.classList.remove('hidden');
                 matches.forEach(m => {
                     const d = document.createElement('div');
-                    d.className = 'autocomplete-item text-sm flex justify-between items-center';
-                    d.innerHTML = `<div class="flex flex-col"><span class="text-white font-bold">${m.title}</span><span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks.slice(0,1)}</span></div><span class="text-zinc-500 text-[10px] font-black">${m.year}</span>`;
+                    d.className = 'autocomplete-item text-xs font-bold';
+                    d.textContent = `${m.title} (${m.year})`;
                     d.onclick = () => submitGuess(m);
                     al.appendChild(d);
                 });
             } else al.classList.add('hidden');
         });
 
-        function surrender() { if (!isGameOver) endGame(false, false, "SURRENDERED"); }
-
-        document.addEventListener('click', (e) => { 
-            if (!document.getElementById('showInput').contains(e.target)) {
-                document.getElementById('autocompleteList').classList.add('hidden');
-            }
-        });
+        function surrender() { if (!isGameOver) endGame(false); }
     </script>
 </body>
 </html>
