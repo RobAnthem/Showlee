@@ -137,9 +137,18 @@
 
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
+
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #c41e1e; color: white; padding: 12px 24px; border-radius: 8px;
+            font-weight: 700; font-size: 14px; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: none;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
+
+    <div id="toast" class="toast"></div>
 
     <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
         <div class="flex items-center gap-3 mb-6">
@@ -184,12 +193,8 @@
             </div>
             <h2 class="text-2xl font-black mb-4 tracking-tighter uppercase italic">No Data Detected</h2>
             <p class="text-zinc-400 text-sm mb-8 leading-relaxed">
-                The show database (CSV) is currently hosted externally. Please make sure the file <code class="text-[#d1a01d] font-bold">enriched_shows_2026-03-07.csv</code> is available in the root directory.
+                The show database (CSV) is currently hosted externally. Please make sure the file <code class="text-[#d1a01d] font-bold">enriched_shows_2026-03-07.csv</code> is available.
             </p>
-            <div class="w-full bg-black/40 p-4 rounded-lg text-[10px] text-left border border-zinc-700">
-                <span class="text-zinc-500 font-black uppercase">Technical Info:</span><br>
-                <span class="text-zinc-300">HTTP 404: File not found in local artifacts.</span>
-            </div>
         </div>
 
         <div id="gameInterface" class="w-full flex flex-col items-center">
@@ -259,7 +264,7 @@
     </main>
 
     <script>
-        const apiKey = "AIzaSyCRK5hUfai9cZjo5d0fuISjM71HJpzJEX8"; 
+        const openRouterKey = "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"; // Runtime provides key
         let tvShows = [];
         let targetShow;
         let guesses = [];
@@ -269,15 +274,22 @@
         let isGameOver = false;
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
+        // Helper for Toast errors
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 5000);
+        }
+
         window.addEventListener('DOMContentLoaded', async () => {
-            const savedStreaks = localStorage.getItem('showlee_streaks_v7');
+            const savedStreaks = localStorage.getItem('showlee_streaks_v8');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
             updateStreakUI();
 
             try {
-                // Fetch CSV relative to the current URL
-                const csvUrl = new URL('enriched_shows_2026-03-07.csv', window.location.href).href;
-                const response = await fetch(csvUrl);
+                const csvPath = 'enriched_shows_2026-03-07.csv';
+                const response = await fetch(csvPath);
                 
                 if (!response.ok) {
                     showNoDataPage();
@@ -303,37 +315,58 @@
             document.getElementById('noDataPage').classList.remove('hidden');
         }
 
+        // Exponential backoff API call
         async function fetchEmojiClues(showTitle, showYear, retryCount = 0) {
-            const systemPrompt = "You are a TV show expert. Provide exactly 10 emojis that represent the requested TV show. Respond ONLY with a JSON array of 10 strings, where each string is a single emoji. Do not include any text outside the JSON.";
+            if (!openRouterKey) {
+                console.warn("OpenRouter API key not set.");
+                return;
+            }
+
+            const systemPrompt = "You are a TV show expert. Provide exactly 10 emojis that represent the requested TV show. Respond ONLY with a JSON object containing a key 'emojis' which is an array of 10 strings, where each string is a single emoji. No markdown, no extra text.";
             const userQuery = `TV Show: ${showTitle} (${showYear})`;
             
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${openRouterKey}`,
+                        'HTTP-Referer': window.location.href, // Required by OpenRouter
+                        'X-Title': 'Showlee' // Optional OpenRouter header
+                    },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: userQuery }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] },
-                        generationConfig: { responseMimeType: "application/json" }
+                        model: "google/gpt-oss-20b",
+                        messages: [
+                            { role: "system", content: systemPrompt },
+                            { role: "user", content: userQuery }
+                        ],
+                        response_format: { type: "json_object" },
+                        temperature: 0.5
                     })
                 });
 
-                if (!response.ok) throw new Error('API Error');
+                if (!response.ok) throw new Error(`OpenRouter API Error: ${response.status}`);
 
                 const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                const emojis = JSON.parse(text);
+                const contentText = data.choices?.[0]?.message?.content;
+                const parsed = JSON.parse(contentText);
+                
+                // Flexible parsing
+                const emojis = parsed.emojis || parsed.array || Object.values(parsed).find(v => Array.isArray(v));
                 
                 if (Array.isArray(emojis) && emojis.length >= 10) {
                     emojiClues = emojis.slice(0, 10);
                     renderEmojis();
                 } else {
-                    throw new Error('Invalid format');
+                    throw new Error('Invalid emoji format returned');
                 }
             } catch (err) {
                 if (retryCount < 5) {
-                    const delay = Math.pow(2, retryCount) * 1000;
-                    setTimeout(() => fetchEmojiClues(showTitle, showYear, retryCount + 1), delay);
+                    const delays = [1000, 2000, 4000, 8000, 16000];
+                    setTimeout(() => fetchEmojiClues(showTitle, showYear, retryCount + 1), delays[retryCount]);
+                } else {
+                    console.error("Failed to load clues:", err);
+                    showToast("Failed to load show clues. API unavailable.");
                 }
             }
         }
@@ -359,30 +392,18 @@
                 }
                 cells.push(cell.trim());
 
-                const nameIdx = getIdx('Name');
-                const yearIdx = getIdx('Year');
-                const genreIdx = getIdx('Genres');
-                const countryIdx = getIdx('Country');
-                const langIdx = getIdx('Language');
-                const seasonIdx = getIdx('Seasons');
-                const networkIdx = getIdx('Networks');
-                const ratingIdx = getIdx('Rating');
-                const scoreIdx = getIdx('Vote_Average');
-                const voteIdx = getIdx('Vote_Count');
-                const posterIdx = getIdx('Poster_URL');
-
                 rows.push({
-                    title: (cells[nameIdx] || "").replace(/"/g, ''),
-                    year: parseInt(cells[yearIdx]) || 0,
-                    genres: (cells[genreIdx] || "").replace(/"/g, '').split(',').map(g => g.trim()),
-                    country: (cells[countryIdx] || "").replace(/"/g, ''),
-                    lang: (cells[langIdx] || "").replace(/"/g, '').toLowerCase(),
-                    seasons: parseInt(cells[seasonIdx]) || 0,
-                    networks: (cells[networkIdx] || "").replace(/"/g, '').split(',').map(n => n.trim()),
-                    contentRating: (cells[ratingIdx] || "").replace(/"/g, ''),
-                    score: parseFloat(cells[scoreIdx]) || 0,
-                    votes: parseInt(cells[voteIdx]) || 0,
-                    poster: (cells[posterIdx] || "").replace(/"/g, '').trim()
+                    title: (cells[getIdx('Name')] || "").replace(/"/g, ''),
+                    year: parseInt(cells[getIdx('Year')]) || 0,
+                    genres: (cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()),
+                    country: (cells[getIdx('Country')] || "").replace(/"/g, ''),
+                    lang: (cells[getIdx('Language')] || "").replace(/"/g, '').toLowerCase(),
+                    seasons: parseInt(cells[getIdx('Seasons')]) || 0,
+                    networks: (cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()),
+                    contentRating: (cells[getIdx('Rating')] || "").replace(/"/g, ''),
+                    score: parseFloat(cells[getIdx('Vote_Average')]) || 0,
+                    votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
+                    poster: (cells[getIdx('Poster_URL')] || "").replace(/"/g, '').trim()
                 });
             }
             return rows;
@@ -402,9 +423,7 @@
             pool.sort((a, b) => b.votes - a.votes);
             pool = pool.slice(0, 2000);
 
-            if (pool.length === 0) {
-                pool = tvShows.slice(0, 100);
-            }
+            if (pool.length === 0) pool = tvShows.slice(0, 100);
 
             targetShow = pool[Math.floor(Math.random() * pool.length)];
             guesses = [];
@@ -474,7 +493,7 @@
 
         function renderRow(guess) {
             const row = document.createElement('div');
-            row.className = 'game-grid';
+            row.className = 'game-grid mb-2';
             
             const fields = [
                 { type: 'title', val: guess.title },
@@ -530,7 +549,9 @@
         }
 
         function updateSummaryUI(guess) {
-            if (guess.genres.some(g => targetShow.genres.includes(g))) {
+            const check = (list1, list2) => list1.some(i => list2.includes(i));
+            
+            if (check(guess.genres, targetShow.genres)) {
                 const el = document.getElementById('sum-genre');
                 const common = guess.genres.filter(g => targetShow.genres.includes(g));
                 el.querySelector('span:last-child').textContent = common[0];
@@ -546,7 +567,7 @@
                 el.classList.add('found');
                 el.querySelector('span:last-child').textContent = targetShow.seasons;
             }
-            if (guess.networks.some(n => targetShow.networks.includes(n))) {
+            if (check(guess.networks, targetShow.networks)) {
                 const el = document.getElementById('sum-network');
                 el.classList.add('found');
                 el.querySelector('span:last-child').textContent = targetShow.networks[0];
@@ -579,7 +600,7 @@
             const s = streaks[currentGameMode];
             if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
             else s.current = 0;
-            localStorage.setItem('showlee_streaks_v7', JSON.stringify(streaks));
+            localStorage.setItem('showlee_streaks_v8', JSON.stringify(streaks));
             updateStreakUI();
 
             if (targetShow.poster) {
