@@ -111,12 +111,6 @@
             background: #2d2f35;
         }
 
-        .loading-dots:after {
-            content: '.';
-            animation: dots 1.5s steps(5, end) infinite;
-        }
-        @keyframes dots { 0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); } 40% { color: #d1a01d; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); } 60% { text-shadow: .25em 0 0 #d1a01d, .5em 0 0 rgba(0,0,0,0); } 80%, 100% { text-shadow: .25em 0 0 #d1a01d, .5em 0 0 #d1a01d; } }
-
         .autocomplete-items {
             position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
             background: #1a1c1e; border: 1px solid #404249; max-height: 250px;
@@ -183,7 +177,6 @@
     </header>
 
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
-        <!-- Error State UI -->
         <div id="noDataPage" class="hidden flex flex-col items-center justify-center text-center p-12 bg-[#1a1c1e] border-2 border-zinc-800 rounded-2xl max-w-md">
             <div class="bg-zinc-800/50 p-6 rounded-full mb-6">
                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d1a01d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -191,9 +184,9 @@
                     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
                 </svg>
             </div>
-            <h2 class="text-2xl font-black mb-4 tracking-tighter uppercase italic">No Data Detected</h2>
+            <h2 class="text-2xl font-black mb-4 tracking-tighter uppercase italic">Files Missing</h2>
             <p class="text-zinc-400 text-sm mb-8 leading-relaxed">
-                The show database (CSV) is currently hosted externally. Please make sure the file <code class="text-[#d1a01d] font-bold">enriched_shows_2026-03-07.csv</code> is available.
+                Database CSV or Emoji metadata CSV not found.
             </p>
         </div>
 
@@ -239,8 +232,7 @@
             </div>
 
             <div id="emojiClueContainer" class="emoji-clue-container">
-                <div id="emojiLoading" class="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-1 loading-dots">Loading Emojis</div>
-                <div id="emojiLabel" class="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-3 hidden">Show Clues</div>
+                <div id="emojiLabel" class="text-[10px] font-black uppercase text-zinc-500 tracking-widest mb-3">Show Clues</div>
                 <div id="emojiRow" class="emoji-row"></div>
             </div>
 
@@ -264,8 +256,8 @@
     </main>
 
     <script>
-        const openRouterKey = "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"; // Runtime provides key
         let tvShows = [];
+        let emojiMap = new Map();
         let targetShow;
         let guesses = [];
         let emojiClues = [];
@@ -274,30 +266,27 @@
         let isGameOver = false;
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
-        // Helper for Toast errors
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 5000);
-        }
-
         window.addEventListener('DOMContentLoaded', async () => {
             const savedStreaks = localStorage.getItem('showlee_streaks_v8');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
             updateStreakUI();
 
             try {
-                const csvPath = 'enriched_shows_2026-03-07.csv';
-                const response = await fetch(csvPath);
+                const [showsRes, emojiRes] = await Promise.all([
+                    fetch('enriched_shows_2026-03-07.csv'),
+                    fetch('emoji_metadata.csv')
+                ]);
                 
-                if (!response.ok) {
+                if (!showsRes.ok || !emojiRes.ok) {
                     showNoDataPage();
                     return;
                 }
                 
-                const text = await response.text();
-                tvShows = parseCSV(text);
+                const showsText = await showsRes.text();
+                const emojiText = await emojiRes.text();
+                
+                parseEmojiCSV(emojiText);
+                tvShows = parseShowsCSV(showsText);
                 
                 if (tvShows.length > 0) {
                     startNewGame();
@@ -315,63 +304,31 @@
             document.getElementById('noDataPage').classList.remove('hidden');
         }
 
-        // Exponential backoff API call
-        async function fetchEmojiClues(showTitle, showYear, retryCount = 0) {
-            if (!openRouterKey) {
-                console.warn("OpenRouter API key not set.");
-                return;
-            }
-
-            const systemPrompt = "You are a TV show expert. Provide exactly 10 emojis that represent the requested TV show. Respond ONLY with a JSON object containing a key 'emojis' which is an array of 10 strings, where each string is a single emoji. No markdown, no extra text.";
-            const userQuery = `TV Show: ${showTitle} (${showYear})`;
-            
-            try {
-                const response = await fetch(`https://openrouter.ai/api/v1/chat/completions`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${openRouterKey}`,
-                        'HTTP-Referer': window.location.href, // Required by OpenRouter
-                        'X-Title': 'Showlee' // Optional OpenRouter header
-                    },
-                    body: JSON.stringify({
-                        model: "google/gpt-oss-20b",
-                        messages: [
-                            { role: "system", content: systemPrompt },
-                            { role: "user", content: userQuery }
-                        ],
-                        response_format: { type: "json_object" },
-                        temperature: 0.5
-                    })
-                });
-
-                if (!response.ok) throw new Error(`OpenRouter API Error: ${response.status}`);
-
-                const data = await response.json();
-                const contentText = data.choices?.[0]?.message?.content;
-                const parsed = JSON.parse(contentText);
+        function parseEmojiCSV(text) {
+            const lines = text.split(/\r?\n/);
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
                 
-                // Flexible parsing
-                const emojis = parsed.emojis || parsed.array || Object.values(parsed).find(v => Array.isArray(v));
-                
-                if (Array.isArray(emojis) && emojis.length >= 10) {
-                    emojiClues = emojis.slice(0, 10);
-                    renderEmojis();
-                } else {
-                    throw new Error('Invalid emoji format returned');
+                const cells = [];
+                let cell = "", inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { cells.push(cell.trim()); cell = ""; }
+                    else cell += char;
                 }
-            } catch (err) {
-                if (retryCount < 5) {
-                    const delays = [1000, 2000, 4000, 8000, 16000];
-                    setTimeout(() => fetchEmojiClues(showTitle, showYear, retryCount + 1), delays[retryCount]);
-                } else {
-                    console.error("Failed to load clues:", err);
-                    showToast("Failed to load show clues. API unavailable.");
+                cells.push(cell.trim());
+
+                const id = cells[0].replace(/"/g, '');
+                const emojis = cells[2] ? cells[2].replace(/"/g, '') : "";
+                if (emojis) {
+                    // Split emojis string into characters (handles surrogate pairs)
+                    emojiMap.set(id, Array.from(emojis));
                 }
             }
         }
 
-        function parseCSV(text) {
+        function parseShowsCSV(text) {
             const lines = text.split(/\r?\n/);
             if (lines.length < 2) return [];
             
@@ -393,6 +350,7 @@
                 cells.push(cell.trim());
 
                 rows.push({
+                    id: (cells[getIdx('ID')] || "").replace(/"/g, ''),
                     title: (cells[getIdx('Name')] || "").replace(/"/g, ''),
                     year: parseInt(cells[getIdx('Year')]) || 0,
                     genres: (cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()),
@@ -421,17 +379,17 @@
             });
             
             pool.sort((a, b) => b.votes - a.votes);
-            pool = pool.slice(0, 2000);
-
-            if (pool.length === 0) pool = tvShows.slice(0, 100);
+            pool = pool.slice(0, 2500);
 
             targetShow = pool[Math.floor(Math.random() * pool.length)];
             guesses = [];
             isGameOver = false;
-            emojiClues = [];
+            
+            // Get emojis from our map
+            emojiClues = emojiMap.get(targetShow.id) || [];
             
             clearUI();
-            fetchEmojiClues(targetShow.title, targetShow.year);
+            renderEmojis();
         }
 
         function clearUI() {
@@ -439,8 +397,6 @@
             document.getElementById('showInput').value = "";
             document.getElementById('statusMessage').classList.add('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
-            document.getElementById('emojiLoading').classList.remove('hidden');
-            document.getElementById('emojiLabel').classList.add('hidden');
             document.getElementById('emojiRow').innerHTML = "";
             document.getElementById('progressBarFill').style.width = "0%";
             document.getElementById('guessesLeft').textContent = "10 CHANCES LEFT";
@@ -454,16 +410,14 @@
 
         function renderEmojis() {
             const container = document.getElementById('emojiRow');
-            const loading = document.getElementById('emojiLoading');
-            const label = document.getElementById('emojiLabel');
-            
-            if (emojiClues.length === 0) return;
-            
-            loading.classList.add('hidden');
-            label.classList.remove('hidden');
             container.innerHTML = "";
             
-            const numToReveal = Math.min(guesses.length + 1, 10);
+            if (emojiClues.length === 0) {
+                container.innerHTML = `<span class="text-[10px] font-bold text-zinc-600 italic">No Emoji Clues for this Show</span>`;
+                return;
+            }
+            
+            const numToReveal = Math.min(guesses.length + 1, emojiClues.length);
             
             emojiClues.forEach((emoji, idx) => {
                 const div = document.createElement('div');
