@@ -63,11 +63,21 @@
             justify-content: center; min-height: 64px;
         }
         
-        /* Labels turn black on found (green) or partial (yellow) boxes */
         .summary-box.found span:first-child, .summary-box.partial-found span:first-child { color: rgba(0,0,0,0.7) !important; }
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
         
+        .emoji-hint-container {
+            width: 100%;
+            max-width: 620px;
+            background: #1a1c1e;
+            border: 2px solid #2d2f35;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
         .autocomplete-items {
             position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
             background: #1a1c1e; border: 1px solid #404249; max-height: 250px;
@@ -194,7 +204,7 @@
                 </button>
             </div>
 
-            <div class="summary-grid mb-8">
+            <div class="summary-grid mb-6">
                 <div id="sum-genre" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
                     <span class="text-[10px] font-black leading-tight">?</span>
@@ -223,6 +233,12 @@
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Score</span>
                     <span class="text-[11px] font-black">?</span>
                 </div>
+            </div>
+
+            <!-- New Emoji Hint Section -->
+            <div id="emojiHintArea" class="emoji-hint-container">
+                <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-2">Emoji Clue</div>
+                <div id="emojiReveal" class="text-2xl tracking-[0.2em]"></div>
             </div>
 
             <div id="inputSection" class="w-full max-w-md mb-10">
@@ -257,6 +273,7 @@
     <script>
         const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
         let tvShows = [];
+        let emojiMetadata = {};
         let targetShow;
         let guesses = [];
         const MAX_GUESSES = 10;
@@ -294,12 +311,25 @@
             }
 
             try {
-                const response = await fetch('enriched_shows_2026-03-07.csv');
-                if (!response.ok) throw new Error();
-                const text = await response.text();
-                tvShows = parseCSV(text);
+                // Load both files
+                const [showsRes, emojiRes] = await Promise.all([
+                    fetch('enriched_shows_2026-03-07.csv'),
+                    fetch('emoji_metadata.csv')
+                ]);
+
+                if (!showsRes.ok) throw new Error("Shows CSV failed");
+                
+                const showsText = await showsRes.text();
+                tvShows = parseCSV(showsText);
+
+                if (emojiRes.ok) {
+                    const emojiText = await emojiRes.text();
+                    emojiMetadata = parseEmojiCSV(emojiText);
+                }
+
                 if (tvShows.length > 0) initGame();
             } catch (err) {
+                console.error(err);
                 document.getElementById('uploadContainer').classList.remove('hidden');
             }
         });
@@ -340,6 +370,30 @@
                 });
             }
             return rows;
+        }
+
+        function parseEmojiCSV(text) {
+            const lines = text.split(/\r?\n/);
+            const data = {};
+            // Skip header
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cells = [];
+                let cell = "", inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { cells.push(cell.trim()); cell = ""; }
+                    else cell += char;
+                }
+                cells.push(cell.trim());
+                if (cells.length >= 3) {
+                    const id = cells[0].replace(/"/g, '');
+                    const emojis = cells[2].replace(/"/g, '');
+                    if (emojis) data[id] = Array.from(emojis); // Handles multi-char emojis correctly
+                }
+            }
+            return data;
         }
 
         function initGame() {
@@ -427,6 +481,7 @@
             
             clearUI();
             updateStreakUI();
+            updateEmojiHint();
             saveSession();
         }
 
@@ -459,6 +514,8 @@
                 renderRow(g, false);
                 updateSummaryUI(g);
             });
+
+            updateEmojiHint();
 
             if (isGameOver) endGame(guesses.length > 0 && guesses[guesses.length-1].title === targetShow.title, true);
             else updateGuessesLeft();
@@ -500,6 +557,21 @@
             btn.classList.toggle('hint-ready', canHint);
         }
 
+        function updateEmojiHint() {
+            const el = document.getElementById('emojiReveal');
+            const emojis = emojiMetadata[targetShow.id];
+            
+            if (!emojis || emojis.length === 0) {
+                el.innerHTML = '<span class="text-[10px] text-zinc-600 font-bold uppercase italic">No Emoji Data For This Show</span>';
+                return;
+            }
+
+            // Reveal 1 by default, then +1 for every guess
+            const count = Math.min(1 + guesses.length, emojis.length);
+            const revealed = emojis.slice(0, count).join("");
+            el.textContent = revealed;
+        }
+
         function useHint() {
             if (hintUsed || guesses.length < 4 || isGameOver) return;
             hintUsed = true;
@@ -531,6 +603,7 @@
             renderRow(show, true);
             updateSummaryUI(show);
             updateGuessesLeft();
+            updateEmojiHint();
             document.getElementById('showInput').value = "";
             document.getElementById('autocompleteList').classList.add('hidden');
             if (show.title === targetShow.title) endGame(true);
@@ -606,7 +679,6 @@
         }
 
         function updateSummaryUI(guess) {
-            // Genre Summary logic
             const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
             commonG.forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
@@ -616,7 +688,6 @@
                 gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
             }
 
-            // Network Summary logic
             const commonN = guess.networks.filter(x => targetShow.networks.includes(x));
             commonN.forEach(x => discoveredNetworks.add(x));
             if (discoveredNetworks.size > 0) {
@@ -626,11 +697,11 @@
                 nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
             }
 
-            // Year Summary logic
             if (!yearGuessed) {
                 if (guess.year === targetShow.year) {
                     yearGuessed = true;
                     const el = document.getElementById('sum-date');
+                    el.classList.remove('partial-found');
                     el.classList.add('found');
                     const v = el.querySelector('span:last-child');
                     v.textContent = targetShow.year; v.className = "text-[11px] font-black";
@@ -642,7 +713,6 @@
                 }
             }
 
-            // Origin Summary logic (Locked once Green)
             const oBox = document.getElementById('sum-origin');
             if (!oBox.classList.contains('found')) {
                 const langMatch = guess.lang === targetShow.lang;
@@ -657,14 +727,12 @@
                 }
             }
 
-            // Content Rating Summary logic
             if (guess.contentRating === targetShow.contentRating) {
                 const crBox = document.getElementById('sum-content-rating');
                 crBox.classList.add('found');
                 crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
             }
 
-            // Seasons and Rating Summary logic
             const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-rating', guess.score, targetShow.score]];
             map.forEach(m => {
                 const el = document.getElementById(m[0]);
@@ -695,13 +763,18 @@
             st.textContent = customTitle || (won ? "VICTORY" : "GAME OVER");
             st.className = won ? "text-3xl font-black mb-2 tracking-tighter italic text-[#1b8a32]" : "text-3xl font-black mb-2 tracking-tighter italic text-[#c41e1e]";
             document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
+            
+            // Show all emojis on game over
+            const emojiList = emojiMetadata[targetShow.id];
+            if (emojiList) document.getElementById('emojiReveal').textContent = emojiList.join("");
+            
             saveSession();
         }
 
         document.getElementById('showInput').addEventListener('input', (e) => {
             const v = e.target.value.toLowerCase();
             const al = document.getElementById('autocompleteList');
-            if (v.length < 2) { al.classList.add('hidden'); return; }
+            if (v.length < 1) { al.classList.add('hidden'); return; }
             const matches = tvShows
                 .filter(s => s.title.toLowerCase().includes(v))
                 .sort((a,b) => b.votes - a.votes)
