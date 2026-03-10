@@ -12,270 +12,780 @@
             font-family: 'Inter', sans-serif;
             background-color: #0b0c0d;
             color: #ffffff;
-            overflow-x: hidden;
         }
 
-        .correct { background-color: #1b8a32 !important; border-color: #146425 !important; color: #ffffff !important; }
+        .correct { background-color: #1b8a32 !important; border-color: #146425 !important; color: #000000 !important; }
         .partial { background-color: #d1a01d !important; border-color: #a37c15 !important; color: #000000 !important; }
         .incorrect { background-color: #c41e1e !important; border-color: #8c1515 !important; color: #ffffff !important; }
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(8, 1fr);
             gap: 6px;
             width: 100%;
-            max-width: 800px;
+            max-width: 620px;
         }
 
         .cell {
             aspect-ratio: 1/1;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
             font-weight: 800;
-            font-size: 0.75rem;
-            border: 2px solid #27272a;
-            border-radius: 4px;
+            font-size: 0.65rem;
+            line-height: 1.1;
+            border: 2px solid #2d2f35;
             text-transform: uppercase;
-            padding: 4px;
             transition: all 0.3s ease;
+            overflow: hidden;
+            word-wrap: break-word;
+            padding: 4px;
+            box-sizing: border-box;
+            border-radius: 2px;
+            position: relative;
         }
 
-        .autocomplete-item {
-            padding: 10px;
-            cursor: pointer;
-            border-bottom: 1px solid #27272a;
+        .poster-cell { padding: 0; background-size: cover; background-position: center; position: relative; }
+        .poster-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.75);
+            display: flex; align-items: center; justify-content: center;
+            padding: 4px; font-size: 0.6rem; text-align: center; color: white;
         }
+        
+        .correct .poster-overlay, .partial .poster-overlay { background: transparent; color: #000000 !important; font-weight: 900; }
 
-        .autocomplete-item:hover {
-            background-color: #18181b;
+        .summary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; width: 100%; max-width: 620px; }
+        .summary-box {
+            background: #1a1c1e; border: 2px solid #2d2f35; border-radius: 4px;
+            padding: 8px 2px; text-align: center; display: flex; flex-direction: column;
+            justify-content: center; min-height: 64px;
         }
-
+        
+        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { color: rgba(0,0,0,0.7) !important; }
+        .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
+        .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
+        
         .emoji-hint-container {
-            letter-spacing: 0.2em;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 620px;
+            background: #1a1c1e;
+            border: 2px solid #2d2f35;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 24px;
+            text-align: center;
         }
 
-        @keyframes flip {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(90deg); opacity: 0.5; }
-            100% { transform: rotateY(0deg); opacity: 1; }
+        .autocomplete-items {
+            position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
+            background: #1a1c1e; border: 1px solid #404249; max-height: 250px;
+            overflow-y: auto; border-radius: 4px; margin-top: 4px;
         }
 
-        .reveal-anim {
-            display: inline-block;
-            animation: flip 0.6s ease-out;
-        }
+        .autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #2d2f35; }
+        .autocomplete-item:hover { background-color: #2d2f35; }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
+        .progress-bar-container { width: 100%; height: 8px; background: #1a1c1e; margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2d2f35; }
+        .progress-bar-fill { height: 100%; background: #d1a01d; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
 
-        .bounce { animation: bounce 0.5s ease; }
+        .mode-btn {
+            padding: 6px 12px; font-size: 9px; font-weight: 700; text-transform: uppercase;
+            border: 1px solid #404249; background: #1a1c1e; transition: all 0.2s;
+        }
+        .mode-btn.active { background: #d1a01d; color: black; border-color: #d1a01d; }
+
+        #hintButton.hint-ready { background-color: #1b8a32 !important; border-color: #146425 !important; color: white !important; }
+
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2d2f35; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #d1a01d; }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        #difficultyModal { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
+        .diff-card { background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer; }
+        .diff-card:hover { border-color: #d1a01d; transform: translateY(-2px); }
+
+        .flip { animation: flip-cell 0.6s ease forwards; }
+        @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
+
+        .emoji-slot { display: inline-block; width: 1.5em; text-align: center; }
+        .reveal-flip { display: inline-block; animation: reveal-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes reveal-bounce { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body class="p-4 flex flex-col items-center min-h-screen">
+<body class="min-h-screen flex flex-col items-center p-4">
 
-    <header class="w-full max-w-2xl flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
-        <h1 class="text-3xl font-black tracking-tighter italic">SHOWLEE</h1>
-        <div class="flex gap-4">
-            <button onclick="surrender()" class="text-xs font-bold text-zinc-500 hover:text-red-500 uppercase tracking-widest">Surrender</button>
+    <div id="difficultyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
+        <div class="w-full max-w-lg bg-[#0b0c0d] border-2 border-zinc-800 rounded-2xl p-8 shadow-2xl">
+            <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Choose Your Difficulty</h3>
+            <p class="text-zinc-500 text-xs mb-8 font-bold uppercase tracking-widest">Locked until your streak ends</p>
+            <div class="grid grid-cols-1 gap-4">
+                <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
+                    <div>
+                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">EASY</h4>
+                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 1,500 most popular shows</p>
+                    </div>
+                </div>
+                <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
+                    <div>
+                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">NORMAL</h4>
+                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 3,000 most popular shows</p>
+                    </div>
+                </div>
+                <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
+                    <div>
+                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">IMPOSSIBLE</h4>
+                        <p class="text-zinc-500 text-[10px] font-bold uppercase">All available shows in database</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1a01d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>
+            </svg>
+            <h1 class="text-4xl font-black tracking-tighter italic">SHOWLEE</h1>
+        </div>
+        
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 items-end gap-4 px-2">
+            <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-1">
+                    <span class="text-[9px] font-black uppercase text-zinc-500">Category</span>
+                    <div class="flex overflow-hidden rounded-lg">
+                        <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active">Mainstream</button>
+                        <button id="modeAnime" onclick="setMode('anime')" class="mode-btn">Anime</button>
+                        <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn">International</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-end">
+                <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
+                    Streak (<span id="streakModeLabel">Mainstream</span>) 
+                    <span id="diffIndicator" class="ml-2 text-zinc-700">| NORMAL</span>
+                </div>
+                <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
+                <div class="text-[10px] text-zinc-600 uppercase mt-1 font-bold">
+                    Best: <span id="bestStreak">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-full mt-4 flex justify-start px-2">
+            <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800">
+                <span class="text-[9px] font-black uppercase text-zinc-500">Emoji Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
         </div>
     </header>
 
-    <div id="emojiDisplay" class="mb-8 text-center p-6 bg-zinc-900/50 rounded-xl border border-zinc-800 w-full max-w-xl">
-        <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-3">Emoji Clue</p>
-        <div id="emojiStory" class="text-3xl md:text-4xl flex flex-wrap justify-center gap-2 emoji-hint-container min-h-[50px]">
-            <!-- Emojis injected here -->
+    <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
+        <div id="uploadContainer" class="hidden text-center py-16 border-2 border-dashed border-zinc-800 rounded-xl w-full bg-[#1a1c1e]">
+            <p class="text-zinc-400 mb-6 font-bold uppercase tracking-tight">Database Not Loaded</p>
+            <label class="bg-[#d1a01d] text-black font-black py-3 px-8 rounded-lg cursor-pointer hover:bg-yellow-600 transition shadow-lg">
+                LOAD CSV
+                <input type="file" id="fileInput" accept=".csv" class="hidden">
+            </label>
         </div>
-    </div>
 
-    <div class="w-full max-w-2xl mb-6 relative">
-        <input type="text" id="showInput" placeholder="Search for a TV show..." 
-               class="w-full bg-zinc-900 border-2 border-zinc-800 rounded-lg py-4 px-6 text-lg font-bold focus:outline-none focus:border-zinc-500 transition-all">
-        
-        <div id="autocompleteList" class="absolute top-full left-0 right-0 bg-zinc-900 border-2 border-zinc-800 rounded-b-lg mt-1 z-50 hidden max-h-60 overflow-y-auto"></div>
-    </div>
+        <div id="gameInterface" class="hidden w-full flex flex-col items-center">
+            <div id="statusMessage" class="hidden mb-8 p-8 border-2 border-[#d1a01d] w-full text-center bg-[#1a1c1e] rounded-xl shadow-2xl">
+                <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 shadow-xl hidden">
+                <h2 id="statusTitle" class="text-3xl font-black mb-2 tracking-tighter italic"></h2>
+                <p id="statusDesc" class="text-zinc-400 text-sm mb-6"></p>
+                <button onclick="handleNextShowClick()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
+                    Next Show
+                </button>
+            </div>
 
-    <div id="gameBoard" class="game-grid mb-10">
-        <!-- Header row -->
-        <div class="text-[9px] font-black text-zinc-500 uppercase text-center pb-2">Title</div>
-        <div class="text-[9px] font-black text-zinc-500 uppercase text-center pb-2">Year</div>
-        <div class="text-[9px] font-black text-zinc-500 uppercase text-center pb-2">Net</div>
-        <div class="text-[9px] font-black text-zinc-500 uppercase text-center pb-2">Gen</div>
-        <div class="text-[9px] font-black text-zinc-500 uppercase text-center pb-2">Rank</div>
-        <div class="text-[9px] font-black text-zinc-500 uppercase text-center pb-2">Stat</div>
-    </div>
+            <div class="summary-grid mb-6">
+                <div id="sum-genre" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
+                    <span class="text-[10px] font-black leading-tight">?</span>
+                </div>
+                <div id="sum-date" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Year</span>
+                    <span class="text-[11px] font-black text-zinc-600">...</span>
+                </div>
+                <div id="sum-seasons" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Seas</span>
+                    <span class="text-[11px] font-black">?</span>
+                </div>
+                <div id="sum-network" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Netw</span>
+                    <span class="text-[11px] font-black">?</span>
+                </div>
+                <div id="sum-origin" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Origin</span>
+                    <span class="text-[11px] font-black">?</span>
+                </div>
+                <div id="sum-content-rating" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Rating</span>
+                    <span class="text-[11px] font-black">?</span>
+                </div>
+                <div id="sum-rating" class="summary-box">
+                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Score</span>
+                    <span class="text-[11px] font-black">?</span>
+                </div>
+            </div>
 
-    <div id="messageBoard" class="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md px-4 pointer-events-none"></div>
+            <!-- New Emoji Hint Section -->
+            <div id="emojiHintArea" class="emoji-hint-container">
+                <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-2">Emoji Clue</div>
+                <div id="emojiReveal" class="text-2xl tracking-[0.2em] flex justify-center items-center gap-1"></div>
+            </div>
+
+            <div id="inputSection" class="w-full max-w-md mb-10">
+                <div class="relative flex gap-2">
+                    <input id="showInput" type="text" placeholder="Type a TV show name..." autocomplete="off"
+                        class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder-zinc-600 min-w-0">
+                    <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-4 rounded-lg text-[10px] uppercase disabled:opacity-30 hover:bg-zinc-800 transition whitespace-nowrap">Hint</button>
+                    <button id="surrenderButton" onclick="surrender()" class="bg-[#c41e1e]/10 border-2 border-[#c41e1e]/40 text-[#c41e1e] font-black px-4 rounded-lg text-[10px] uppercase hover:bg-[#c41e1e]/20 transition whitespace-nowrap">Surrender</button>
+                    <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="progressBarFill" class="progress-bar-fill"></div>
+                </div>
+                <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">
+                    10 CHANCES LEFT
+                </div>
+            </div>
+
+            <div id="gameBoard" class="flex flex-col gap-2 w-full items-center mb-12"></div>
+        </div>
+    </main>
+
+    <footer class="w-full max-w-2xl py-10 mt-auto border-t border-zinc-900 flex flex-col items-center gap-6">
+        <div class="flex flex-col items-center text-center px-4">
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-5 mb-4 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+            <p class="text-[9px] text-zinc-600 leading-relaxed uppercase tracking-[0.15em] font-black max-w-xs">
+                This product uses the TMDB API but is not endorsed or certified by TMDB.
+            </p>
+        </div>
+    </footer>
 
     <script>
+        const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
         let tvShows = [];
-        let targetShow = null;
+        let emojiMetadata = {};
+        let targetShow;
         let guesses = [];
+        const MAX_GUESSES = 10;
+        
+        let currentGameMode = 'normal';
+        let currentDifficulty = 'normal';
+        let emojiMode = false;
+        let minYearBound = 1900;
+        let maxYearBound = new Date().getFullYear();
+        let yearGuessed = false;
+        let discoveredGenres = new Set();
+        let discoveredNetworks = new Set();
+        let hintUsed = false;
         let isGameOver = false;
-        let emojiData = {};
-        const MAX_EMOJIS = 10;
 
-        async function initGame() {
+        let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
+
+        const GENRE_EMOJIS = {
+            'Action': '💥', 'Adventure': '🏹', 'Animation': '🎨', 'Comedy': '😂', 'Crime': '🚓',
+            'Documentary': '🎥', 'Drama': '🎭', 'Family': '👨‍👩‍👧', 'Fantasy': '🧙‍♂️', 'History': '📜',
+            'Horror': '👻', 'Music': '🎵', 'Mystery': '🕵️', 'News': '📰', 'Reality': '🏠',
+            'Romance': '💖', 'Sci-Fi': '🚀', 'Soap': '🧼', 'Talk': '🎙️', 'War': '🪖', 'Western': '🤠',
+            'Kids': '🧸', 'Politics': '🏛️', 'Action & Adventure': '💥', 'Sci-Fi & Fantasy': '🚀'
+        };
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const savedStreaks = localStorage.getItem('showlee_streaks_v6');
+            if (savedStreaks) streaks = JSON.parse(savedStreaks);
+            updateStreakUI();
+
+            const savedEmojiMode = localStorage.getItem('showlee_emoji_mode');
+            if (savedEmojiMode !== null) {
+                emojiMode = savedEmojiMode === 'true';
+                document.getElementById('emojiToggle').checked = emojiMode;
+            }
+
             try {
                 const [showsRes, emojiRes] = await Promise.all([
-                    fetch('https://raw.githubusercontent.com/fedeperin/tv-shows-dataset/main/tv-shows-dataset.json'),
+                    fetch('enriched_shows_2026-03-07.csv'),
                     fetch('emoji_metadata.csv')
                 ]);
 
-                tvShows = await showsRes.json();
-                const csvText = await emojiRes.text();
+                if (!showsRes.ok) throw new Error("Shows CSV failed");
                 
-                const lines = csvText.split('\n').slice(1);
-                lines.forEach(line => {
-                    const match = line.match(/"(\d+)","(.*?)","(.*?)"/);
-                    if (match) {
-                        const [_, id, name, emojis] = match;
-                        emojiData[id] = emojis;
-                    }
-                });
+                const showsText = await showsRes.text();
+                tvShows = parseCSV(showsText);
 
-                const eligibleShows = tvShows.filter(s => emojiData[s.id]);
-                targetShow = eligibleShows[Math.floor(Math.random() * eligibleShows.length)];
-                
-                updateEmojiDisplay();
-                console.log("Target:", targetShow.title);
+                if (emojiRes.ok) {
+                    const emojiText = await emojiRes.text();
+                    emojiMetadata = parseEmojiCSV(emojiText);
+                }
+
+                if (tvShows.length > 0) initGame();
             } catch (err) {
-                console.error("Failed to load data", err);
+                console.error(err);
+                document.getElementById('uploadContainer').classList.remove('hidden');
+            }
+        });
+
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            if (lines.length < 2) return [];
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            const getIdx = (n) => headers.indexOf(n);
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cells = [];
+                let cell = "", inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { cells.push(cell.trim()); cell = ""; }
+                    else cell += char;
+                }
+                cells.push(cell.trim());
+                if (cells.length < headers.length - 1) continue;
+
+                rows.push({
+                    id: cells[getIdx('ID')],
+                    title: (cells[getIdx('Name')] || "").replace(/"/g, ''),
+                    year: parseInt(cells[getIdx('Year')]) || 0,
+                    genres: (cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== '-'),
+                    country: (cells[getIdx('Country')] || "").replace(/"/g, '') || "??",
+                    lang: (cells[getIdx('Language')] || "").replace(/"/g, '').toLowerCase() || "??",
+                    seasons: parseInt(cells[getIdx('Seasons')]) || 0,
+                    networks: (cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== '-'),
+                    contentRating: (cells[getIdx('Rating')] || "").replace(/"/g, '') || "NR",
+                    score: parseFloat(cells[getIdx('Vote_Average')]) || 0,
+                    votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
+                    poster: (cells[getIdx('Poster_URL')] || "").replace(/"/g, '').trim()
+                });
+            }
+            return rows;
+        }
+
+        function parseEmojiCSV(text) {
+            const lines = text.split(/\r?\n/);
+            const data = {};
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const cells = [];
+                let cell = "", inQuotes = false;
+                for (let char of line) {
+                    if (char === '"') inQuotes = !inQuotes;
+                    else if (char === ',' && !inQuotes) { cells.push(cell.trim()); cell = ""; }
+                    else cell += char;
+                }
+                cells.push(cell.trim());
+                if (cells.length >= 3) {
+                    const id = cells[0].replace(/"/g, '');
+                    const emojis = cells[2].replace(/"/g, '');
+                    if (emojis) data[id] = Array.from(emojis);
+                }
+            }
+            return data;
+        }
+
+        function initGame() {
+            document.getElementById('uploadContainer').classList.add('hidden');
+            document.getElementById('gameInterface').classList.remove('hidden');
+            const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
+            if (saved) resumeGame(JSON.parse(saved));
+            else {
+                currentDifficulty = 'easy'; 
+                startNewGame();
             }
         }
 
-        function updateEmojiDisplay() {
-            const container = document.getElementById('emojiStory');
-            const emojiString = emojiData[targetShow.id] || "";
-            const emojis = Array.from(emojiString); 
+        function toggleEmojiMode(enabled) {
+            emojiMode = enabled;
+            localStorage.setItem('showlee_emoji_mode', enabled);
+            document.getElementById('gameBoard').innerHTML = "";
+            guesses.forEach(g => renderRow(g, false));
+        }
+
+        function setMode(mode) {
+            if (mode === currentGameMode) return;
+            currentGameMode = mode;
+            updateStreakUI();
             
-            // Revealed count: 1 + number of guesses
-            const revealedCount = isGameOver ? emojis.length : Math.min(1 + guesses.length, emojis.length);
+            const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
+            if (saved) resumeGame(JSON.parse(saved));
+            else {
+                if (streaks[currentGameMode].current === 0) showDifficultyPopup();
+                else startNewGame();
+            }
+        }
+
+        function updateStreakUI() {
+            const s = streaks[currentGameMode] || { current: 0, best: 0 };
+            document.getElementById('currentStreak').textContent = s.current;
+            document.getElementById('bestStreak').textContent = s.best;
+            document.getElementById('modeNormal').classList.toggle('active', currentGameMode === 'normal');
+            document.getElementById('modeAnime').classList.toggle('active', currentGameMode === 'anime');
+            document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
+            const labelMap = { normal: 'Mainstream', anime: 'Anime', foreign: 'International' };
+            document.getElementById('streakModeLabel').textContent = labelMap[currentGameMode];
+            document.getElementById('diffIndicator').textContent = `| ${currentDifficulty.toUpperCase()}`;
+        }
+
+        function handleNextShowClick() {
+            const s = streaks[currentGameMode];
+            if (s.current === 0) showDifficultyPopup();
+            else startNewGame();
+        }
+
+        function showDifficultyPopup() {
+            document.getElementById('difficultyModal').classList.remove('hidden');
+        }
+
+        function selectDifficulty(diff) {
+            currentDifficulty = diff;
+            document.getElementById('difficultyModal').classList.add('hidden');
+            startNewGame();
+        }
+
+        function startNewGame() {
+            let pool = tvShows.filter(s => {
+                const isAnime = s.genres.includes('Animation') && s.country === 'JP';
+                const isEnglish = s.lang === 'en';
+                if (currentGameMode === 'anime') return isAnime;
+                if (currentGameMode === 'normal') return isEnglish && !isAnime;
+                return !isEnglish && !isAnime;
+            });
+            pool.sort((a, b) => b.votes - a.votes);
+            if (currentDifficulty === 'easy') pool = pool.slice(0, 1500);
+            else if (currentDifficulty === 'normal') pool = pool.slice(0, 3000);
+            targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
+            guesses = []; minYearBound = 1900; maxYearBound = new Date().getFullYear();
+            yearGuessed = false; discoveredGenres = new Set(); discoveredNetworks = new Set();
+            hintUsed = false; isGameOver = false;
+            clearUI();
+            updateStreakUI();
+            updateEmojiHint();
+            saveSession();
+        }
+
+        function resumeGame(session) {
+            targetShow = session.targetShow;
+            currentDifficulty = session.difficulty || 'easy';
+            guesses = []; 
+            minYearBound = session.minYearBound || 1900; 
+            maxYearBound = session.maxYearBound || new Date().getFullYear();
+            yearGuessed = session.yearGuessed; 
+            discoveredGenres = new Set(session.discoveredGenres);
+            discoveredNetworks = new Set(session.discoveredNetworks);
+            hintUsed = session.hintUsed; 
+            isGameOver = session.isGameOver;
+            clearUI();
+            updateStreakUI();
+            if (yearGuessed) {
+                const yearEl = document.getElementById('sum-date');
+                yearEl.classList.add('found');
+                yearEl.querySelector('span:last-child').textContent = targetShow.year;
+                yearEl.querySelector('span:last-child').className = "text-[11px] font-black";
+            } else {
+                document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
+            }
+            session.guesses.forEach(g => {
+                guesses.push(g);
+                renderRow(g, false);
+                updateSummaryUI(g);
+            });
+            updateEmojiHint();
+            if (isGameOver) endGame(guesses.length > 0 && guesses[guesses.length-1].title === targetShow.title, true);
+            else updateGuessesLeft();
+        }
+
+        function clearUI() {
+            document.getElementById('gameBoard').innerHTML = "";
+            document.getElementById('showInput').value = "";
+            document.getElementById('autocompleteList').classList.add('hidden');
+            document.getElementById('inputSection').classList.remove('hidden');
+            document.getElementById('statusMessage').classList.add('hidden');
+            ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('found', 'partial-found');
+                const v = el.querySelector('span:last-child');
+                v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
+                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : (id === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black");
+            });
+            updateGuessesLeft();
+        }
+
+        function saveSession() {
+            localStorage.setItem(`showlee_session_v6_${currentGameMode}`, JSON.stringify({
+                targetShow, guesses, minYearBound, maxYearBound, yearGuessed,
+                discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
+                hintUsed, isGameOver, difficulty: currentDifficulty
+            }));
+        }
+
+        function updateGuessesLeft() {
+            if (isGameOver) return;
+            const left = MAX_GUESSES - guesses.length;
+            document.getElementById('guessesLeft').textContent = `${left} CHANCES LEFT`;
+            document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
+            const canHint = guesses.length >= 4 && !hintUsed;
+            const btn = document.getElementById('hintButton');
+            btn.disabled = !canHint;
+            btn.classList.toggle('hint-ready', canHint);
+        }
+
+        function updateEmojiHint() {
+            const el = document.getElementById('emojiReveal');
+            const emojis = emojiMetadata[targetShow.id];
             
-            container.innerHTML = '';
+            if (!emojis || emojis.length === 0) {
+                el.innerHTML = '<span class="text-[10px] text-zinc-600 font-bold uppercase italic">No Emoji Data For This Show</span>';
+                return;
+            }
+
+            el.innerHTML = '';
+            const countToReveal = isGameOver ? emojis.length : Math.min(1 + guesses.length, emojis.length);
             
-            for (let i = 0; i < MAX_EMOJIS; i++) {
+            for (let i = 0; i < 10; i++) {
                 const span = document.createElement('span');
+                span.className = 'emoji-slot';
+                
                 if (i < emojis.length) {
-                    if (i < revealedCount) {
-                        span.innerText = emojis[i];
-                        // Add animation class if it's the most recently revealed one
-                        if (i === revealedCount - 1 && guesses.length > 0 && !isGameOver) {
-                            span.className = 'reveal-anim';
+                    if (i < countToReveal) {
+                        span.textContent = emojis[i];
+                        // Animate if it's the most recently revealed emoji
+                        if (!isGameOver && i === countToReveal - 1 && guesses.length > 0) {
+                            span.classList.add('reveal-flip');
                         }
                     } else {
-                        span.innerText = '⚪';
+                        span.textContent = '⚪';
                         span.style.opacity = '0.3';
                     }
+                } else {
+                    // Padding if the show has fewer than 10 emojis
+                    span.textContent = '';
                 }
-                container.appendChild(span);
+                el.appendChild(span);
             }
-            
-            if (emojis.length === 0) {
-                container.innerHTML = '<span class="text-xs text-zinc-600 font-bold uppercase tracking-widest">No Emoji Data For This Show</span>';
-            }
+        }
+
+        function useHint() {
+            if (hintUsed || guesses.length < 4 || isGameOver) return;
+            hintUsed = true;
+            document.getElementById('hintButton').disabled = true;
+            document.getElementById('hintButton').classList.remove('hint-ready');
+            const unsolved = ['sum-date', 'sum-genre', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating']
+                .filter(id => !document.getElementById(id).classList.contains('found'));
+            if (unsolved.length === 0) return;
+            const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
+            const el = document.getElementById(cid);
+            const v = el.querySelector('span:last-child');
+            v.className = cid === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black";
+            if (cid === 'sum-genre') { v.textContent = targetShow.genres.join(", "); el.classList.add('found'); }
+            else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
+            else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
+            else if (cid === 'sum-network') { v.textContent = targetShow.networks[0]; el.classList.add('found'); }
+            else if (cid === 'sum-origin') { v.textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`; el.classList.add('found'); }
+            else if (cid === 'sum-content-rating') { v.textContent = targetShow.contentRating; el.classList.add('found'); }
+            else if (cid === 'sum-rating') { v.textContent = targetShow.score; el.classList.add('found'); }
+            saveSession();
         }
 
         function submitGuess(show) {
-            if (isGameOver || guesses.some(g => g.id === show.id)) return;
-
+            if (isGameOver || guesses.some(g => g.title === show.title)) return;
             guesses.push(show);
-            renderGuess(show);
-            updateEmojiDisplay();
-
-            if (show.id === targetShow.id) {
-                endGame(true);
-            } else if (guesses.length >= 6) {
-                endGame(false);
-            }
-
+            renderRow(show, true);
+            updateSummaryUI(show);
+            updateGuessesLeft();
+            updateEmojiHint();
             document.getElementById('showInput').value = "";
             document.getElementById('autocompleteList').classList.add('hidden');
+            if (show.title === targetShow.title) endGame(true);
+            else if (guesses.length >= MAX_GUESSES) endGame(false);
+            else saveSession();
         }
 
-        function renderGuess(guess) {
-            const board = document.getElementById('gameBoard');
-            
-            const fields = [
-                { val: guess.title, check: guess.title === targetShow.title },
-                { val: guess.year, check: guess.year === targetShow.year, partial: Math.abs(guess.year - targetShow.year) <= 2 },
-                { val: guess.networks[0], check: targetShow.networks.includes(guess.networks[0]) },
-                { val: guess.genres[0], check: targetShow.genres.includes(guess.genres[0]) },
-                { val: guess.votes > targetShow.votes ? '↓' : guess.votes < targetShow.votes ? '↑' : '★', check: guess.votes === targetShow.votes },
-                { val: guess.status, check: guess.status === targetShow.status }
+        function renderRow(guess, animate) {
+            const row = document.createElement('div');
+            row.className = 'game-grid';
+            const config = [
+                { type: 'p', val: guess.title },
+                { type: 'g', val: guess.genres },
+                { type: 'y', val: guess.year },
+                { type: 's', val: guess.seasons },
+                { type: 'n', val: guess.networks },
+                { type: 'o', val: { lang: guess.lang, country: guess.country } },
+                { type: 'cr', val: guess.contentRating },
+                { type: 'r', val: guess.score }
             ];
+            config.forEach((f, i) => {
+                const c = document.createElement('div');
+                c.className = 'cell';
+                if (animate) { c.classList.add('flip'); c.style.animationDelay = `${i * 60}ms`; }
+                if (f.type === 'p') {
+                    c.classList.add('poster-cell');
+                    if (guess.poster) c.style.backgroundImage = `url(${guess.poster})`;
+                    const o = document.createElement('div');
+                    o.className = 'poster-overlay';
+                    o.textContent = f.val;
+                    c.appendChild(o);
+                    c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
+                } else if (f.type === 'g' || f.type === 'n') {
+                    const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
+                    if (f.type === 'g' && emojiMode) {
+                        const emojis = f.val.map(g => GENRE_EMOJIS[g] || '❓');
+                        c.textContent = emojis.slice(0, 2).join(" ");
+                        c.style.fontSize = '1.1rem';
+                    } else {
+                        c.textContent = f.val.slice(0, 2).join(", ");
+                    }
+                    const common = f.val.filter(x => targetArr.includes(x));
+                    if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
+                    else if (common.length > 0) c.classList.add('partial');
+                    else c.classList.add('incorrect');
+                } else if (f.type === 'o') {
+                    c.innerHTML = `<span class="text-[8px] opacity-60">${f.val.lang.toUpperCase()}</span><span>${f.val.country}</span>`;
+                    const langMatch = f.val.lang === targetShow.lang;
+                    const countryMatch = f.val.country === targetShow.country;
+                    if (langMatch && countryMatch) c.classList.add('correct');
+                    else if (langMatch || countryMatch) c.classList.add('partial');
+                    else c.classList.add('incorrect');
+                } else if (f.type === 'cr') {
+                    c.textContent = f.val;
+                    c.classList.add(f.val === targetShow.contentRating ? 'correct' : 'incorrect');
+                } else if (f.type === 'y' || f.type === 's' || f.type === 'r') {
+                    const tv = f.type === 'y' ? targetShow.year : f.type === 's' ? targetShow.seasons : targetShow.score;
+                    const range = f.type === 'y' ? 5 : f.type === 's' ? 1 : 0.5;
+                    c.innerHTML = `<div class="w-full">${f.val}</div>`;
+                    if (f.val === tv) c.classList.add('correct');
+                    else {
+                        c.classList.add(Math.abs(f.val - tv) <= range ? 'partial' : 'incorrect');
+                        const arrow = f.val < tv ? '▲' : '▼';
+                        c.innerHTML += `<div class="text-[8px] font-black opacity-60">${arrow}</div>`;
+                    }
+                }
+                row.appendChild(c);
+            });
+            document.getElementById('gameBoard').prepend(row);
+        }
 
-            fields.forEach(f => {
-                const cell = document.createElement('div');
-                cell.className = 'cell bounce';
-                cell.innerText = f.val || 'N/A';
-                
-                if (f.check) cell.classList.add('correct');
-                else if (f.partial) cell.classList.add('partial');
-                else cell.classList.add('incorrect');
-                
-                board.appendChild(cell);
+        function updateSummaryUI(guess) {
+            const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
+            commonG.forEach(x => discoveredGenres.add(x));
+            if (discoveredGenres.size > 0) {
+                const gBox = document.getElementById('sum-genre');
+                gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
+                gBox.classList.remove('found', 'partial-found');
+                gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
+            }
+            const commonN = guess.networks.filter(x => targetShow.networks.includes(x));
+            commonN.forEach(x => discoveredNetworks.add(x));
+            if (discoveredNetworks.size > 0) {
+                const nBox = document.getElementById('sum-network');
+                nBox.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
+                nBox.classList.remove('found', 'partial-found');
+                nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
+            }
+            if (!yearGuessed) {
+                if (guess.year === targetShow.year) {
+                    yearGuessed = true;
+                    const el = document.getElementById('sum-date');
+                    el.classList.remove('partial-found'); el.classList.add('found');
+                    const v = el.querySelector('span:last-child');
+                    v.textContent = targetShow.year; v.className = "text-[11px] font-black";
+                } else if (guess.year > 0) {
+                    if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
+                    else maxYearBound = Math.min(maxYearBound, guess.year - 1);
+                    document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
+                    if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
+                }
+            }
+            const oBox = document.getElementById('sum-origin');
+            if (!oBox.classList.contains('found')) {
+                const langMatch = guess.lang === targetShow.lang;
+                const countryMatch = guess.country === targetShow.country;
+                if (langMatch && countryMatch) {
+                    oBox.classList.remove('partial-found'); oBox.classList.add('found');
+                    oBox.querySelector('span:last-child').textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`;
+                } else if (langMatch || countryMatch) {
+                    oBox.classList.add('partial-found');
+                    oBox.querySelector('span:last-child').textContent = langMatch ? targetShow.lang.toUpperCase() : targetShow.country;
+                }
+            }
+            if (guess.contentRating === targetShow.contentRating) {
+                const crBox = document.getElementById('sum-content-rating');
+                crBox.classList.add('found');
+                crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
+            }
+            const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-rating', guess.score, targetShow.score]];
+            map.forEach(m => {
+                const el = document.getElementById(m[0]);
+                if (m[1] === m[2]) { el.classList.add('found'); el.querySelector('span:last-child').textContent = m[1]; }
             });
         }
 
-        function endGame(win) {
+        function endGame(won, resumed, customTitle) {
             isGameOver = true;
-            updateEmojiDisplay();
-            
-            const msg = document.getElementById('messageBoard');
-            msg.innerHTML = `
-                <div class="bg-zinc-800 p-6 rounded-2xl border-2 border-zinc-700 shadow-2xl text-center pointer-events-auto">
-                    <h2 class="text-2xl font-black mb-2">${win ? 'CORRECT!' : 'GAME OVER'}</h2>
-                    <p class="text-zinc-400 mb-4">The show was <span class="text-white font-bold">${targetShow.title}</span></p>
-                    <button onclick="location.reload()" class="w-full bg-white text-black font-black py-3 rounded-lg hover:bg-zinc-200 transition">PLAY AGAIN</button>
-                </div>
-            `;
-        }
-
-        function surrender() {
-            if (!isGameOver) endGame(false);
+            document.getElementById('inputSection').classList.add('hidden');
+            const sm = document.getElementById('statusMessage');
+            sm.classList.remove('hidden');
+            if (!resumed) {
+                const s = streaks[currentGameMode];
+                if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
+                else s.current = 0;
+                localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
+                updateStreakUI();
+            }
+            if (targetShow.poster) {
+                const img = document.getElementById('final-reveal-img');
+                img.src = targetShow.poster; img.classList.remove('hidden');
+            }
+            const st = document.getElementById('statusTitle');
+            st.textContent = customTitle || (won ? "VICTORY" : "GAME OVER");
+            st.className = won ? "text-3xl font-black mb-2 tracking-tighter italic text-[#1b8a32]" : "text-3xl font-black mb-2 tracking-tighter italic text-[#c41e1e]";
+            document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
+            updateEmojiHint();
+            saveSession();
         }
 
         document.getElementById('showInput').addEventListener('input', (e) => {
             const v = e.target.value.toLowerCase();
             const al = document.getElementById('autocompleteList');
-            if (v.length < 2) { al.classList.add('hidden'); return; }
-
+            if (v.length < 1) { al.classList.add('hidden'); return; }
             const matches = tvShows
                 .filter(s => s.title.toLowerCase().includes(v))
                 .sort((a,b) => b.votes - a.votes)
                 .slice(0, 8);
-
             al.innerHTML = "";
             if (matches.length) {
                 al.classList.remove('hidden');
                 matches.forEach(m => {
                     const d = document.createElement('div');
                     d.className = 'autocomplete-item text-sm flex justify-between items-center';
-                    d.innerHTML = `
-                        <div class="flex flex-col">
-                            <span class="text-white font-bold">${m.title}</span>
-                            <span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks[0] || 'N/A'}</span>
-                        </div>
-                        <span class="text-zinc-500 text-[10px] font-black">${m.year}</span>
-                    `;
+                    d.innerHTML = `<div class=\"flex flex-col\"><span class=\"text-white font-bold\">${m.title}</span><span class=\"text-zinc-600 text-[10px] uppercase font-bold\">${m.networks.slice(0,1)}</span></div><span class=\"text-zinc-500 text-[10px] font-black\">${m.year}</span>`;
                     d.onclick = () => submitGuess(m);
                     al.appendChild(d);
                 });
             } else al.classList.add('hidden');
         });
 
-        document.addEventListener('click', (e) => {
+        function surrender() { if (!isGameOver) endGame(false, false, "SURRENDERED"); }
+
+        document.addEventListener('click', (e) => { 
             if (!document.getElementById('showInput').contains(e.target)) {
                 document.getElementById('autocompleteList').classList.add('hidden');
             }
         });
-
-        initGame();
     </script>
 </body>
 </html>
