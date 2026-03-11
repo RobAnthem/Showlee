@@ -73,7 +73,7 @@
             background: #1a1c1e;
             border: 2px solid #2d2f35;
             border-radius: 8px;
-            padding: 12px;
+            padding: 16px;
             margin-bottom: 24px;
             text-align: center;
         }
@@ -98,13 +98,6 @@
 
         #hintButton.hint-ready { background-color: #1b8a32 !important; border-color: #146425 !important; color: white !important; }
 
-        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #2d2f35; transition: .4s; border-radius: 20px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #d1a01d; }
-        input:checked + .slider:before { transform: translateX(16px); }
-
         #difficultyModal { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
         .diff-card { background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer; }
         .diff-card:hover { border-color: #d1a01d; transform: translateY(-2px); }
@@ -112,9 +105,9 @@
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
 
-        .emoji-slot { display: inline-block; width: 1.5em; text-align: center; }
-        .reveal-flip { display: inline-block; animation: reveal-bounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes reveal-bounce { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .emoji-slot { display: inline-block; width: 1.5em; text-align: center; vertical-align: middle; }
+        .reveal-flip { display: inline-block; animation: reveal-bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes reveal-bounce { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.4); } 100% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
@@ -177,16 +170,6 @@
                 </div>
             </div>
         </div>
-        
-        <div class="w-full mt-4 flex justify-start px-2">
-            <div class="flex items-center gap-3 bg-[#1a1c1e] px-3 py-1.5 rounded-lg border border-zinc-800">
-                <span class="text-[9px] font-black uppercase text-zinc-500">Emoji Mode</span>
-                <label class="switch">
-                    <input type="checkbox" id="emojiToggle" onchange="toggleEmojiMode(this.checked)">
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
     </header>
 
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
@@ -211,7 +194,7 @@
             <div class="summary-grid mb-6">
                 <div id="sum-genre" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
-                    <span class="text-[10px] font-black leading-tight">?</span>
+                    <span class="text-[10px] font-black leading-tight text-zinc-600">?</span>
                 </div>
                 <div id="sum-date" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Year</span>
@@ -219,30 +202,30 @@
                 </div>
                 <div id="sum-seasons" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Seas</span>
-                    <span class="text-[11px] font-black">?</span>
+                    <span class="text-[11px] font-black text-zinc-600">?</span>
                 </div>
                 <div id="sum-network" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Netw</span>
-                    <span class="text-[11px] font-black">?</span>
+                    <span class="text-[11px] font-black text-zinc-600">?</span>
                 </div>
                 <div id="sum-origin" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Origin</span>
-                    <span class="text-[11px] font-black">?</span>
+                    <span class="text-[11px] font-black text-zinc-600">?</span>
                 </div>
                 <div id="sum-content-rating" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Rating</span>
-                    <span class="text-[11px] font-black">?</span>
+                    <span class="text-[11px] font-black text-zinc-600">?</span>
                 </div>
                 <div id="sum-rating" class="summary-box">
                     <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Score</span>
-                    <span class="text-[11px] font-black">?</span>
+                    <span class="text-[11px] font-black text-zinc-600">?</span>
                 </div>
             </div>
 
-            <!-- New Emoji Hint Section -->
+            <!-- Emoji Hint Section -->
             <div id="emojiHintArea" class="emoji-hint-container">
-                <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-2">Emoji Clue</div>
-                <div id="emojiReveal" class="text-2xl tracking-[0.2em] flex justify-center items-center gap-1"></div>
+                <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-3">The Story In Emojis</div>
+                <div id="emojiReveal" class="text-3xl flex justify-center items-center gap-2"></div>
             </div>
 
             <div id="inputSection" class="w-full max-w-md mb-10">
@@ -284,7 +267,6 @@
         
         let currentGameMode = 'normal';
         let currentDifficulty = 'normal';
-        let emojiMode = false;
         let minYearBound = 1900;
         let maxYearBound = new Date().getFullYear();
         let yearGuessed = false;
@@ -295,24 +277,10 @@
 
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
-        const GENRE_EMOJIS = {
-            'Action': '💥', 'Adventure': '🏹', 'Animation': '🎨', 'Comedy': '😂', 'Crime': '🚓',
-            'Documentary': '🎥', 'Drama': '🎭', 'Family': '👨‍👩‍👧', 'Fantasy': '🧙‍♂️', 'History': '📜',
-            'Horror': '👻', 'Music': '🎵', 'Mystery': '🕵️', 'News': '📰', 'Reality': '🏠',
-            'Romance': '💖', 'Sci-Fi': '🚀', 'Soap': '🧼', 'Talk': '🎙️', 'War': '🪖', 'Western': '🤠',
-            'Kids': '🧸', 'Politics': '🏛️', 'Action & Adventure': '💥', 'Sci-Fi & Fantasy': '🚀'
-        };
-
         window.addEventListener('DOMContentLoaded', async () => {
             const savedStreaks = localStorage.getItem('showlee_streaks_v6');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
             updateStreakUI();
-
-            const savedEmojiMode = localStorage.getItem('showlee_emoji_mode');
-            if (savedEmojiMode !== null) {
-                emojiMode = savedEmojiMode === 'true';
-                document.getElementById('emojiToggle').checked = emojiMode;
-            }
 
             try {
                 const [showsRes, emojiRes] = await Promise.all([
@@ -336,6 +304,13 @@
                 document.getElementById('uploadContainer').classList.remove('hidden');
             }
         });
+
+        // Robust emoji string to array converter
+        function getEmojiArray(str) {
+            if (!str) return [];
+            // Using Array.from correctly handles surrogate pairs (compound emojis)
+            return Array.from(str.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\S/g) || []);
+        }
 
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
@@ -391,8 +366,9 @@
                 cells.push(cell.trim());
                 if (cells.length >= 3) {
                     const id = cells[0].replace(/"/g, '');
-                    const emojis = cells[2].replace(/"/g, '');
-                    if (emojis) data[id] = Array.from(emojis);
+                    const rawEmojis = cells[2].replace(/"/g, '');
+                    // Use robust splitter for emojis
+                    data[id] = Array.from(rawEmojis);
                 }
             }
             return data;
@@ -407,13 +383,6 @@
                 currentDifficulty = 'easy'; 
                 startNewGame();
             }
-        }
-
-        function toggleEmojiMode(enabled) {
-            emojiMode = enabled;
-            localStorage.setItem('showlee_emoji_mode', enabled);
-            document.getElementById('gameBoard').innerHTML = "";
-            guesses.forEach(g => renderRow(g, false));
         }
 
         function setMode(mode) {
@@ -520,7 +489,7 @@
                 el.classList.remove('found', 'partial-found');
                 const v = el.querySelector('span:last-child');
                 v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
-                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : (id === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black");
+                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : "text-[11px] font-black text-zinc-600";
             });
             updateGuessesLeft();
         }
@@ -554,6 +523,7 @@
             }
 
             el.innerHTML = '';
+            // Reveal first emoji immediately, then one more for each guess
             const countToReveal = isGameOver ? emojis.length : Math.min(1 + guesses.length, emojis.length);
             
             for (let i = 0; i < 10; i++) {
@@ -563,7 +533,6 @@
                 if (i < emojis.length) {
                     if (i < countToReveal) {
                         span.textContent = emojis[i];
-                        // Animate if it's the most recently revealed emoji
                         if (!isGameOver && i === countToReveal - 1 && guesses.length > 0) {
                             span.classList.add('reveal-flip');
                         }
@@ -572,7 +541,6 @@
                         span.style.opacity = '0.3';
                     }
                 } else {
-                    // Padding if the show has fewer than 10 emojis
                     span.textContent = '';
                 }
                 el.appendChild(span);
@@ -590,7 +558,7 @@
             const cid = unsolved[Math.floor(Math.random() * unsolved.length)];
             const el = document.getElementById(cid);
             const v = el.querySelector('span:last-child');
-            v.className = cid === 'sum-genre' ? "text-[10px] font-black leading-tight" : "text-[11px] font-black";
+            v.className = "text-[11px] font-black";
             if (cid === 'sum-genre') { v.textContent = targetShow.genres.join(", "); el.classList.add('found'); }
             else if (cid === 'sum-date') { v.textContent = targetShow.year; yearGuessed = true; el.classList.add('found'); }
             else if (cid === 'sum-seasons') { v.textContent = targetShow.seasons; el.classList.add('found'); }
@@ -642,13 +610,7 @@
                     c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
                 } else if (f.type === 'g' || f.type === 'n') {
                     const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
-                    if (f.type === 'g' && emojiMode) {
-                        const emojis = f.val.map(g => GENRE_EMOJIS[g] || '❓');
-                        c.textContent = emojis.slice(0, 2).join(" ");
-                        c.style.fontSize = '1.1rem';
-                    } else {
-                        c.textContent = f.val.slice(0, 2).join(", ");
-                    }
+                    c.textContent = f.val.slice(0, 2).join(", ");
                     const common = f.val.filter(x => targetArr.includes(x));
                     if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial');
@@ -685,6 +647,7 @@
             if (discoveredGenres.size > 0) {
                 const gBox = document.getElementById('sum-genre');
                 gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
+                gBox.querySelector('span:last-child').classList.remove('text-zinc-600');
                 gBox.classList.remove('found', 'partial-found');
                 gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
             }
@@ -693,6 +656,7 @@
             if (discoveredNetworks.size > 0) {
                 const nBox = document.getElementById('sum-network');
                 nBox.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
+                nBox.querySelector('span:last-child').classList.remove('text-zinc-600');
                 nBox.classList.remove('found', 'partial-found');
                 nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
             }
@@ -706,7 +670,8 @@
                 } else if (guess.year > 0) {
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
                     else maxYearBound = Math.min(maxYearBound, guess.year - 1);
-                    document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
+                    const v = document.getElementById('sum-date').querySelector('span:last-child');
+                    v.textContent = `${minYearBound}—${maxYearBound}`;
                     if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
                 }
             }
@@ -717,20 +682,27 @@
                 if (langMatch && countryMatch) {
                     oBox.classList.remove('partial-found'); oBox.classList.add('found');
                     oBox.querySelector('span:last-child').textContent = `${targetShow.lang.toUpperCase()} / ${targetShow.country}`;
+                    oBox.querySelector('span:last-child').classList.remove('text-zinc-600');
                 } else if (langMatch || countryMatch) {
                     oBox.classList.add('partial-found');
                     oBox.querySelector('span:last-child').textContent = langMatch ? targetShow.lang.toUpperCase() : targetShow.country;
+                    oBox.querySelector('span:last-child').classList.remove('text-zinc-600');
                 }
             }
             if (guess.contentRating === targetShow.contentRating) {
                 const crBox = document.getElementById('sum-content-rating');
                 crBox.classList.add('found');
                 crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
+                crBox.querySelector('span:last-child').classList.remove('text-zinc-600');
             }
             const map = [['sum-seasons', guess.seasons, targetShow.seasons], ['sum-rating', guess.score, targetShow.score]];
             map.forEach(m => {
                 const el = document.getElementById(m[0]);
-                if (m[1] === m[2]) { el.classList.add('found'); el.querySelector('span:last-child').textContent = m[1]; }
+                if (m[1] === m[2]) { 
+                    el.classList.add('found'); 
+                    el.querySelector('span:last-child').textContent = m[1];
+                    el.querySelector('span:last-child').classList.remove('text-zinc-600');
+                }
             });
         }
 
@@ -762,10 +734,22 @@
             const v = e.target.value.toLowerCase();
             const al = document.getElementById('autocompleteList');
             if (v.length < 1) { al.classList.add('hidden'); return; }
-            const matches = tvShows
-                .filter(s => s.title.toLowerCase().includes(v))
-                .sort((a,b) => b.votes - a.votes)
-                .slice(0, 8);
+            
+            let matches;
+            // If only one character, look for exact matches (like "V", "Y", "X")
+            if (v.length === 1) {
+                matches = tvShows
+                    .filter(s => s.title.toLowerCase() === v)
+                    .sort((a,b) => b.votes - a.votes)
+                    .slice(0, 8);
+            } else {
+                // Normal contains search for 2+ characters
+                matches = tvShows
+                    .filter(s => s.title.toLowerCase().includes(v))
+                    .sort((a,b) => b.votes - a.votes)
+                    .slice(0, 8);
+            }
+
             al.innerHTML = "";
             if (matches.length) {
                 al.classList.remove('hidden');
