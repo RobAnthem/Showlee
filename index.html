@@ -222,7 +222,6 @@
                 </div>
             </div>
 
-            <!-- Emoji Hint Section -->
             <div id="emojiHintArea" class="emoji-hint-container">
                 <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-3">The Story In Emojis</div>
                 <div id="emojiReveal" class="text-3xl flex justify-center items-center gap-2"></div>
@@ -259,6 +258,9 @@
 
     <script>
         const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
+        // Use Intl.Segmenter to properly handle complex emojis (ZWJ sequences like genders, skin tones)
+        const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+        
         let tvShows = [];
         let emojiMetadata = {};
         let targetShow;
@@ -305,11 +307,10 @@
             }
         });
 
-        // Robust emoji string to array converter
+        // Split string into valid emojis (handling ZWJ, skin tones, etc.)
         function getEmojiArray(str) {
             if (!str) return [];
-            // Using Array.from correctly handles surrogate pairs (compound emojis)
-            return Array.from(str.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\S/g) || []);
+            return Array.from(segmenter.segment(str)).map(s => s.segment);
         }
 
         function parseCSV(text) {
@@ -367,8 +368,8 @@
                 if (cells.length >= 3) {
                     const id = cells[0].replace(/"/g, '');
                     const rawEmojis = cells[2].replace(/"/g, '');
-                    // Use robust splitter for emojis
-                    data[id] = Array.from(rawEmojis);
+                    // Use segmenter to keep complex emojis together
+                    data[id] = getEmojiArray(rawEmojis);
                 }
             }
             return data;
@@ -464,7 +465,6 @@
                 const yearEl = document.getElementById('sum-date');
                 yearEl.classList.add('found');
                 yearEl.querySelector('span:last-child').textContent = targetShow.year;
-                yearEl.querySelector('span:last-child').className = "text-[11px] font-black";
             } else {
                 document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
             }
@@ -489,7 +489,7 @@
                 el.classList.remove('found', 'partial-found');
                 const v = el.querySelector('span:last-child');
                 v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
-                v.className = (id === 'sum-date' && !yearGuessed) ? "text-[11px] font-black text-zinc-600" : "text-[11px] font-black text-zinc-600";
+                v.className = "text-[11px] font-black text-zinc-600";
             });
             updateGuessesLeft();
         }
@@ -523,7 +523,6 @@
             }
 
             el.innerHTML = '';
-            // Reveal first emoji immediately, then one more for each guess
             const countToReveal = isGameOver ? emojis.length : Math.min(1 + guesses.length, emojis.length);
             
             for (let i = 0; i < 10; i++) {
@@ -736,14 +735,12 @@
             if (v.length < 1) { al.classList.add('hidden'); return; }
             
             let matches;
-            // If only one character, look for exact matches (like "V", "Y", "X")
             if (v.length === 1) {
                 matches = tvShows
                     .filter(s => s.title.toLowerCase() === v)
                     .sort((a,b) => b.votes - a.votes)
                     .slice(0, 8);
             } else {
-                // Normal contains search for 2+ characters
                 matches = tvShows
                     .filter(s => s.title.toLowerCase().includes(v))
                     .sort((a,b) => b.votes - a.votes)
