@@ -109,8 +109,6 @@
         .reveal-flip { display: inline-block; animation: reveal-bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes reveal-bounce { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.4); } 100% { transform: scale(1); opacity: 1; } }
     </style>
-    <link rel="icon" type="image/png" href="icon.png">
-
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
@@ -260,7 +258,6 @@
 
     <script>
         const languageNames = new Intl.DisplayNames(['en'], {type: 'language'});
-        // Use Intl.Segmenter to properly handle complex emojis (ZWJ sequences like genders, skin tones)
         const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
         
         let tvShows = [];
@@ -309,7 +306,6 @@
             }
         });
 
-        // Split string into valid emojis (handling ZWJ, skin tones, etc.)
         function getEmojiArray(str) {
             if (!str) return [];
             return Array.from(segmenter.segment(str)).map(s => s.segment);
@@ -370,7 +366,6 @@
                 if (cells.length >= 3) {
                     const id = cells[0].replace(/"/g, '');
                     const rawEmojis = cells[2].replace(/"/g, '');
-                    // Use segmenter to keep complex emojis together
                     data[id] = getEmojiArray(rawEmojis);
                 }
             }
@@ -383,7 +378,7 @@
             const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
             if (saved) resumeGame(JSON.parse(saved));
             else {
-                currentDifficulty = 'easy'; 
+                currentDifficulty = 'normal'; 
                 startNewGame();
             }
         }
@@ -732,22 +727,28 @@
         }
 
         document.getElementById('showInput').addEventListener('input', (e) => {
-            const v = e.target.value.toLowerCase();
+            const v = e.target.value.toLowerCase().trim();
             const al = document.getElementById('autocompleteList');
             if (v.length < 1) { al.classList.add('hidden'); return; }
             
-            let matches;
-            if (v.length === 1) {
-                matches = tvShows
-                    .filter(s => s.title.toLowerCase() === v)
-                    .sort((a,b) => b.votes - a.votes)
-                    .slice(0, 8);
-            } else {
-                matches = tvShows
-                    .filter(s => s.title.toLowerCase().includes(v))
-                    .sort((a,b) => b.votes - a.votes)
-                    .slice(0, 8);
-            }
+            // Allow searching for single letters or exact short titles
+            const matches = tvShows
+                .filter(s => {
+                    const lowTitle = s.title.toLowerCase();
+                    // Match if search starts with query OR search matches exactly
+                    return lowTitle.startsWith(v) || lowTitle.includes(v);
+                })
+                .sort((a,b) => {
+                    // Boost exact matches or "starts with" matches to the top
+                    const aLow = a.title.toLowerCase();
+                    const bLow = b.title.toLowerCase();
+                    if (aLow === v && bLow !== v) return -1;
+                    if (bLow === v && aLow !== v) return 1;
+                    if (aLow.startsWith(v) && !bLow.startsWith(v)) return -1;
+                    if (bLow.startsWith(v) && !aLow.startsWith(v)) return 1;
+                    return b.votes - a.votes;
+                })
+                .slice(0, 8);
 
             al.innerHTML = "";
             if (matches.length) {
@@ -772,5 +773,3 @@
     </script>
 </body>
 </html>
-
-
