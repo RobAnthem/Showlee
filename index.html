@@ -64,20 +64,12 @@
             transition: all 0.4s ease;
         }
         
-        /* Title color adjustment when background is bright */
         .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
             color: rgba(0,0,0,0.55) !important; 
         }
 
-        /* High contrast black for discovered content */
-        .summary-box.found { 
-            border-color: #1b8a32; 
-            background: #1b8a32; 
-        }
-        .summary-box.partial-found { 
-            border-color: #d1a01d; 
-            background: #d1a01d; 
-        }
+        .summary-box.found { border-color: #1b8a32; background: #1b8a32; }
+        .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; }
 
         .summary-box.found span:last-child, 
         .summary-box.partial-found span:last-child {
@@ -363,7 +355,19 @@
                     });
                 } else if (type === 'emoji' || type === 'hint') {
                     const id = cells[0].replace(/"/g, '');
-                    const content = cells[2]?.replace(/"/g, '') || "";
+                    let content = cells[2]?.replace(/"/g, '') || "";
+                    
+                    if (type === 'hint') {
+                        // Resilient hint parsing: Stop at the first sign of concatenated show names 
+                        // (often looks like "The Show Name: Description") or the delimiter "-1-" 
+                        const leakPatterns = [" -1- ", " The Beatles:", " Begin Again:", " Shelley:"];
+                        leakPatterns.forEach(pattern => {
+                            if (content.includes(pattern)) {
+                                content = content.split(pattern)[0].trim();
+                            }
+                        });
+                    }
+
                     if (type === 'emoji') {
                         data[id] = Array.from(segmenter.segment(content)).map(s => s.segment);
                     } else {
@@ -413,7 +417,12 @@
             const btn = document.getElementById('hintButton');
             btn.disabled = true;
             btn.classList.remove('hint-ready');
-            const text = hintMetadata[targetShow.id] || "A mysterious story unfolds in this popular television series.";
+            
+            // Logic to fetch hint and avoid "orphaned" content leaks
+            const text = (hintMetadata[targetShow.id] && hintMetadata[targetShow.id].length > 5) 
+                        ? hintMetadata[targetShow.id] 
+                        : "No specific hint found for this series. Look at the genre and network summaries above!";
+
             document.getElementById('plotHintText').textContent = text;
             document.getElementById('textHintArea').style.display = 'block';
             saveSession();
@@ -433,7 +442,7 @@
             clearUI();
             updateStreakUI();
             if (hintUsed) {
-                document.getElementById('plotHintText').textContent = hintMetadata[targetShow.id] || "...";
+                document.getElementById('plotHintText').textContent = hintMetadata[targetShow.id] || "No hint available.";
                 document.getElementById('textHintArea').style.display = 'block';
             }
             session.guesses.forEach(g => {
