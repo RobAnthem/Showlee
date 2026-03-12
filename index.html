@@ -14,6 +14,7 @@
             color: #ffffff;
         }
 
+        /* Result Colors */
         .correct { background-color: #1b8a32 !important; border-color: #146425 !important; color: #000000 !important; }
         .partial { background-color: #d1a01d !important; border-color: #a37c15 !important; color: #000000 !important; }
         .incorrect { background-color: #c41e1e !important; border-color: #8c1515 !important; color: #ffffff !important; }
@@ -61,57 +62,32 @@
             background: #1a1c1e; border: 2px solid #2d2f35; border-radius: 4px;
             padding: 8px 2px; text-align: center; display: flex; flex-direction: column;
             justify-content: center; min-height: 64px;
-            transition: all 0.4s ease;
         }
         
-        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
-            color: rgba(0,0,0,0.55) !important; 
-        }
-
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; }
 
-        .summary-box.found span:last-child, 
-        .summary-box.partial-found span:last-child {
-            color: #000000 !important;
-            font-weight: 900 !important;
-            text-shadow: 0px 0.5px 0px rgba(0,0,0,0.1);
-        }
+        .summary-box.found span, .summary-box.partial-found span { color: #000000 !important; font-weight: 900; }
         
         .hint-container {
-            width: 100%;
-            max-width: 620px;
-            background: #1a1c1e;
-            border: 2px solid #2d2f35;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            text-align: center;
+            width: 100%; max-width: 620px; background: #1a1c1e; border: 2px solid #2d2f35;
+            border-radius: 8px; padding: 16px; margin-bottom: 12px; text-align: center;
         }
 
-        #textHintArea {
-            border-color: #d1a01d;
-            background: #1a1c1e;
-            display: none;
-            animation: slideDown 0.4s ease-out;
-        }
+        #textHintArea { border-color: #d1a01d; display: none; animation: slideDown 0.4s ease-out; }
 
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .autocomplete-items {
             position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
-            background: #1a1c1e; border: 1px solid #404249; max-height: 250px;
+            background: #1a1c1e; border: 1px solid #404249; max-height: 300px;
             overflow-y: auto; border-radius: 4px; margin-top: 4px;
         }
 
         .autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #2d2f35; }
         .autocomplete-item:hover { background-color: #2d2f35; }
 
-        .progress-bar-container { width: 100%; height: 8px; background: #1a1c1e; margin: 16px 0; border-radius: 10px; overflow: hidden; border: 1px solid #2d2f35; }
-        .progress-bar-fill { height: 100%; background: #d1a01d; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .progress-bar-fill { height: 100%; background: #d1a01d; width: 0%; transition: width 0.4s ease; }
 
         .mode-btn {
             padding: 6px 12px; font-size: 9px; font-weight: 700; text-transform: uppercase;
@@ -119,11 +95,9 @@
         }
         .mode-btn.active { background: #d1a01d; color: black; border-color: #d1a01d; }
 
-        #hintButton.hint-ready { background-color: #1b8a32 !important; border-color: #146425 !important; color: white !important; }
-
         #difficultyModal { background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
-        .diff-card { background: #1a1c1e; border: 2px solid #2d2f35; transition: all 0.2s; cursor: pointer; }
-        .diff-card:hover { border-color: #d1a01d; transform: translateY(-2px); }
+        .diff-card { background: #1a1c1e; border: 2px solid #2d2f35; cursor: pointer; }
+        .diff-card:hover { border-color: #d1a01d; }
 
         .flip { animation: flip-cell 0.6s ease forwards; }
         @keyframes flip-cell { 0% { transform: rotateX(90deg); opacity: 0; } 100% { transform: rotateX(0deg); opacity: 1; } }
@@ -133,28 +107,22 @@
 </head>
 <body class="min-h-screen flex flex-col items-center p-4">
 
+    <!-- Difficulty Picker -->
     <div id="difficultyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
         <div class="w-full max-w-lg bg-[#0b0c0d] border-2 border-zinc-800 rounded-2xl p-8 shadow-2xl">
-            <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Choose Your Difficulty</h3>
-            <p class="text-zinc-500 text-xs mb-8 font-bold uppercase tracking-widest">Select a pool of shows</p>
-            <div class="grid grid-cols-1 gap-4">
-                <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
-                    <div>
-                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">EASY</h4>
-                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 1,500 most popular shows</p>
-                    </div>
+            <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Difficulty</h3>
+            <div class="grid grid-cols-1 gap-4 mt-6">
+                <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-xl group">
+                    <h4 class="font-black text-lg group-hover:text-[#d1a01d]">EASY</h4>
+                    <p class="text-zinc-500 text-[10px] uppercase">Top 1,500 most popular shows</p>
                 </div>
-                <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
-                    <div>
-                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">NORMAL</h4>
-                        <p class="text-zinc-500 text-[10px] font-bold uppercase">Top 3,000 most popular shows</p>
-                    </div>
+                <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-xl group">
+                    <h4 class="font-black text-lg group-hover:text-[#d1a01d]">NORMAL</h4>
+                    <p class="text-zinc-500 text-[10px] uppercase">Top 3,000 most popular shows</p>
                 </div>
-                <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-xl flex items-center justify-between group">
-                    <div>
-                        <h4 class="font-black text-lg group-hover:text-[#d1a01d]">IMPOSSIBLE</h4>
-                        <p class="text-zinc-500 text-[10px] font-bold uppercase">All available shows</p>
-                    </div>
+                <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-xl group">
+                    <h4 class="font-black text-lg group-hover:text-[#d1a01d]">HARD</h4>
+                    <p class="text-zinc-500 text-[10px] uppercase">All available shows</p>
                 </div>
             </div>
         </div>
@@ -162,29 +130,20 @@
 
     <header class="w-full max-w-2xl flex flex-col items-center py-6 border-b border-zinc-800 mb-8">
         <div class="flex items-center gap-3 mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1a01d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <rect width="20" height="15" x="2" y="7" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>
-            </svg>
-            <h1 class="text-4xl font-black tracking-tighter italic">SHOWLEE</h1>
+            <h1 class="text-4xl font-black tracking-tighter italic text-[#d1a01d]">SHOWLEE</h1>
         </div>
         
         <div class="w-full grid grid-cols-1 md:grid-cols-2 items-end gap-4 px-2">
-            <div class="flex flex-col gap-3">
-                <div class="flex flex-col gap-1">
-                    <span class="text-[9px] font-black uppercase text-zinc-500">Category</span>
-                    <div class="flex overflow-hidden rounded-lg">
-                        <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active">Mainstream</button>
-                        <button id="modeAnime" onclick="setMode('anime')" class="mode-btn">Anime</button>
-                        <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn">International</button>
-                    </div>
+            <div class="flex flex-col gap-1">
+                <span class="text-[9px] font-black uppercase text-zinc-500">Category</span>
+                <div class="flex overflow-hidden rounded-lg">
+                    <button id="modeNormal" onclick="setMode('normal')" class="mode-btn active">Mainstream</button>
+                    <button id="modeAnime" onclick="setMode('anime')" class="mode-btn">Anime</button>
+                    <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn">International</button>
                 </div>
             </div>
-
             <div class="flex flex-col items-end">
-                <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">
-                    Streak (<span id="streakModeLabel">Mainstream</span>) 
-                    <span id="diffIndicator" class="ml-2 text-zinc-700">| NORMAL</span>
-                </div>
+                <div class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Streak (<span id="streakModeLabel">Mainstream</span>)</div>
                 <div class="text-3xl font-black leading-none" id="currentStreak">0</div>
             </div>
         </div>
@@ -192,70 +151,41 @@
 
     <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
         <div id="gameInterface" class="w-full flex flex-col items-center">
+            
             <div id="statusMessage" class="hidden mb-8 p-8 border-2 border-[#d1a01d] w-full text-center bg-[#1a1c1e] rounded-xl shadow-2xl">
-                <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 shadow-xl hidden">
-                <h2 id="statusTitle" class="text-3xl font-black mb-2 tracking-tighter italic"></h2>
+                <img id="final-reveal-img" src="" alt="Poster" class="w-28 h-40 object-cover mx-auto mb-6 rounded-lg border-2 border-zinc-700 hidden">
+                <h2 id="statusTitle" class="text-3xl font-black mb-2 italic"></h2>
                 <p id="statusDesc" class="text-zinc-400 text-sm mb-6"></p>
-                <button onclick="handleNextShowClick()" class="bg-white text-black font-black py-3 px-10 rounded-lg hover:bg-zinc-200 transition text-sm uppercase tracking-widest">
-                    Next Show
-                </button>
+                <button onclick="startNewGame()" class="bg-white text-black font-black py-3 px-10 rounded-lg text-sm uppercase">Next Show</button>
             </div>
 
             <div class="summary-grid mb-6">
-                <div id="sum-genre" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Genre</span>
-                    <span class="text-[10px] font-black leading-tight text-zinc-600">?</span>
-                </div>
-                <div id="sum-date" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Year</span>
-                    <span class="text-[11px] font-black text-zinc-600">...</span>
-                </div>
-                <div id="sum-seasons" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Seas</span>
-                    <span class="text-[11px] font-black text-zinc-600">?</span>
-                </div>
-                <div id="sum-network" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Netw</span>
-                    <span class="text-[11px] font-black text-zinc-600">?</span>
-                </div>
-                <div id="sum-origin" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Origin</span>
-                    <span class="text-[11px] font-black text-zinc-600">?</span>
-                </div>
-                <div id="sum-content-rating" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Rating</span>
-                    <span class="text-[11px] font-black text-zinc-600">?</span>
-                </div>
-                <div id="sum-rating" class="summary-box">
-                    <span class="text-[10px] text-zinc-500 font-black uppercase mb-1">Score</span>
-                    <span class="text-[11px] font-black text-zinc-600">?</span>
-                </div>
+                <div id="sum-genre" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Genre</span><span class="text-[10px] font-black">?</span></div>
+                <div id="sum-date" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Year</span><span class="text-[11px] font-black">...</span></div>
+                <div id="sum-seasons" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Seas</span><span class="text-[11px] font-black">?</span></div>
+                <div id="sum-network" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Netw</span><span class="text-[11px] font-black">?</span></div>
+                <div id="sum-origin" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Origin</span><span class="text-[11px] font-black">?</span></div>
+                <div id="sum-content-rating" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Rating</span><span class="text-[11px] font-black">?</span></div>
+                <div id="sum-rating" class="summary-box"><span class="text-[9px] text-zinc-500 uppercase mb-1">Score</span><span class="text-[11px] font-black">?</span></div>
             </div>
 
             <div id="textHintArea" class="hint-container">
-                <div class="text-[9px] font-black uppercase text-[#d1a01d] tracking-widest mb-2">Plot Premise</div>
-                <div id="plotHintText" class="text-sm font-medium italic text-zinc-300 px-4"></div>
+                <div id="plotHintText" class="text-sm font-medium italic text-zinc-300"></div>
             </div>
 
             <div id="emojiHintArea" class="hint-container">
-                <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-3">Story In Emojis</div>
-                <div id="emojiReveal" class="text-3xl flex justify-center items-center gap-2"></div>
+                <div id="emojiReveal" class="text-3xl flex justify-center gap-2"></div>
             </div>
 
             <div id="inputSection" class="w-full max-w-md mb-10">
                 <div class="relative flex gap-2">
-                    <input id="showInput" type="text" placeholder="Type a TV show name..." autocomplete="off"
-                        class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder-zinc-600 min-w-0">
-                    <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-4 rounded-lg text-[10px] uppercase disabled:opacity-30 hover:bg-zinc-800 transition whitespace-nowrap">Hint</button>
-                    <button id="surrenderButton" onclick="surrender()" class="bg-[#c41e1e]/10 border-2 border-[#c41e1e]/40 text-[#c41e1e] font-black px-4 rounded-lg text-[10px] uppercase hover:bg-[#c41e1e]/20 transition whitespace-nowrap">Surrender</button>
-                    <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
+                    <input id="showInput" type="text" placeholder="Type a show..." autocomplete="off"
+                        class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#d1a01d] text-sm font-bold">
+                    <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-4 rounded-lg text-[10px] uppercase">Hint</button>
                 </div>
-                <div class="progress-bar-container">
-                    <div id="progressBarFill" class="progress-bar-fill"></div>
-                </div>
-                <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 tracking-[0.2em]">
-                    10 CHANCES LEFT
-                </div>
+                <div class="w-full h-2 bg-zinc-800 rounded mt-4"><div id="progressBarFill" class="progress-bar-fill"></div></div>
+                <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 mt-2">10 CHANCES LEFT</div>
+                <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
             </div>
 
             <div id="gameBoard" class="flex flex-col gap-2 w-full items-center mb-12"></div>
@@ -274,14 +204,9 @@
         
         let currentGameMode = 'normal';
         let currentDifficulty = 'normal';
-        let minYearBound = 1900;
-        let maxYearBound = new Date().getFullYear();
-        let yearGuessed = false;
-        let discoveredGenres = new Set();
-        let discoveredNetworks = new Set();
-        let hintUsed = false;
-        let isGameOver = false;
-
+        let minYearBound = 1900, maxYearBound = new Date().getFullYear();
+        let yearGuessed = false, hintUsed = false, isGameOver = false;
+        let discoveredGenres = new Set(), discoveredNetworks = new Set();
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
         window.addEventListener('DOMContentLoaded', async () => {
@@ -296,31 +221,18 @@
                     fetch('show_hints.csv')
                 ]);
 
-                if (!showsRes.ok) throw new Error("Shows data failed");
                 const showsText = await showsRes.text();
                 tvShows = parseCSV(showsText, 'shows');
 
-                if (emojiRes.ok) {
-                    const emojiText = await emojiRes.text();
-                    emojiMetadata = parseCSV(emojiText, 'emoji');
-                }
-
-                if (hintRes.ok) {
-                    const hintText = await hintRes.text();
-                    hintMetadata = parseCSV(hintText, 'hint');
-                }
+                if (emojiRes.ok) emojiMetadata = parseCSV(await emojiRes.text(), 'emoji');
+                if (hintRes.ok) hintMetadata = parseCSV(await hintRes.text(), 'hint');
 
                 if (tvShows.length > 0) initGame();
-            } catch (err) {
-                console.error(err);
-                alert("Database failed to load.");
-            }
+            } catch (err) { console.error(err); }
         });
 
         function parseCSV(text, type) {
             const lines = text.split(/\r?\n/);
-            if (lines.length < 2) return type === 'shows' ? [] : {};
-            
             const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
             const data = type === 'shows' ? [] : {};
 
@@ -353,25 +265,16 @@
                         votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
                         poster: (cells[getIdx('Poster_URL')] || "").replace(/"/g, '').trim()
                     });
-                } else if (type === 'emoji' || type === 'hint') {
+                } else {
                     const id = cells[0].replace(/"/g, '');
                     let content = cells[2]?.replace(/"/g, '') || "";
-                    
                     if (type === 'hint') {
-                        // Resilient hint parsing: Stop at the first sign of concatenated show names 
-                        // (often looks like "The Show Name: Description") or the delimiter "-1-" 
-                        const leakPatterns = [" -1- ", " The Beatles:", " Begin Again:", " Shelley:"];
-                        leakPatterns.forEach(pattern => {
-                            if (content.includes(pattern)) {
-                                content = content.split(pattern)[0].trim();
-                            }
-                        });
-                    }
-
-                    if (type === 'emoji') {
-                        data[id] = Array.from(segmenter.segment(content)).map(s => s.segment);
+                        // Anti-leak cleanup: look for patterns that indicate start of another show's data
+                        const patterns = [" -1- ", " The Beatles:", " Begin Again:", " Shelley:", " Queendom:", " Equinox:"];
+                        patterns.forEach(p => { if (content.includes(p)) content = content.split(p)[0]; });
+                        data[id] = content.trim();
                     } else {
-                        data[id] = content;
+                        data[id] = Array.from(segmenter.segment(content)).map(s => s.segment);
                     }
                 }
             }
@@ -379,13 +282,8 @@
         }
 
         function initGame() {
-            document.getElementById('gameInterface').classList.remove('hidden');
             const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
-            if (saved) resumeGame(JSON.parse(saved));
-            else {
-                currentDifficulty = 'normal'; 
-                startNewGame();
-            }
+            if (saved) resumeGame(JSON.parse(saved)); else startNewGame();
         }
 
         function startNewGame() {
@@ -406,109 +304,51 @@
             hintUsed = false; isGameOver = false;
             
             clearUI();
-            updateStreakUI();
             updateEmojiHint();
             saveSession();
-        }
-
-        function useHint() {
-            if (hintUsed || guesses.length < 4 || isGameOver) return;
-            hintUsed = true;
-            const btn = document.getElementById('hintButton');
-            btn.disabled = true;
-            btn.classList.remove('hint-ready');
-            
-            // Logic to fetch hint and avoid "orphaned" content leaks
-            const text = (hintMetadata[targetShow.id] && hintMetadata[targetShow.id].length > 5) 
-                        ? hintMetadata[targetShow.id] 
-                        : "No specific hint found for this series. Look at the genre and network summaries above!";
-
-            document.getElementById('plotHintText').textContent = text;
-            document.getElementById('textHintArea').style.display = 'block';
-            saveSession();
-        }
-
-        function resumeGame(session) {
-            targetShow = session.targetShow;
-            currentDifficulty = session.difficulty || 'easy';
-            guesses = []; 
-            minYearBound = session.minYearBound || 1900; 
-            maxYearBound = session.maxYearBound || new Date().getFullYear();
-            yearGuessed = session.yearGuessed; 
-            discoveredGenres = new Set(session.discoveredGenres);
-            discoveredNetworks = new Set(session.discoveredNetworks);
-            hintUsed = session.hintUsed; 
-            isGameOver = session.isGameOver;
-            clearUI();
-            updateStreakUI();
-            if (hintUsed) {
-                document.getElementById('plotHintText').textContent = hintMetadata[targetShow.id] || "No hint available.";
-                document.getElementById('textHintArea').style.display = 'block';
-            }
-            session.guesses.forEach(g => {
-                guesses.push(g);
-                renderRow(g, false);
-                updateSummaryUI(g);
-            });
-            updateEmojiHint();
-            if (isGameOver) endGame(guesses.length > 0 && guesses[guesses.length-1].title === targetShow.title, true);
-            else updateGuessesLeft();
         }
 
         function clearUI() {
             document.getElementById('gameBoard').innerHTML = "";
             document.getElementById('showInput').value = "";
-            document.getElementById('autocompleteList').classList.add('hidden');
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             document.getElementById('textHintArea').style.display = 'none';
             ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating'].forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
-                const v = el.querySelector('span:last-child');
-                v.textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
-                v.className = "text-[11px] font-black text-zinc-600";
+                el.querySelector('span:last-child').textContent = id === 'sum-date' ? `${minYearBound}—${maxYearBound}` : "?";
             });
             updateGuessesLeft();
         }
 
-        function saveSession() {
-            localStorage.setItem(`showlee_session_v6_${currentGameMode}`, JSON.stringify({
-                targetShow, guesses, minYearBound, maxYearBound, yearGuessed,
-                discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
-                hintUsed, isGameOver, difficulty: currentDifficulty
-            }));
-        }
-
         function updateGuessesLeft() {
-            if (isGameOver) return;
             const left = MAX_GUESSES - guesses.length;
             document.getElementById('guessesLeft').textContent = `${left} CHANCES LEFT`;
             document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
-            const canHint = guesses.length >= 4 && !hintUsed;
-            const btn = document.getElementById('hintButton');
-            btn.disabled = !canHint;
-            btn.classList.toggle('hint-ready', canHint);
+            document.getElementById('hintButton').disabled = guesses.length < 4 || hintUsed;
         }
 
         function updateEmojiHint() {
             const el = document.getElementById('emojiReveal');
             const emojis = emojiMetadata[targetShow.id];
-            if (!emojis) {
-                el.innerHTML = '<span class="text-[9px] uppercase italic text-zinc-700">No emoji data</span>';
-                return;
-            }
+            if (!emojis) { el.innerHTML = "No emoji data"; return; }
             el.innerHTML = '';
-            const countToReveal = isGameOver ? emojis.length : Math.min(1 + guesses.length, emojis.length);
+            const count = isGameOver ? emojis.length : Math.min(1 + guesses.length, emojis.length);
             for (let i = 0; i < 10; i++) {
-                const span = document.createElement('span');
-                span.className = 'emoji-slot';
-                if (i < emojis.length) {
-                    span.textContent = i < countToReveal ? emojis[i] : '⚪';
-                    if (i >= countToReveal) span.style.opacity = '0.3';
-                }
-                el.appendChild(span);
+                const s = document.createElement('span'); s.className = 'emoji-slot';
+                if (i < emojis.length) { s.textContent = i < count ? emojis[i] : '⚪'; if (i >= count) s.style.opacity = '0.3'; }
+                el.appendChild(s);
             }
+        }
+
+        function useHint() {
+            if (hintUsed || guesses.length < 4) return;
+            hintUsed = true;
+            document.getElementById('plotHintText').textContent = hintMetadata[targetShow.id] || "No description available.";
+            document.getElementById('textHintArea').style.display = 'block';
+            updateGuessesLeft();
+            saveSession();
         }
 
         function submitGuess(show) {
@@ -529,14 +369,10 @@
             const row = document.createElement('div');
             row.className = 'game-grid';
             const config = [
-                { type: 'p', val: guess.title },
-                { type: 'g', val: guess.genres },
-                { type: 'y', val: guess.year },
-                { type: 's', val: guess.seasons },
-                { type: 'n', val: guess.networks },
-                { type: 'o', val: { lang: guess.lang, country: guess.country } },
-                { type: 'cr', val: guess.contentRating },
-                { type: 'r', val: guess.score }
+                { type: 'p', val: guess.title }, { type: 'g', val: guess.genres },
+                { type: 'y', val: guess.year }, { type: 's', val: guess.seasons },
+                { type: 'n', val: guess.networks }, { type: 'o', val: { lang: guess.lang, country: guess.country } },
+                { type: 'cr', val: guess.contentRating }, { type: 'r', val: guess.score }
             ];
             config.forEach((f, i) => {
                 const c = document.createElement('div');
@@ -545,9 +381,7 @@
                 if (f.type === 'p') {
                     c.classList.add('poster-cell');
                     if (guess.poster) c.style.backgroundImage = `url(${guess.poster})`;
-                    const o = document.createElement('div');
-                    o.className = 'poster-overlay';
-                    o.textContent = f.val;
+                    const o = document.createElement('div'); o.className = 'poster-overlay'; o.textContent = f.val;
                     c.appendChild(o);
                     c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
                 } else if (f.type === 'g' || f.type === 'n') {
@@ -555,15 +389,11 @@
                     c.textContent = f.val.slice(0, 2).join(", ");
                     const common = f.val.filter(x => targetArr.includes(x));
                     if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
-                    else if (common.length > 0) c.classList.add('partial');
-                    else c.classList.add('incorrect');
+                    else if (common.length > 0) c.classList.add('partial'); else c.classList.add('incorrect');
                 } else if (f.type === 'o') {
                     c.innerHTML = `<span class="text-[8px] opacity-60">${f.val.lang.toUpperCase()}</span><span>${f.val.country}</span>`;
-                    const langMatch = f.val.lang === targetShow.lang;
-                    const countryMatch = f.val.country === targetShow.country;
-                    if (langMatch && countryMatch) c.classList.add('correct');
-                    else if (langMatch || countryMatch) c.classList.add('partial');
-                    else c.classList.add('incorrect');
+                    if (f.val.lang === targetShow.lang && f.val.country === targetShow.country) c.classList.add('correct');
+                    else if (f.val.lang === targetShow.lang || f.val.country === targetShow.country) c.classList.add('partial'); else c.classList.add('incorrect');
                 } else {
                     const tv = f.type === 'y' ? targetShow.year : f.type === 's' ? targetShow.seasons : f.type === 'r' ? targetShow.score : targetShow.contentRating;
                     c.textContent = f.val;
@@ -580,75 +410,126 @@
         }
 
         function updateSummaryUI(guess) {
-            const commonG = guess.genres.filter(x => targetShow.genres.includes(x));
-            commonG.forEach(x => discoveredGenres.add(x));
+            guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
-                const gBox = document.getElementById('sum-genre');
-                gBox.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
-                gBox.classList.add(discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found');
+                const el = document.getElementById('sum-genre');
+                el.querySelector('span:last-child').textContent = Array.from(discoveredGenres).join(", ");
+                el.className = `summary-box ${discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found'}`;
             }
-            const commonN = guess.networks.filter(x => targetShow.networks.includes(x));
-            commonN.forEach(x => discoveredNetworks.add(x));
+            guess.networks.filter(x => targetShow.networks.includes(x)).forEach(x => discoveredNetworks.add(x));
             if (discoveredNetworks.size > 0) {
-                const nBox = document.getElementById('sum-network');
-                nBox.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
-                nBox.classList.add(discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found');
+                const el = document.getElementById('sum-network');
+                el.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
+                el.className = `summary-box ${discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found'}`;
             }
             if (!yearGuessed) {
                 if (guess.year === targetShow.year) {
-                    yearGuessed = true;
-                    const el = document.getElementById('sum-date');
-                    el.classList.add('found');
-                    el.querySelector('span:last-child').textContent = targetShow.year;
+                    yearGuessed = true; document.getElementById('sum-date').className = "summary-box found";
+                    document.getElementById('sum-date').querySelector('span:last-child').textContent = targetShow.year;
                 } else if (guess.year > 0) {
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
                     else maxYearBound = Math.min(maxYearBound, guess.year - 1);
                     document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
-                    if (Math.abs(guess.year - targetShow.year) <= 5) document.getElementById('sum-date').classList.add('partial-found');
                 }
             }
-            if (guess.contentRating === targetShow.contentRating) {
-                const crBox = document.getElementById('sum-content-rating');
-                crBox.classList.add('found');
-                crBox.querySelector('span:last-child').textContent = targetShow.contentRating;
-            }
-            if (guess.seasons === targetShow.seasons) {
-                const sBox = document.getElementById('sum-seasons');
-                sBox.classList.add('found');
-                sBox.querySelector('span:last-child').textContent = targetShow.seasons;
-            }
-            if (guess.score === targetShow.score) {
-                const rBox = document.getElementById('sum-rating');
-                rBox.classList.add('found');
-                rBox.querySelector('span:last-child').textContent = targetShow.score;
-            }
-            const oBox = document.getElementById('sum-origin');
-            if (guess.lang === targetShow.lang || guess.country === targetShow.country) {
-                oBox.classList.add(guess.lang === targetShow.lang && guess.country === targetShow.country ? 'found' : 'partial-found');
-                oBox.querySelector('span:last-child').textContent = guess.lang === targetShow.lang ? targetShow.lang.toUpperCase() : targetShow.country;
-            }
+            ['seasons', 'contentRating', 'score'].forEach(key => {
+                if (guess[key] === targetShow[key]) {
+                    const id = key === 'contentRating' ? 'sum-content-rating' : key === 'score' ? 'sum-rating' : 'sum-seasons';
+                    const el = document.getElementById(id);
+                    el.className = "summary-box found"; el.querySelector('span:last-child').textContent = targetShow[key];
+                }
+            });
         }
 
-        function endGame(won, resumed) {
+        function endGame(won) {
             isGameOver = true;
             document.getElementById('inputSection').classList.add('hidden');
             const sm = document.getElementById('statusMessage');
             sm.classList.remove('hidden');
-            if (!resumed) {
-                const s = streaks[currentGameMode];
-                if (won) { s.current++; if (s.current > s.best) s.best = s.current; }
-                else s.current = 0;
-                localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
-                updateStreakUI();
-            }
+            const s = streaks[currentGameMode];
+            if (won) { s.current++; if (s.current > s.best) s.best = s.current; } else s.current = 0;
+            localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
+            updateStreakUI();
             if (targetShow.poster) {
                 const img = document.getElementById('final-reveal-img');
                 img.src = targetShow.poster; img.classList.remove('hidden');
             }
             document.getElementById('statusTitle').textContent = won ? "VICTORY" : "GAME OVER";
-            document.getElementById('statusDesc').innerHTML = `The show was <b>${targetShow.title}</b>.`;
+            document.getElementById('statusDesc').textContent = `The show was ${targetShow.title}.`;
             updateEmojiHint();
             saveSession();
+        }
+
+        // Robust Searching Logic
+        document.getElementById('showInput').addEventListener('input', (e) => {
+            const v = e.target.value.toLowerCase().trim();
+            const al = document.getElementById('autocompleteList');
+            if (v.length < 1) { al.classList.add('hidden'); return; }
+
+            // Priority Scoring
+            const matches = tvShows.filter(s => s.title.toLowerCase().includes(v))
+                .sort((a, b) => {
+                    const aT = a.title.toLowerCase();
+                    const bT = b.title.toLowerCase();
+                    
+                    // 1. Exact matches
+                    if (aT === v && bT !== v) return -1;
+                    if (bT === v && aT !== v) return 1;
+
+                    // 2. Starts with
+                    const aStart = aT.startsWith(v);
+                    const bStart = bT.startsWith(v);
+                    if (aStart && !bStart) return -1;
+                    if (bStart && !aStart) return 1;
+
+                    // 3. Length (Shortest first for small queries like 'V')
+                    if (v.length < 3) {
+                        if (aT.length !== bT.length) return aT.length - bT.length;
+                    }
+
+                    // 4. Popularity
+                    return b.votes - a.votes;
+                })
+                .slice(0, 10);
+
+            al.innerHTML = "";
+            if (matches.length) {
+                al.classList.remove('hidden');
+                matches.forEach(m => {
+                    const d = document.createElement('div');
+                    d.className = 'autocomplete-item text-sm flex justify-between items-center';
+                    d.innerHTML = `
+                        <div class="flex flex-col text-left">
+                            <span class="text-white font-bold">${m.title}</span>
+                            <span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks[0] || 'Unknown'}</span>
+                        </div>
+                        <span class="text-zinc-500 text-[10px] font-black">${m.year}</span>`;
+                    d.onclick = () => submitGuess(m);
+                    al.appendChild(d);
+                });
+            } else al.classList.add('hidden');
+        });
+
+        function saveSession() {
+            localStorage.setItem(`showlee_session_v6_${currentGameMode}`, JSON.stringify({
+                targetShow, guesses, minYearBound, maxYearBound, yearGuessed,
+                discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
+                hintUsed, isGameOver, difficulty: currentDifficulty
+            }));
+        }
+
+        function resumeGame(session) {
+            targetShow = session.targetShow; guesses = []; 
+            minYearBound = session.minYearBound; maxYearBound = session.maxYearBound;
+            yearGuessed = session.yearGuessed; hintUsed = session.hintUsed;
+            discoveredGenres = new Set(session.discoveredGenres);
+            discoveredNetworks = new Set(session.discoveredNetworks);
+            isGameOver = session.isGameOver;
+            clearUI();
+            session.guesses.forEach(g => { guesses.push(g); renderRow(g, false); updateSummaryUI(g); });
+            updateEmojiHint();
+            if (isGameOver) endGame(guesses.length > 0 && guesses[guesses.length-1].id === targetShow.id);
+            else updateGuessesLeft();
         }
 
         function setMode(mode) {
@@ -656,8 +537,7 @@
             currentGameMode = mode;
             updateStreakUI();
             const saved = localStorage.getItem(`showlee_session_v6_${mode}`);
-            if (saved) resumeGame(JSON.parse(saved));
-            else startNewGame();
+            if (saved) resumeGame(JSON.parse(saved)); else startNewGame();
         }
 
         function updateStreakUI() {
@@ -666,30 +546,9 @@
             document.getElementById('modeNormal').classList.toggle('active', currentGameMode === 'normal');
             document.getElementById('modeAnime').classList.toggle('active', currentGameMode === 'anime');
             document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
-            document.getElementById('streakModeLabel').textContent = currentGameMode === 'normal' ? 'Mainstream' : currentGameMode === 'anime' ? 'Anime' : 'International';
         }
 
-        function handleNextShowClick() { startNewGame(); }
         function selectDifficulty(diff) { currentDifficulty = diff; document.getElementById('difficultyModal').classList.add('hidden'); startNewGame(); }
-        function surrender() { if (!isGameOver) endGame(false, false); }
-
-        document.getElementById('showInput').addEventListener('input', (e) => {
-            const v = e.target.value.toLowerCase().trim();
-            const al = document.getElementById('autocompleteList');
-            if (v.length < 1) { al.classList.add('hidden'); return; }
-            const matches = tvShows.filter(s => s.title.toLowerCase().includes(v)).sort((a,b) => b.votes - a.votes).slice(0, 8);
-            al.innerHTML = "";
-            if (matches.length) {
-                al.classList.remove('hidden');
-                matches.forEach(m => {
-                    const d = document.createElement('div');
-                    d.className = 'autocomplete-item text-sm flex justify-between items-center';
-                    d.innerHTML = `<div class="flex flex-col text-left"><span class="text-white font-bold">${m.title}</span><span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks[0] || 'Unknown'}</span></div><span class="text-zinc-500 text-[10px] font-black">${m.year}</span>`;
-                    d.onclick = () => submitGuess(m);
-                    al.appendChild(d);
-                });
-            } else al.classList.add('hidden');
-        });
     </script>
 </body>
 </html>
