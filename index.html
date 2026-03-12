@@ -61,11 +61,30 @@
             background: #1a1c1e; border: 2px solid #2d2f35; border-radius: 4px;
             padding: 8px 2px; text-align: center; display: flex; flex-direction: column;
             justify-content: center; min-height: 64px;
+            transition: all 0.4s ease;
         }
         
-        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { color: rgba(0,0,0,1) !important; }
-        .summary-box.found { border-color: #1b8a32; background: #1b8a32; color: #000000; }
-        .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; color: #000000; }
+        /* Title color adjustment when background is bright */
+        .summary-box.found span:first-child, .summary-box.partial-found span:first-child { 
+            color: rgba(0,0,0,0.55) !important; 
+        }
+
+        /* High contrast black for discovered content */
+        .summary-box.found { 
+            border-color: #1b8a32; 
+            background: #1b8a32; 
+        }
+        .summary-box.partial-found { 
+            border-color: #d1a01d; 
+            background: #d1a01d; 
+        }
+
+        .summary-box.found span:last-child, 
+        .summary-box.partial-found span:last-child {
+            color: #000000 !important;
+            font-weight: 900 !important;
+            text-shadow: 0px 0.5px 0px rgba(0,0,0,0.1);
+        }
         
         .hint-container {
             width: 100%;
@@ -221,13 +240,11 @@
                 </div>
             </div>
 
-            <!-- Plot Hint Area (New) -->
             <div id="textHintArea" class="hint-container">
                 <div class="text-[9px] font-black uppercase text-[#d1a01d] tracking-widest mb-2">Plot Premise</div>
                 <div id="plotHintText" class="text-sm font-medium italic text-zinc-300 px-4"></div>
             </div>
 
-            <!-- Emoji Hint Area -->
             <div id="emojiHintArea" class="hint-container">
                 <div class="text-[9px] font-black uppercase text-zinc-600 tracking-widest mb-3">Story In Emojis</div>
                 <div id="emojiReveal" class="text-3xl flex justify-center items-center gap-2"></div>
@@ -258,7 +275,7 @@
         
         let tvShows = [];
         let emojiMetadata = {};
-        let hintMetadata = {}; // New hint store
+        let hintMetadata = {};
         let targetShow;
         let guesses = [];
         const MAX_GUESSES = 10;
@@ -281,7 +298,6 @@
             updateStreakUI();
 
             try {
-                // Fetch datasets
                 const [showsRes, emojiRes, hintRes] = await Promise.all([
                     fetch('enriched_shows_2026-03-07.csv'),
                     fetch('emoji_metadata.csv'),
@@ -394,15 +410,12 @@
         function useHint() {
             if (hintUsed || guesses.length < 4 || isGameOver) return;
             hintUsed = true;
-            
             const btn = document.getElementById('hintButton');
             btn.disabled = true;
             btn.classList.remove('hint-ready');
-            
             const text = hintMetadata[targetShow.id] || "A mysterious story unfolds in this popular television series.";
             document.getElementById('plotHintText').textContent = text;
             document.getElementById('textHintArea').style.display = 'block';
-            
             saveSession();
         }
 
@@ -417,15 +430,12 @@
             discoveredNetworks = new Set(session.discoveredNetworks);
             hintUsed = session.hintUsed; 
             isGameOver = session.isGameOver;
-            
             clearUI();
             updateStreakUI();
-            
             if (hintUsed) {
                 document.getElementById('plotHintText').textContent = hintMetadata[targetShow.id] || "...";
                 document.getElementById('textHintArea').style.display = 'block';
             }
-            
             session.guesses.forEach(g => {
                 guesses.push(g);
                 renderRow(g, false);
@@ -674,5 +684,3 @@
     </script>
 </body>
 </html>
-
-
