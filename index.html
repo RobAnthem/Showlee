@@ -179,7 +179,9 @@
             <div id="emojiHintArea" class="hint-container">
                 <div id="emojiReveal" class="text-3xl flex justify-center gap-2"></div>
             </div>
-
+            
+            <div class="w-full h-2 bg-zinc-800 rounded mt-4"><div id="progressBarFill" class="progress-bar-fill"></div></div>
+            <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 mt-2">10 CHANCES LEFT</div>
             <div id="inputSection" class="w-full max-w-md mb-10 relative">
                 <div class="flex gap-2">
                     <input id="showInput" type="text" placeholder="Type a show..." autocomplete="off"
@@ -189,8 +191,6 @@
                 <!-- Fixed Autocomplete List Position -->
                 <div id="autocompleteList" class="autocomplete-items hidden"></div>
 
-                <div class="w-full h-2 bg-zinc-800 rounded mt-4"><div id="progressBarFill" class="progress-bar-fill"></div></div>
-                <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 mt-2">10 CHANCES LEFT</div>
             </div>
 
             <div id="gameBoard" class="flex flex-col gap-2 w-full items-center mb-12"></div>
@@ -557,4 +557,5 @@
     </script>
 </body>
 </html>
+
 
