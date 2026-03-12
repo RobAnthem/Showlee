@@ -12,6 +12,7 @@
             font-family: 'Inter', sans-serif;
             background-color: #0b0c0d;
             color: #ffffff;
+            overflow-x: hidden;
         }
 
         /* Result Colors */
@@ -66,7 +67,6 @@
         
         .summary-box.found { border-color: #1b8a32; background: #1b8a32; }
         .summary-box.partial-found { border-color: #d1a01d; background: #d1a01d; }
-
         .summary-box.found span, .summary-box.partial-found span { color: #000000 !important; font-weight: 900; }
         
         .hint-container {
@@ -79,12 +79,14 @@
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
         .autocomplete-items {
-            position: absolute; z-index: 99; top: 100%; left: 0; right: 0;
-            background: #1a1c1e; border: 1px solid #404249; max-height: 300px;
-            overflow-y: auto; border-radius: 4px; margin-top: 4px;
+            position: absolute; z-index: 1000; top: 100%; left: 0; right: 0;
+            background: #1a1c1e; border: 2px solid #404249; max-height: 300px;
+            overflow-y: auto; border-radius: 8px; margin-top: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        .autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #2d2f35; }
+        .autocomplete-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #2d2f35; transition: background 0.2s; }
+        .autocomplete-item:last-child { border-bottom: none; }
         .autocomplete-item:hover { background-color: #2d2f35; }
 
         .progress-bar-fill { height: 100%; background: #d1a01d; width: 0%; transition: width 0.4s ease; }
@@ -108,7 +110,7 @@
 <body class="min-h-screen flex flex-col items-center p-4">
 
     <!-- Difficulty Picker -->
-    <div id="difficultyModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6">
+    <div id="difficultyModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-6">
         <div class="w-full max-w-lg bg-[#0b0c0d] border-2 border-zinc-800 rounded-2xl p-8 shadow-2xl">
             <h3 class="text-2xl font-black italic tracking-tighter mb-2 uppercase">Difficulty</h3>
             <div class="grid grid-cols-1 gap-4 mt-6">
@@ -177,15 +179,17 @@
                 <div id="emojiReveal" class="text-3xl flex justify-center gap-2"></div>
             </div>
 
-            <div id="inputSection" class="w-full max-w-md mb-10">
-                <div class="relative flex gap-2">
+            <div id="inputSection" class="w-full max-w-md mb-10 relative">
+                <div class="flex gap-2">
                     <input id="showInput" type="text" placeholder="Type a show..." autocomplete="off"
                         class="flex-grow bg-[#1a1c1e] border-2 border-zinc-800 p-4 rounded-lg focus:outline-none focus:border-[#d1a01d] text-sm font-bold">
                     <button id="hintButton" onclick="useHint()" disabled class="bg-[#1a1c1e] border-2 border-zinc-800 text-zinc-500 font-black px-4 rounded-lg text-[10px] uppercase">Hint</button>
                 </div>
+                <!-- Fixed Autocomplete List Position -->
+                <div id="autocompleteList" class="autocomplete-items hidden"></div>
+
                 <div class="w-full h-2 bg-zinc-800 rounded mt-4"><div id="progressBarFill" class="progress-bar-fill"></div></div>
                 <div id="guessesLeft" class="text-center text-[10px] uppercase font-black text-zinc-500 mt-2">10 CHANCES LEFT</div>
-                <div id="autocompleteList" class="autocomplete-items hidden shadow-2xl"></div>
             </div>
 
             <div id="gameBoard" class="flex flex-col gap-2 w-full items-center mb-12"></div>
@@ -269,7 +273,6 @@
                     const id = cells[0].replace(/"/g, '');
                     let content = cells[2]?.replace(/"/g, '') || "";
                     if (type === 'hint') {
-                        // Anti-leak cleanup: look for patterns that indicate start of another show's data
                         const patterns = [" -1- ", " The Beatles:", " Begin Again:", " Shelley:", " Queendom:", " Equinox:"];
                         patterns.forEach(p => { if (content.includes(p)) content = content.split(p)[0]; });
                         data[id] = content.trim();
@@ -314,6 +317,7 @@
             document.getElementById('inputSection').classList.remove('hidden');
             document.getElementById('statusMessage').classList.add('hidden');
             document.getElementById('textHintArea').style.display = 'none';
+            document.getElementById('autocompleteList').classList.add('hidden');
             ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating'].forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
@@ -466,48 +470,48 @@
             const al = document.getElementById('autocompleteList');
             if (v.length < 1) { al.classList.add('hidden'); return; }
 
-            // Priority Scoring
             const matches = tvShows.filter(s => s.title.toLowerCase().includes(v))
-                .sort((a, b) => {
-                    const aT = a.title.toLowerCase();
-                    const bT = b.title.toLowerCase();
+                .map(s => {
+                    const t = s.title.toLowerCase();
+                    let score = 0;
+                    if (t === v) score += 1000;
+                    else if (t.startsWith(v)) score += 500;
+                    else if (t.split(' ').some(word => word.startsWith(v))) score += 250;
                     
-                    // 1. Exact matches
-                    if (aT === v && bT !== v) return -1;
-                    if (bT === v && aT !== v) return 1;
-
-                    // 2. Starts with
-                    const aStart = aT.startsWith(v);
-                    const bStart = bT.startsWith(v);
-                    if (aStart && !bStart) return -1;
-                    if (bStart && !aStart) return 1;
-
-                    // 3. Length (Shortest first for small queries like 'V')
-                    if (v.length < 3) {
-                        if (aT.length !== bT.length) return aT.length - bT.length;
-                    }
-
-                    // 4. Popularity
-                    return b.votes - a.votes;
+                    // Penalty for length difference for very short queries
+                    if (v.length <= 2) score -= t.length * 2;
+                    
+                    // Small popularity boost
+                    score += Math.min(s.votes / 100, 100);
+                    
+                    return { s, score };
                 })
+                .sort((a, b) => b.score - a.score)
                 .slice(0, 10);
 
             al.innerHTML = "";
             if (matches.length) {
                 al.classList.remove('hidden');
-                matches.forEach(m => {
+                matches.forEach(({s}) => {
                     const d = document.createElement('div');
                     d.className = 'autocomplete-item text-sm flex justify-between items-center';
                     d.innerHTML = `
                         <div class="flex flex-col text-left">
-                            <span class="text-white font-bold">${m.title}</span>
-                            <span class="text-zinc-600 text-[10px] uppercase font-bold">${m.networks[0] || 'Unknown'}</span>
+                            <span class="text-white font-bold">${s.title}</span>
+                            <span class="text-zinc-600 text-[10px] uppercase font-bold">${s.networks[0] || 'Unknown'}</span>
                         </div>
-                        <span class="text-zinc-500 text-[10px] font-black">${m.year}</span>`;
-                    d.onclick = () => submitGuess(m);
+                        <span class="text-zinc-500 text-[10px] font-black">${s.year}</span>`;
+                    d.onclick = () => submitGuess(s);
                     al.appendChild(d);
                 });
             } else al.classList.add('hidden');
+        });
+
+        // Click outside to close search
+        document.addEventListener('click', (e) => {
+            if (!document.getElementById('inputSection').contains(e.target)) {
+                document.getElementById('autocompleteList').classList.add('hidden');
+            }
         });
 
         function saveSession() {
