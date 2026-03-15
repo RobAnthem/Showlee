@@ -88,14 +88,19 @@
             background: var(--card-bg); 
             border: 1px solid var(--border); 
             border-radius: 12px;
-            padding: 10px 4px; 
+            padding: 12px 4px; 
             text-align: center; 
             transition: all 0.4s ease;
             backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Title always at top */
+            gap: 4px;
         }
         
         .summary-box.found { border-color: var(--correct); background: rgba(34, 197, 94, 0.1); box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.1); }
-        .summary-box.found span:last-child { color: var(--correct); }
+        .summary-box.found .value-text { color: var(--correct); }
         .summary-box.partial-found { border-color: var(--partial); background: rgba(234, 179, 8, 0.1); }
 
         .hint-container {
@@ -171,6 +176,9 @@
             padding: 12px 20px;
             border-radius: 16px;
         }
+
+        .label-text { font-size: 8px; color: #71717a; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; }
+        .value-text { font-size: 10px; font-weight: 900; }
     </style>
 </head>
 <body class="flex flex-col items-center p-4">
@@ -232,13 +240,34 @@
             </div>
 
             <div class="summary-grid mb-8">
-                <div id="sum-genre" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Genre</span><span class="text-[10px] font-black">?</span></div>
-                <div id="sum-date" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Release</span><span class="text-[10px] font-black">...</span></div>
-                <div id="sum-seasons" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Length</span><span class="text-[10px] font-black">...</span></div>
-                <div id="sum-network" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Studio</span><span class="text-[10px] font-black">?</span></div>
-                <div id="sum-origin" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Origin</span><span class="text-[10px] font-black">?</span></div>
-                <div id="sum-content-rating" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Maturity</span><span class="text-[10px] font-black">?</span></div>
-                <div id="sum-rating" class="summary-box flex flex-col items-center justify-center min-h-[70px]"><span class="text-[8px] text-zinc-500 uppercase font-bold tracking-widest mb-1">Critic</span><span class="text-[10px] font-black">?</span></div>
+                <div id="sum-genre" class="summary-box">
+                    <span class="label-text">Genre</span>
+                    <span class="value-text">?</span>
+                </div>
+                <div id="sum-date" class="summary-box">
+                    <span class="label-text">Release</span>
+                    <span class="value-text">...</span>
+                </div>
+                <div id="sum-seasons" class="summary-box">
+                    <span class="label-text">Length</span>
+                    <span class="value-text">...</span>
+                </div>
+                <div id="sum-network" class="summary-box">
+                    <span class="label-text">Studio</span>
+                    <span class="value-text">?</span>
+                </div>
+                <div id="sum-origin" class="summary-box">
+                    <span class="label-text">Origin</span>
+                    <span class="value-text">?</span>
+                </div>
+                <div id="sum-content-rating" class="summary-box">
+                    <span class="label-text">Maturity</span>
+                    <span class="value-text">?</span>
+                </div>
+                <div id="sum-rating" class="summary-box">
+                    <span class="label-text">Critic</span>
+                    <span class="value-text">?</span>
+                </div>
             </div>
 
             <div id="textHintArea" class="hint-container hidden">
@@ -268,9 +297,6 @@
     </main>
 
     <script>
-        // ... Logic remains identical to your original engine to maintain game stability ...
-        // Only UI-interacting parts were slightly adjusted for new class names/animations.
-        
         const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
         
         let tvShows = [];
@@ -294,7 +320,6 @@
             updateStreakUI();
 
             try {
-                // Pointing to your specific CSV files
                 const [showsRes, emojiRes, hintRes] = await Promise.all([
                     fetch('enriched_shows_2026-03-07.csv'),
                     fetch('emoji_metadata.csv'),
@@ -397,10 +422,10 @@
             ['sum-genre', 'sum-date', 'sum-seasons', 'sum-network', 'sum-origin', 'sum-content-rating', 'sum-rating'].forEach(id => {
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
-                const label = el.querySelector('span:last-child');
-                if (id === 'sum-date') label.textContent = `${minYearBound}—${maxYearBound}`;
-                else if (id === 'sum-seasons') label.textContent = `${minSeasonBound}—${maxSeasonBound}`;
-                else label.textContent = "?";
+                const val = el.querySelector('.value-text');
+                if (id === 'sum-date') val.textContent = `${minYearBound}—${maxYearBound}`;
+                else if (id === 'sum-seasons') val.textContent = `${minSeasonBound}—${maxSeasonBound}`;
+                else val.textContent = "?";
             });
             updateGuessesLeft();
         }
@@ -508,35 +533,43 @@
             guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
                 const el = document.getElementById('sum-genre');
-                el.querySelector('span:last-child').textContent = Array.from(discoveredGenres).slice(0, 2).join(", ");
+                el.querySelector('.value-text').textContent = Array.from(discoveredGenres).slice(0, 2).join(", ");
                 el.className = `summary-box ${discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found'}`;
             }
             guess.networks.filter(x => targetShow.networks.includes(x)).forEach(x => discoveredNetworks.add(x));
             if (discoveredNetworks.size > 0) {
                 const el = document.getElementById('sum-network');
-                el.querySelector('span:last-child').textContent = Array.from(discoveredNetworks)[0];
+                el.querySelector('.value-text').textContent = Array.from(discoveredNetworks)[0];
                 el.className = `summary-box ${discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found'}`;
             }
             
+            // Origin check
+            if (guess.lang === targetShow.lang || guess.country === targetShow.country) {
+                const el = document.getElementById('sum-origin');
+                const isFull = guess.lang === targetShow.lang && guess.country === targetShow.country;
+                el.className = `summary-box ${isFull ? 'found' : 'partial-found'}`;
+                el.querySelector('.value-text').textContent = isFull ? `${targetShow.lang.toUpperCase()} / ${targetShow.country}` : (guess.lang === targetShow.lang ? targetShow.lang.toUpperCase() : targetShow.country);
+            }
+
             if (!yearGuessed) {
                 if (guess.year === targetShow.year) {
                     yearGuessed = true; document.getElementById('sum-date').className = "summary-box found";
-                    document.getElementById('sum-date').querySelector('span:last-child').textContent = targetShow.year;
+                    document.getElementById('sum-date').querySelector('.value-text').textContent = targetShow.year;
                 } else if (guess.year > 0) {
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
                     else maxYearBound = Math.min(maxYearBound, guess.year - 1);
-                    document.getElementById('sum-date').querySelector('span:last-child').textContent = `${minYearBound}—${maxYearBound}`;
+                    document.getElementById('sum-date').querySelector('.value-text').textContent = `${minYearBound}—${maxYearBound}`;
                 }
             }
 
             if (!seasonGuessed) {
                 if (guess.seasons === targetShow.seasons) {
                     seasonGuessed = true; document.getElementById('sum-seasons').className = "summary-box found";
-                    document.getElementById('sum-seasons').querySelector('span:last-child').textContent = targetShow.seasons;
+                    document.getElementById('sum-seasons').querySelector('.value-text').textContent = targetShow.seasons;
                 } else if (guess.seasons > 0) {
                     if (guess.seasons < targetShow.seasons) minSeasonBound = Math.max(minSeasonBound, guess.seasons + 1);
                     else maxSeasonBound = Math.min(maxSeasonBound, guess.seasons - 1);
-                    document.getElementById('sum-seasons').querySelector('span:last-child').textContent = `${minSeasonBound}—${maxSeasonBound}`;
+                    document.getElementById('sum-seasons').querySelector('.value-text').textContent = `${minSeasonBound}—${maxSeasonBound}`;
                 }
             }
 
@@ -544,20 +577,25 @@
                 if (guess[key] === targetShow[key]) {
                     const id = key === 'contentRating' ? 'sum-content-rating' : 'sum-rating';
                     const el = document.getElementById(id);
-                    el.className = "summary-box found"; el.querySelector('span:last-child').textContent = targetShow[key];
+                    el.className = "summary-box found"; el.querySelector('.value-text').textContent = targetShow[key];
                 }
             });
         }
 
         function endGame(won) {
+            const alreadyOver = isGameOver;
             isGameOver = true;
             document.getElementById('inputSection').classList.add('hidden');
             const sm = document.getElementById('statusMessage');
             sm.classList.remove('hidden');
-            const s = streaks[currentGameMode];
-            if (won) { s.current++; if (s.current > s.best) s.best = s.current; } else s.current = 0;
-            localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
-            updateStreakUI();
+            
+            if (!alreadyOver) {
+                const s = streaks[currentGameMode];
+                if (won) { s.current++; if (s.current > s.best) s.best = s.current; } else s.current = 0;
+                localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
+                updateStreakUI();
+            }
+            
             if (targetShow.poster) {
                 const img = document.getElementById('final-reveal-img');
                 img.src = targetShow.poster; img.classList.remove('hidden');
