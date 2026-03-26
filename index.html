@@ -95,8 +95,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start; /* Title always at top */
+            justify-content: flex-start;
             gap: 4px;
+            min-height: 60px;
         }
         
         .summary-box.found { border-color: var(--correct); background: rgba(34, 197, 94, 0.1); box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.1); }
@@ -177,25 +178,24 @@
             border-radius: 16px;
         }
 
-        .label-text { font-size: 8px; color: #71717a; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; }
-        .value-text { font-size: 10px; font-weight: 900; }
+        .label-text { font-size: 8px; color: #71717a; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 2px; }
+        .value-text { font-size: 10px; font-weight: 900; line-height: 1.2; }
     </style>
-    <link rel="icon" type="image/png" href="icon.png">
 </head>
 <body class="flex flex-col items-center p-4">
 
     <!-- Difficulty Picker -->
-    <div id="difficultyModal" class="fixed inset-0 z-[110] hidden flex items-center justify-center p-6">
+    <div id="difficultyModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
         <div class="w-full max-w-lg bg-[#0b0c0d] border border-zinc-800 rounded-3xl p-10 shadow-2xl">
             <h3 class="text-3xl font-black italic tracking-tighter mb-2 uppercase text-center">Select Experience</h3>
             <div class="grid grid-cols-1 gap-4 mt-8">
                 <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-2xl group">
                     <h4 class="font-black text-xl group-hover:text-[#d1a01d]">CINEMA BEGINNER</h4>
-                    <p class="text-zinc-500 text-[11px] uppercase tracking-wider">Top 1,500 mainstream titles</p>
+                    <p class="text-zinc-500 text-[11px] uppercase tracking-wider">Top 500 iconic mainstream titles</p>
                 </div>
                 <div onclick="selectDifficulty('normal')" class="diff-card p-6 rounded-2xl group">
                     <h4 class="font-black text-xl group-hover:text-[#d1a01d]">TV ENTHUSIAST</h4>
-                    <p class="text-zinc-500 text-[11px] uppercase tracking-wider">Top 3,000 global shows</p>
+                    <p class="text-zinc-500 text-[11px] uppercase tracking-wider">Top 2,000 global shows</p>
                 </div>
                 <div onclick="selectDifficulty('hard')" class="diff-card p-6 rounded-2xl group">
                     <h4 class="font-black text-xl group-hover:text-[#d1a01d]">INDUSTRY EXPERT</h4>
@@ -207,7 +207,7 @@
 
     <header class="w-full max-w-2xl flex flex-col items-center py-8 mb-4">
         <div class="flex items-center gap-3 mb-8">
-            <h1 class="text-5xl font-black tracking-tighter italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">TeeVeedle</h1>
+            <h1 class="text-5xl font-black tracking-tighter italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">SHOWLEE</h1>
         </div>
         
         <div class="w-full grid grid-cols-1 md:grid-cols-2 items-center gap-6 px-4">
@@ -219,7 +219,8 @@
                     <button id="modeForeign" onclick="setMode('foreign')" class="mode-btn flex-1 rounded-lg">Global</button>
                 </div>
             </div>
-            <div class="flex justify-end">
+            <div class="flex justify-end items-center gap-4">
+                <button onclick="document.getElementById('difficultyModal').classList.remove('hidden')" class="text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Difficulty</button>
                 <div class="streak-badge flex flex-col items-center min-w-[100px]">
                     <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Win Streak</span>
                     <div class="text-3xl font-black text-[#d1a01d]" id="currentStreak">0</div>
@@ -285,10 +286,13 @@
             </div>
 
             <div id="inputSection" class="w-full max-w-md mb-12 relative px-4">
-                <div class="flex gap-3">
+                <div class="flex gap-2">
                     <input id="showInput" type="text" placeholder="Search the archive..." autocomplete="off"
                         class="flex-grow bg-[#1a1c1e] border border-zinc-800 p-5 rounded-2xl focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder:text-zinc-600">
-                    <button id="hintButton" onclick="useHint()" disabled class="border border-zinc-800 text-zinc-500 font-black px-6 rounded-2xl text-[9px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all">Hint</button>
+                    <div class="flex flex-col gap-2">
+                        <button id="hintButton" onclick="useHint()" disabled class="h-1/2 border border-zinc-800 text-zinc-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all">Hint</button>
+                        <button id="surrenderButton" onclick="surrender()" class="h-1/2 border border-red-900/50 text-red-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-red-950/20 hover:bg-red-950/40 transition-all">Surrender</button>
+                    </div>
                 </div>
                 <div id="autocompleteList" class="autocomplete-items hidden"></div>
             </div>
@@ -308,7 +312,7 @@
         const MAX_GUESSES = 10;
         
         let currentGameMode = 'normal';
-        let currentDifficulty = 'normal';
+        let currentDifficulty = localStorage.getItem('showlee_difficulty') || 'normal';
         let minYearBound = 1900, maxYearBound = new Date().getFullYear();
         let minSeasonBound = 1, maxSeasonBound = 100;
         let yearGuessed = false, seasonGuessed = false, hintUsed = false, isGameOver = false;
@@ -386,7 +390,10 @@
 
         function initGame() {
             const saved = localStorage.getItem(`showlee_session_v6_${currentGameMode}`);
-            if (saved) resumeGame(JSON.parse(saved)); else startNewGame();
+            if (saved) {
+                document.getElementById('difficultyModal').classList.add('hidden');
+                resumeGame(JSON.parse(saved));
+            }
         }
 
         function startNewGame() {
@@ -397,9 +404,12 @@
                 if (currentGameMode === 'normal') return isEnglish && !isAnime;
                 return !isEnglish && !isAnime;
             });
+
+            // Sort by popularity/votes for difficulty slicing
             pool.sort((a, b) => b.votes - a.votes);
-            if (currentDifficulty === 'easy') pool = pool.slice(0, 1500);
-            else if (currentDifficulty === 'normal') pool = pool.slice(0, 3000);
+            
+            if (currentDifficulty === 'easy') pool = pool.slice(0, 500);
+            else if (currentDifficulty === 'normal') pool = pool.slice(0, 2000);
             
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
             guesses = []; 
@@ -472,6 +482,11 @@
             saveSession();
         }
 
+        function surrender() {
+            if (isGameOver) return;
+            endGame(false);
+        }
+
         function submitGuess(show) {
             if (isGameOver || guesses.some(g => g.id === show.id)) return;
             guesses.push(show);
@@ -531,6 +546,7 @@
         }
 
         function updateSummaryUI(guess) {
+            if (isGameOver) return; // Managed by revealAllSummary
             guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
             if (discoveredGenres.size > 0) {
                 const el = document.getElementById('sum-genre');
@@ -583,6 +599,25 @@
             });
         }
 
+        function revealAllSummary() {
+            // Fill all summary boxes with correct data
+            const mapping = [
+                { id: 'sum-genre', val: targetShow.genres.slice(0, 2).join(", ") },
+                { id: 'sum-date', val: targetShow.year },
+                { id: 'sum-seasons', val: targetShow.seasons },
+                { id: 'sum-network', val: targetShow.networks[0] || '?' },
+                { id: 'sum-origin', val: `${targetShow.lang.toUpperCase()} / ${targetShow.country}` },
+                { id: 'sum-content-rating', val: targetShow.contentRating },
+                { id: 'sum-rating', val: targetShow.score }
+            ];
+
+            mapping.forEach(m => {
+                const el = document.getElementById(m.id);
+                el.className = "summary-box found";
+                el.querySelector('.value-text').textContent = m.val;
+            });
+        }
+
         function endGame(won) {
             const alreadyOver = isGameOver;
             isGameOver = true;
@@ -597,6 +632,8 @@
                 updateStreakUI();
             }
             
+            revealAllSummary();
+
             if (targetShow.poster) {
                 const img = document.getElementById('final-reveal-img');
                 img.src = targetShow.poster; img.classList.remove('hidden');
@@ -668,6 +705,7 @@
             discoveredGenres = new Set(session.discoveredGenres);
             discoveredNetworks = new Set(session.discoveredNetworks);
             isGameOver = session.isGameOver;
+            currentDifficulty = session.difficulty || 'normal';
             clearUI();
             session.guesses.forEach(g => { guesses.push(g); renderRow(g, false); updateSummaryUI(g); });
             updateEmojiHint();
@@ -691,7 +729,12 @@
             document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
         }
 
-        function selectDifficulty(diff) { currentDifficulty = diff; document.getElementById('difficultyModal').classList.add('hidden'); startNewGame(); }
+        function selectDifficulty(diff) { 
+            currentDifficulty = diff; 
+            localStorage.setItem('showlee_difficulty', diff);
+            document.getElementById('difficultyModal').classList.add('hidden'); 
+            startNewGame(); 
+        }
     </script>
 </body>
 </html>
