@@ -171,6 +171,25 @@
             box-shadow: 0 0 0 4px rgba(209, 160, 29, 0.15);
         }
 
+        #toast {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #1a1c1e; border: 1px solid #444; color: #fff;
+            padding: 10px 20px; border-radius: 12px; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            opacity: 0; transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none; z-index: 200; white-space: nowrap;
+        }
+        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        .shake { animation: shake 0.4s ease; }
+
         .streak-badge {
             background: linear-gradient(135deg, #1a1c1e, #0b0c0d);
             border: 1px solid var(--border);
@@ -184,6 +203,8 @@
     <link rel="icon" type="image/png" href="icon.png">
 </head>
 <body class="flex flex-col items-center p-4">
+
+    <div id="toast"></div>
 
     <!-- Difficulty Picker -->
     <div id="difficultyModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
@@ -249,11 +270,11 @@
                 </div>
                 <div id="sum-date" class="summary-box">
                     <span class="label-text">Release</span>
-                    <span class="value-text">...</span>
+                    <span class="value-text">?</span>
                 </div>
                 <div id="sum-seasons" class="summary-box">
                     <span class="label-text">Length</span>
-                    <span class="value-text">...</span>
+                    <span class="value-text">?</span>
                 </div>
                 <div id="sum-network" class="summary-box">
                     <span class="label-text">Studio</span>
@@ -291,7 +312,7 @@
                     <input id="showInput" type="text" placeholder="Search the archive..." autocomplete="off"
                         class="flex-grow bg-[#1a1c1e] border border-zinc-800 p-5 rounded-2xl focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder:text-zinc-600">
                     <div class="flex flex-col gap-2">
-                        <button id="hintButton" onclick="useHint()" disabled class="h-1/2 border border-zinc-800 text-zinc-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all">Hint</button>
+                        <button id="hintButton" onclick="useHint()" disabled class="h-1/2 border border-zinc-800 text-zinc-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all" title="Costs 1 attempt">Hint −1</button>
                         <button id="surrenderButton" onclick="surrender()" class="h-1/2 border border-red-900/50 text-red-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-red-950/20 hover:bg-red-950/40 transition-all">Surrender</button>
                     </div>
                 </div>
@@ -323,7 +344,7 @@
         let currentDifficulty = localStorage.getItem('showlee_difficulty') || 'normal';
         let minYearBound = 1900, maxYearBound = new Date().getFullYear();
         let minSeasonBound = 1, maxSeasonBound = 100;
-        let yearGuessed = false, seasonGuessed = false, hintUsed = false, isGameOver = false;
+        let yearGuessed = false, seasonGuessed = false, hintUsed = false, hintPenalty = 0, isGameOver = false;
         let discoveredGenres = new Set(), discoveredNetworks = new Set();
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
 
@@ -418,13 +439,16 @@
             
             if (currentDifficulty === 'easy') pool = pool.slice(0, 500);
             else if (currentDifficulty === 'normal') pool = pool.slice(0, 2000);
+            pool = pool.filter(s => s.seasons > 0 && s.year > 0);
             
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
+            const poolYears = pool.map(s => s.year).filter(y => y > 0);
+            minYearBound = Math.min(...poolYears);
+            maxYearBound = new Date().getFullYear() - 1;
             guesses = []; 
-            minYearBound = 1900; maxYearBound = new Date().getFullYear();
             minSeasonBound = 1; maxSeasonBound = 100;
             yearGuessed = false; seasonGuessed = false; discoveredGenres = new Set(); discoveredNetworks = new Set();
-            hintUsed = false; isGameOver = false;
+            hintUsed = false; hintPenalty = 0; isGameOver = false;
             
             clearUI();
             updateEmojiHint();
@@ -442,17 +466,17 @@
                 const el = document.getElementById(id);
                 el.classList.remove('found', 'partial-found');
                 const val = el.querySelector('.value-text');
-                if (id === 'sum-date') val.textContent = `${minYearBound}—${maxYearBound}`;
-                else if (id === 'sum-seasons') val.textContent = `${minSeasonBound}—${maxSeasonBound}`;
+                if (id === 'sum-date') val.textContent = '?';
+                else if (id === 'sum-seasons') val.textContent = '?';
                 else val.textContent = "?";
             });
             updateGuessesLeft();
         }
 
         function updateGuessesLeft() {
-            const left = MAX_GUESSES - guesses.length;
+            const left = MAX_GUESSES - hintPenalty - guesses.length;
             document.getElementById('guessesLeft').textContent = `${left} ATTEMPTS REMAINING`;
-            document.getElementById('progressBarFill').style.width = `${(guesses.length / MAX_GUESSES) * 100}%`;
+            document.getElementById('progressBarFill').style.width = `${((guesses.length + hintPenalty) / MAX_GUESSES) * 100}%`;
             
             const hBtn = document.getElementById('hintButton');
             hBtn.disabled = guesses.length < 4 || hintUsed;
@@ -484,9 +508,11 @@
         function useHint() {
             if (hintUsed || guesses.length < 4) return;
             hintUsed = true;
+            hintPenalty = 1;
             document.getElementById('plotHintText').textContent = hintMetadata[targetShow.id] || "No description available.";
             document.getElementById('textHintArea').classList.remove('hidden');
             updateGuessesLeft();
+            if (guesses.length + hintPenalty >= MAX_GUESSES) endGame(false);
             saveSession();
         }
 
@@ -495,8 +521,23 @@
             endGame(false);
         }
 
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
         function submitGuess(show) {
-            if (isGameOver || guesses.some(g => g.id === show.id)) return;
+            if (isGameOver) return;
+            if (guesses.some(g => g.id === show.id)) {
+                const input = document.getElementById('showInput');
+                input.classList.add('shake');
+                input.addEventListener('animationend', () => input.classList.remove('shake'), { once: true });
+                showToast('Already guessed!');
+                return;
+            }
             guesses.push(show);
             renderRow(show, true);
             updateSummaryUI(show);
@@ -505,7 +546,7 @@
             document.getElementById('showInput').value = "";
             document.getElementById('autocompleteList').classList.add('hidden');
             if (show.id === targetShow.id) endGame(true);
-            else if (guesses.length >= MAX_GUESSES) endGame(false);
+            else if (guesses.length + hintPenalty >= MAX_GUESSES) endGame(false);
             else saveSession();
         }
 
@@ -532,7 +573,7 @@
                     const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
                     c.textContent = f.val.slice(0, 2).join(", ");
                     const common = f.val.filter(x => targetArr.includes(x));
-                    if (common.length === targetArr.length && f.val.length === targetArr.length) c.classList.add('correct');
+                    if (common.length === targetArr.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial'); else c.classList.add('incorrect');
                 } else if (f.type === 'o') {
                     c.innerHTML = `<span class="text-[8px] opacity-60">${f.val.lang.toUpperCase()}</span><span>${f.val.country}</span>`;
@@ -553,56 +594,93 @@
             document.getElementById('gameBoard').prepend(row);
         }
 
+        function isSummaryLocked(id) {
+            return document.getElementById(id).classList.contains('found');
+        }
+
         function updateSummaryUI(guess) {
             if (isGameOver) return; // Managed by revealAllSummary
-            guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
-            if (discoveredGenres.size > 0) {
-                const el = document.getElementById('sum-genre');
-                el.querySelector('.value-text').textContent = Array.from(discoveredGenres).slice(0, 2).join(", ");
-                el.className = `summary-box ${discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found'}`;
-            }
-            guess.networks.filter(x => targetShow.networks.includes(x)).forEach(x => discoveredNetworks.add(x));
-            if (discoveredNetworks.size > 0) {
-                const el = document.getElementById('sum-network');
-                el.querySelector('.value-text').textContent = Array.from(discoveredNetworks)[0];
-                el.className = `summary-box ${discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found'}`;
-            }
-            
-            // Origin check
-            if (guess.lang === targetShow.lang || guess.country === targetShow.country) {
-                const el = document.getElementById('sum-origin');
-                const isFull = guess.lang === targetShow.lang && guess.country === targetShow.country;
-                el.className = `summary-box ${isFull ? 'found' : 'partial-found'}`;
-                el.querySelector('.value-text').textContent = isFull ? `${targetShow.lang.toUpperCase()} / ${targetShow.country}` : (guess.lang === targetShow.lang ? targetShow.lang.toUpperCase() : targetShow.country);
+
+            // Genre
+            if (!isSummaryLocked('sum-genre')) {
+                guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
+                if (discoveredGenres.size > 0) {
+                    const el = document.getElementById('sum-genre');
+                    el.querySelector('.value-text').textContent = Array.from(discoveredGenres).slice(0, 2).join(", ");
+                    el.className = `summary-box ${discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found'}`;
+                }
             }
 
+            // Network
+            if (!isSummaryLocked('sum-network')) {
+                guess.networks.filter(x => targetShow.networks.includes(x)).forEach(x => discoveredNetworks.add(x));
+                if (discoveredNetworks.size > 0) {
+                    const el = document.getElementById('sum-network');
+                    el.querySelector('.value-text').textContent = Array.from(discoveredNetworks)[0];
+                    el.className = `summary-box ${discoveredNetworks.size === targetShow.networks.length ? 'found' : 'partial-found'}`;
+                }
+            }
+
+            // Origin
+            if (!isSummaryLocked('sum-origin')) {
+                if (guess.lang === targetShow.lang || guess.country === targetShow.country) {
+                    const el = document.getElementById('sum-origin');
+                    const isFull = guess.lang === targetShow.lang && guess.country === targetShow.country;
+                    el.className = `summary-box ${isFull ? 'found' : 'partial-found'}`;
+                    el.querySelector('.value-text').textContent = isFull ? `${targetShow.lang.toUpperCase()} / ${targetShow.country}` : (guess.lang === targetShow.lang ? targetShow.lang.toUpperCase() : targetShow.country);
+                }
+            }
+
+            // Release year
             if (!yearGuessed) {
                 if (guess.year === targetShow.year) {
                     yearGuessed = true; document.getElementById('sum-date').className = "summary-box found";
                     document.getElementById('sum-date').querySelector('.value-text').textContent = targetShow.year;
                 } else if (guess.year > 0) {
+                    const dir = guess.year < targetShow.year ? '▲' : '▼';
                     if (guess.year < targetShow.year) minYearBound = Math.max(minYearBound, guess.year + 1);
                     else maxYearBound = Math.min(maxYearBound, guess.year - 1);
-                    document.getElementById('sum-date').querySelector('.value-text').textContent = `${minYearBound}—${maxYearBound}`;
+                    if (minYearBound === maxYearBound) {
+                        yearGuessed = true; document.getElementById('sum-date').className = "summary-box found";
+                        document.getElementById('sum-date').querySelector('.value-text').textContent = minYearBound;
+                    } else {
+                        document.getElementById('sum-date').querySelector('.value-text').textContent = `${minYearBound}—${maxYearBound} ${dir}`;
+                    }
                 }
             }
 
+            // Seasons
             if (!seasonGuessed) {
                 if (guess.seasons === targetShow.seasons) {
                     seasonGuessed = true; document.getElementById('sum-seasons').className = "summary-box found";
                     document.getElementById('sum-seasons').querySelector('.value-text').textContent = targetShow.seasons;
                 } else if (guess.seasons > 0) {
+                    const dir = guess.seasons < targetShow.seasons ? '▲' : '▼';
                     if (guess.seasons < targetShow.seasons) minSeasonBound = Math.max(minSeasonBound, guess.seasons + 1);
                     else maxSeasonBound = Math.min(maxSeasonBound, guess.seasons - 1);
-                    document.getElementById('sum-seasons').querySelector('.value-text').textContent = `${minSeasonBound}—${maxSeasonBound}`;
+                    if (minSeasonBound === maxSeasonBound) {
+                        seasonGuessed = true; document.getElementById('sum-seasons').className = "summary-box found";
+                        document.getElementById('sum-seasons').querySelector('.value-text').textContent = minSeasonBound;
+                    } else {
+                        document.getElementById('sum-seasons').querySelector('.value-text').textContent = `${minSeasonBound}—${maxSeasonBound} ${dir}`;
+                    }
                 }
             }
 
+            // Content rating & score
             ['contentRating', 'score'].forEach(key => {
+                const id = key === 'contentRating' ? 'sum-content-rating' : 'sum-rating';
+                if (isSummaryLocked(id)) return;
                 if (guess[key] === targetShow[key]) {
-                    const id = key === 'contentRating' ? 'sum-content-rating' : 'sum-rating';
                     const el = document.getElementById(id);
-                    el.className = "summary-box found"; el.querySelector('.value-text').textContent = targetShow[key];
+                    el.className = "summary-box found";
+                    el.querySelector('.value-text').textContent = targetShow[key];
+                } else if (key === 'score' && typeof guess[key] === 'number') {
+                    if (Math.abs(guess[key] - targetShow[key]) <= 0.5) {
+                        const el = document.getElementById('sum-rating');
+                        el.className = "summary-box partial-found";
+                        el.querySelector('.value-text').textContent = guess[key] < targetShow[key] ? '▲' : '▼';
+                    }
                 }
             });
         }
@@ -675,11 +753,12 @@
             if (matches.length) {
                 al.classList.remove('hidden');
                 matches.forEach(({s}) => {
+                    const alreadyGuessed = guesses.some(g => g.id === s.id);
                     const d = document.createElement('div');
-                    d.className = 'autocomplete-item text-sm flex justify-between items-center';
+                    d.className = 'autocomplete-item text-sm flex justify-between items-center' + (alreadyGuessed ? ' opacity-30 cursor-not-allowed' : '');
                     d.innerHTML = `
                         <div class="flex flex-col text-left">
-                            <span class="text-white font-bold">${s.title}</span>
+                            <span class="text-white font-bold">${s.title}${alreadyGuessed ? ' ✓' : ''}</span>
                             <span class="text-zinc-600 text-[10px] uppercase font-bold tracking-wider">${s.networks[0] || 'Unknown Network'}</span>
                         </div>
                         <span class="text-zinc-500 text-[11px] font-black">${s.year}</span>`;
@@ -700,7 +779,7 @@
                 targetShow, guesses, minYearBound, maxYearBound, minSeasonBound, maxSeasonBound, 
                 yearGuessed, seasonGuessed,
                 discoveredGenres: Array.from(discoveredGenres), discoveredNetworks: Array.from(discoveredNetworks),
-                hintUsed, isGameOver, difficulty: currentDifficulty
+                hintUsed, hintPenalty, isGameOver, difficulty: currentDifficulty
             }));
         }
 
@@ -710,6 +789,7 @@
             minSeasonBound = session.minSeasonBound || 1; maxSeasonBound = session.maxSeasonBound || 100;
             yearGuessed = session.yearGuessed; seasonGuessed = session.seasonGuessed || false; 
             hintUsed = session.hintUsed;
+            hintPenalty = session.hintPenalty || 0;
             discoveredGenres = new Set(session.discoveredGenres);
             discoveredNetworks = new Set(session.discoveredNetworks);
             isGameOver = session.isGameOver;
