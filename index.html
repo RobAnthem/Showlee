@@ -301,7 +301,14 @@
             <div id="gameBoard" class="flex flex-col gap-3 w-full items-center mb-20"></div>
         </div>
     </main>
-
+    <footer class="w-full max-w-2xl py-10 mt-auto border-t border-zinc-900 flex flex-col items-center gap-6">
+        <div class="flex flex-col items-center text-center px-4">
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-5 mb-4 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
+            <p class="text-[9px] text-zinc-600 leading-relaxed uppercase tracking-[0.15em] font-black max-w-xs">
+                This product uses the TMDB API but is not endorsed or certified by TMDB.
+            </p>
+        </div>
+    </footer>
     <script>
         const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
         
