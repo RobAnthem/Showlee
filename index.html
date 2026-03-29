@@ -273,7 +273,7 @@
                     <span class="value-text">?</span>
                 </div>
                 <div id="sum-seasons" class="summary-box">
-                    <span class="label-text">Seasons</span>
+                    <span class="label-text">Length</span>
                     <span class="value-text">?</span>
                 </div>
                 <div id="sum-network" class="summary-box">
@@ -606,7 +606,7 @@
                 guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
                 if (discoveredGenres.size > 0) {
                     const el = document.getElementById('sum-genre');
-                    el.querySelector('.value-text').textContent = Array.from(discoveredGenres).slice(0, 2).join(", ");
+                    el.querySelector('.value-text').textContent = Array.from(discoveredGenres).slice(0, targetShow.genres.length).join(", ");
                     el.className = `summary-box ${discoveredGenres.size === targetShow.genres.length ? 'found' : 'partial-found'}`;
                 }
             }
