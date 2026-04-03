@@ -347,10 +347,16 @@
         let yearGuessed = false, seasonGuessed = false, hintUsed = false, hintPenalty = 0, isGameOver = false;
         let discoveredGenres = new Set(), discoveredNetworks = new Set();
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
+        let seenShows = {}; // keyed by `${mode}_${difficulty}` -> Set of show IDs
 
         window.addEventListener('DOMContentLoaded', async () => {
             const savedStreaks = localStorage.getItem('showlee_streaks_v6');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
+            const savedSeen = localStorage.getItem('showlee_seen_v6');
+            if (savedSeen) {
+                const raw = JSON.parse(savedSeen);
+                for (const key in raw) seenShows[key] = new Set(raw[key]);
+            }
             updateStreakUI();
 
             try {
@@ -425,6 +431,16 @@
             }
         }
 
+        function saveSeenShows() {
+            const raw = {};
+            for (const key in seenShows) raw[key] = Array.from(seenShows[key]);
+            localStorage.setItem('showlee_seen_v6', JSON.stringify(raw));
+        }
+
+        function getSeenKey() {
+            return `${currentGameMode}_${currentDifficulty}`;
+        }
+
         function startNewGame() {
             let pool = tvShows.filter(s => {
                 const isAnime = s.genres.includes('Animation') && s.country === 'JP';
@@ -440,6 +456,16 @@
             if (currentDifficulty === 'easy') pool = pool.slice(0, 500);
             else if (currentDifficulty === 'normal') pool = pool.slice(0, 2000);
             pool = pool.filter(s => s.seasons > 0 && s.year > 0);
+
+            // Exclude already-seen shows during an active streak; reset if pool exhausted
+            const seenKey = getSeenKey();
+            if (!seenShows[seenKey]) seenShows[seenKey] = new Set();
+            let unseenPool = pool.filter(s => !seenShows[seenKey].has(s.id));
+            if (unseenPool.length === 0) {
+                seenShows[seenKey] = new Set();
+                unseenPool = pool;
+            }
+            pool = unseenPool;
             
             targetShow = pool[Math.floor(Math.random() * pool.length)] || tvShows[0];
             const poolYears = pool.map(s => s.year).filter(y => y > 0);
@@ -710,10 +736,24 @@
             document.getElementById('inputSection').classList.add('hidden');
             const sm = document.getElementById('statusMessage');
             sm.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             
             if (!alreadyOver) {
                 const s = streaks[currentGameMode];
-                if (won) { s.current++; if (s.current > s.best) s.best = s.current; } else s.current = 0;
+                if (won) {
+                    s.current++; if (s.current > s.best) s.best = s.current;
+                    // Mark this show as seen so it won't repeat during the streak
+                    const seenKey = getSeenKey();
+                    if (!seenShows[seenKey]) seenShows[seenKey] = new Set();
+                    seenShows[seenKey].add(targetShow.id);
+                    saveSeenShows();
+                } else {
+                    s.current = 0;
+                    // Reset seen shows on streak loss
+                    const seenKey = getSeenKey();
+                    seenShows[seenKey] = new Set();
+                    saveSeenShows();
+                }
                 localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
                 updateStreakUI();
             }
