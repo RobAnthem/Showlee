@@ -313,10 +313,17 @@
                         class="flex-grow bg-[#1a1c1e] border border-zinc-800 p-5 rounded-2xl focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder:text-zinc-600">
                     <div class="flex flex-col gap-2">
                         <button id="hintButton" onclick="useHint()" disabled class="h-1/2 border border-zinc-800 text-zinc-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all" title="Costs 1 attempt">Hint −1</button>
-                        <button id="surrenderButton" onclick="surrender()" class="h-1/2 border border-red-900/50 text-red-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-red-950/20 hover:bg-red-950/40 transition-all">Surrender</button>
+                        <button id="surrenderButton" onclick="confirmSurrender()" class="h-1/2 border border-red-900/50 text-red-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-red-950/20 hover:bg-red-950/40 transition-all">Surrender</button>
                     </div>
                 </div>
                 <div id="autocompleteList" class="autocomplete-items hidden"></div>
+                <div id="surrenderConfirm" class="hidden absolute bottom-full mb-2 right-0 bg-[#1a1c1e] border border-red-900/60 rounded-2xl p-4 shadow-2xl z-50 text-center min-w-[180px]">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-red-400 mb-3">Give up?</p>
+                    <div class="flex gap-2 justify-center">
+                        <button onclick="surrender()" class="bg-red-600 hover:bg-red-500 text-white font-black px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all">Yes</button>
+                        <button onclick="cancelSurrender()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all">No</button>
+                    </div>
+                </div>
             </div>
 
             <div id="gameBoard" class="flex flex-col gap-3 w-full items-center mb-20"></div>
@@ -505,7 +512,24 @@
             document.getElementById('progressBarFill').style.width = `${((guesses.length + hintPenalty) / MAX_GUESSES) * 100}%`;
             
             const hBtn = document.getElementById('hintButton');
-            hBtn.disabled = guesses.length < 4 || hintUsed;
+            const guessesNeeded = 4 - guesses.length;
+            if (hintUsed) {
+                hBtn.disabled = true;
+                hBtn.textContent = 'Hint −1';
+                hBtn.className = hBtn.className.replace(/border-green-[\w]+|text-green-[\w]+|bg-green-[\w/]+/g, '').trim();
+                hBtn.classList.remove('border-green-600', 'text-green-400', 'bg-green-950/30');
+                hBtn.classList.add('border-zinc-800', 'text-zinc-500', 'bg-zinc-900/50');
+            } else if (guessesNeeded > 0) {
+                hBtn.disabled = true;
+                hBtn.textContent = `Hint in ${guessesNeeded}`;
+                hBtn.classList.remove('border-green-600', 'text-green-400', 'bg-green-950/30');
+                hBtn.classList.add('border-zinc-800', 'text-zinc-500', 'bg-zinc-900/50');
+            } else {
+                hBtn.disabled = false;
+                hBtn.textContent = 'Hint −1';
+                hBtn.classList.remove('border-zinc-800', 'text-zinc-500', 'bg-zinc-900/50');
+                hBtn.classList.add('border-green-600', 'text-green-400', 'bg-green-950/30');
+            }
         }
 
         function updateEmojiHint() {
@@ -542,8 +566,20 @@
             saveSession();
         }
 
+        function confirmSurrender() {
+            if (isGameOver) return;
+            document.getElementById('surrenderConfirm').classList.remove('hidden');
+            document.getElementById('surrenderButton').classList.add('opacity-50', 'pointer-events-none');
+        }
+
+        function cancelSurrender() {
+            document.getElementById('surrenderConfirm').classList.add('hidden');
+            document.getElementById('surrenderButton').classList.remove('opacity-50', 'pointer-events-none');
+        }
+
         function surrender() {
             if (isGameOver) return;
+            cancelSurrender();
             endGame(false);
         }
 
@@ -811,6 +847,10 @@
         document.addEventListener('click', (e) => {
             if (!document.getElementById('inputSection').contains(e.target)) {
                 document.getElementById('autocompleteList').classList.add('hidden');
+            }
+            if (!document.getElementById('surrenderButton').contains(e.target) &&
+                !document.getElementById('surrenderConfirm').contains(e.target)) {
+                cancelSurrender();
             }
         });
 
