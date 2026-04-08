@@ -254,12 +254,78 @@
         body.light #emojiHintArea p { color: #888; }
         body.light #plotHintText { color: #444; }
         body.light .text-zinc-400 { color: #555 !important; }
+
+        /* ── Theme Widget ── */
+        #themeWidget {
+            position: fixed; top: 16px; right: 16px; z-index: 300;
+        }
+        #themeIconBtn {
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: #1a1c1e;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            padding: 0;
+            overflow: hidden;
+        }
+        #themeIconBtn:hover { border-color: rgba(255,255,255,0.4); box-shadow: 0 0 0 3px rgba(255,255,255,0.08); }
+        body.light #themeIconBtn { background: #fff; border-color: rgba(0,0,0,0.15); }
+        body.light #themeIconBtn:hover { border-color: rgba(0,0,0,0.35); box-shadow: 0 0 0 3px rgba(0,0,0,0.06); }
+
+        #themeDropdown {
+            position: absolute; top: calc(100% + 8px); right: 0;
+            background: #16181a; border: 1px solid #333;
+            border-radius: 14px; overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            min-width: 130px;
+            opacity: 0; transform: translateY(-6px) scale(0.97);
+            pointer-events: none;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+        }
+        #themeDropdown.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+        body.light #themeDropdown { background: #fff; border-color: #ddd; box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
+
+        .theme-option {
+            display: flex; align-items: center; gap: 10px;
+            padding: 11px 16px; cursor: pointer; font-size: 11px;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+            color: #888; transition: background 0.15s, color 0.15s;
+        }
+        .theme-option:hover { background: rgba(255,255,255,0.06); color: #fff; }
+        .theme-option.active { color: #fff; }
+        body.light .theme-option { color: #888; }
+        body.light .theme-option:hover { background: rgba(0,0,0,0.05); color: #111; }
+        body.light .theme-option.active { color: #111; }
     </style>
     <link rel="icon" type="image/png" href="icon.png">
 </head>
 <body class="flex flex-col items-center p-4">
 
     <div id="toast"></div>
+
+    <!-- Theme Widget -->
+    <div id="themeWidget">
+        <button id="themeIconBtn" onclick="toggleThemeDropdown()" aria-label="Toggle theme">
+            <!-- Half-dark / half-light circle SVG -->
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="11" cy="11" r="10" stroke="currentColor" stroke-width="1.5" fill="none" opacity="0.3"/>
+                <!-- Left half dark -->
+                <path d="M11 1 A10 10 0 0 0 11 21 Z" fill="#888"/>
+                <!-- Right half light -->
+                <path d="M11 1 A10 10 0 0 1 11 21 Z" fill="#e2e5ea"/>
+            </svg>
+        </button>
+        <div id="themeDropdown">
+            <div class="theme-option" id="optDark" onclick="setTheme('dark')">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1a6 6 0 1 0 5.65 8.03A4.5 4.5 0 0 1 6.5 2.5 4.47 4.47 0 0 1 7 2.5V1z" opacity="0.9"/></svg>
+                Dark
+            </div>
+            <div class="theme-option" id="optLight" onclick="setTheme('light')">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><circle cx="7" cy="7" r="3"/><line x1="7" y1="0.5" x2="7" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="11.5" x2="7" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="0.5" y1="7" x2="2.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11.5" y1="7" x2="13.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2.4" y1="2.4" x2="3.8" y2="3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10.2" y1="10.2" x2="11.6" y2="11.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10.2" y1="3.8" x2="11.6" y2="2.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2.4" y1="11.6" x2="3.8" y2="10.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                Light
+            </div>
+        </div>
+    </div>
 
     <!-- Difficulty Picker -->
     <div id="difficultyModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6" onclick="closeDifficultyModal(event)">
@@ -298,7 +364,6 @@
             </div>
             <div class="flex justify-end items-center gap-4">
                 <button onclick="document.getElementById('difficultyModal').classList.remove('hidden')" class="header-btn text-[9px] font-black uppercase tracking-widest transition-colors">Difficulty</button>
-                <button id="themeToggle" onclick="toggleTheme()" class="header-btn text-[9px] font-black uppercase tracking-widest transition-colors">☀ Light</button>
                 <div class="streak-badge flex flex-col items-center min-w-[100px]">
                     <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Win Streak</span>
                     <div class="text-3xl font-black text-[#d1a01d]" id="currentStreak">0</div>
@@ -394,18 +459,37 @@
         (function() {
             if (localStorage.getItem('showlee_theme') === 'light') {
                 document.body.classList.add('light');
-                document.addEventListener('DOMContentLoaded', () => {
-                    const btn = document.getElementById('themeToggle');
-                    if (btn) btn.textContent = '☽ Dark';
-                });
             }
         })();
 
-        function toggleTheme() {
-            const isLight = document.body.classList.toggle('light');
-            localStorage.setItem('showlee_theme', isLight ? 'light' : 'dark');
-            document.getElementById('themeToggle').textContent = isLight ? '☽ Dark' : '☀ Light';
+        function setTheme(mode) {
+            if (mode === 'light') {
+                document.body.classList.add('light');
+            } else {
+                document.body.classList.remove('light');
+            }
+            localStorage.setItem('showlee_theme', mode);
+            document.getElementById('optDark').classList.toggle('active', mode === 'dark');
+            document.getElementById('optLight').classList.toggle('active', mode === 'light');
+            document.getElementById('themeDropdown').classList.remove('open');
         }
+
+        function toggleThemeDropdown() {
+            const dd = document.getElementById('themeDropdown');
+            dd.classList.toggle('open');
+            // Sync active states
+            const isLight = document.body.classList.contains('light');
+            document.getElementById('optDark').classList.toggle('active', !isLight);
+            document.getElementById('optLight').classList.toggle('active', isLight);
+        }
+
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            const widget = document.getElementById('themeWidget');
+            if (!widget.contains(e.target)) {
+                document.getElementById('themeDropdown').classList.remove('open');
+            }
+        });
 
         function closeDifficultyModal(event) {
             if (guesses.length > 0 || isGameOver) {
