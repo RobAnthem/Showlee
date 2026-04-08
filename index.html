@@ -24,7 +24,43 @@
             color: #ffffff;
             min-height: 100vh;
             overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
         }
+
+        body.light {
+            background: radial-gradient(circle at 50% 0%, #f0f2f5 0%, #e2e5ea 100%);
+            color: #111111;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.1);
+        }
+        body.light .streak-badge { background: linear-gradient(135deg, #ffffff, #f0f2f5); border-color: rgba(0,0,0,0.1); }
+        body.light .mode-btn { color: #555; border-color: rgba(0,0,0,0.15); }
+        body.light .mode-btn.active { background: #111; color: #fff; border-color: #111; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        body.light .autocomplete-items { background: #ffffff; border-color: #ddd; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        body.light .autocomplete-item { border-color: rgba(0,0,0,0.05); }
+        body.light .autocomplete-item:hover { background-color: #f5f5f5; }
+        body.light .autocomplete-item .text-white { color: #111 !important; }
+        body.light .autocomplete-item .text-zinc-500 { color: #666 !important; }
+        body.light .autocomplete-item .text-zinc-600 { color: #888 !important; }
+        body.light input#showInput { background: #ffffff; border-color: #ddd; color: #111; }
+        body.light input#showInput::placeholder { color: #aaa; }
+        body.light #difficultyModal { background: rgba(240,242,245,0.97); }
+        body.light .diff-card { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.1); }
+        body.light .diff-card h4 { color: #111; }
+        body.light .diff-card p { color: #888; }
+        body.light #statusMessage { background: rgba(255,255,255,0.92); border-color: #ddd; }
+        body.light #statusDesc { color: #555; }
+        body.light .label-text { color: #999; }
+        body.light .value-text { color: #111; }
+        body.light .summary-box.found .value-text { color: var(--correct); }
+        body.light .progress-bar-bg { background: rgba(0,0,0,0.08); }
+        body.light #guessesLeft { color: #888; }
+        body.light #toast { background: #fff; border-color: #ccc; color: #111; }
+        body.light footer { border-color: rgba(0,0,0,0.1); }
+        body.light #hintButton { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.15); color: #555; }
+        body.light #surrenderButton { background: rgba(239,68,68,0.06); }
+        body.light #surrenderConfirm { background: #fff; }
+        body.light .emoji-slot { background: rgba(0,0,0,0.06); }
 
         /* Result Colors with Glassmorphism */
         .correct { 
@@ -48,9 +84,9 @@
         .game-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 10px;
+            gap: 8px;
             width: 100%;
-            max-width: 860px;
+            max-width: 680px;
         }
 
         .cell {
@@ -61,14 +97,14 @@
             justify-content: center;
             text-align: center;
             font-weight: 800;
-            font-size: 0.75rem;
-            line-height: 1.2;
+            font-size: 0.7rem;
+            line-height: 1.1;
             border: 1px solid var(--border);
             text-transform: uppercase;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden;
             padding: 6px;
-            border-radius: 8px;
+            border-radius: 6px;
             background: var(--card-bg);
             backdrop-filter: blur(10px);
         }
@@ -77,18 +113,18 @@
         .poster-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.6);
             display: flex; align-items: center; justify-content: center;
-            padding: 6px; font-size: 0.72rem; text-align: center; color: white;
+            padding: 6px; font-size: 0.65rem; text-align: center; color: white;
             backdrop-filter: blur(2px);
         }
         
         .correct .poster-overlay, .partial .poster-overlay { background: transparent; color: #000 !important; font-weight: 900; backdrop-filter: none; }
 
-        .summary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; width: 100%; max-width: 860px; }
+        .summary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; width: 100%; max-width: 680px; }
         .summary-box {
             background: var(--card-bg); 
             border: 1px solid var(--border); 
-            border-radius: 14px;
-            padding: 14px 6px; 
+            border-radius: 12px;
+            padding: 12px 4px; 
             text-align: center; 
             transition: all 0.4s ease;
             backdrop-filter: blur(5px);
@@ -96,8 +132,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            gap: 5px;
-            min-height: 68px;
+            gap: 4px;
+            min-height: 60px;
         }
         
         .summary-box.found { border-color: var(--correct); background: rgba(34, 197, 94, 0.1); box-shadow: inset 0 0 10px rgba(34, 197, 94, 0.1); }
@@ -105,7 +141,7 @@
         .summary-box.partial-found { border-color: var(--partial); background: rgba(234, 179, 8, 0.1); }
 
         .hint-container {
-            width: 100%; max-width: 860px; background: var(--card-bg); border: 1px solid var(--border);
+            width: 100%; max-width: 680px; background: var(--card-bg); border: 1px solid var(--border);
             border-radius: 16px; padding: 20px; margin-bottom: 16px; text-align: center;
             backdrop-filter: blur(15px);
         }
@@ -126,7 +162,7 @@
         .autocomplete-item:hover { background-color: #2d2f35; padding-left: 20px; }
 
         .mode-btn {
-            padding: 10px 16px; font-size: 12px; font-weight: 700; text-transform: uppercase;
+            padding: 8px 16px; font-size: 10px; font-weight: 700; text-transform: uppercase;
             border: 1px solid var(--border); background: transparent; transition: all 0.3s;
             color: #888;
         }
@@ -152,11 +188,11 @@
         }
 
         .emoji-slot { 
-            display: inline-block; width: 1.8em; height: 1.8em; 
+            width: 3.2em; height: 3.2em; 
             background: rgba(255,255,255,0.05); 
             border-radius: 50%; 
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.8rem;
             transition: all 0.5s ease;
         }
         
@@ -197,8 +233,8 @@
             border-radius: 16px;
         }
 
-        .label-text { font-size: 10px; color: #71717a; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 2px; }
-        .value-text { font-size: 12px; font-weight: 900; line-height: 1.3; }
+        .label-text { font-size: 8px; color: #71717a; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 2px; }
+        .value-text { font-size: 10px; font-weight: 900; line-height: 1.2; }
     </style>
     <link rel="icon" type="image/png" href="icon.png">
 </head>
@@ -207,8 +243,8 @@
     <div id="toast"></div>
 
     <!-- Difficulty Picker -->
-    <div id="difficultyModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6">
-        <div class="w-full max-w-lg bg-[#0b0c0d] border border-zinc-800 rounded-3xl p-10 shadow-2xl">
+    <div id="difficultyModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6" onclick="closeDifficultyModal(event)">
+        <div class="w-full max-w-lg bg-[#0b0c0d] border border-zinc-800 rounded-3xl p-10 shadow-2xl" onclick="event.stopPropagation()">
             <h3 class="text-3xl font-black italic tracking-tighter mb-2 uppercase text-center">Select Experience</h3>
             <div class="grid grid-cols-1 gap-4 mt-8">
                 <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-2xl group">
@@ -227,14 +263,14 @@
         </div>
     </div>
 
-    <header class="w-full max-w-4xl flex flex-col items-center py-8 mb-4">
+    <header class="w-full max-w-2xl flex flex-col items-center py-8 mb-4">
         <div class="flex items-center gap-3 mb-8">
-            <h1 class="text-6xl font-black tracking-tighter italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">TeeVeedle</h1>
+            <h1 class="text-5xl font-black tracking-tighter italic text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">TeeVeedle</h1>
         </div>
         
         <div class="w-full grid grid-cols-1 md:grid-cols-2 items-center gap-6 px-4">
             <div class="flex flex-col gap-2">
-                <span class="text-xs font-bold uppercase text-zinc-500 tracking-[0.2em] ml-1">Archive</span>
+                <span class="text-[10px] font-bold uppercase text-zinc-500 tracking-[0.2em] ml-1">Archive</span>
                 <div class="flex overflow-hidden rounded-xl border border-zinc-800 p-1 bg-black/40">
                     <button id="modeNormal" onclick="setMode('normal')" class="mode-btn flex-1 rounded-lg active">Series</button>
                     <button id="modeAnime" onclick="setMode('anime')" class="mode-btn flex-1 rounded-lg">Anime</button>
@@ -242,26 +278,26 @@
                 </div>
             </div>
             <div class="flex justify-end items-center gap-4">
-                <button onclick="document.getElementById('difficultyModal').classList.remove('hidden')" class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Difficulty</button>
-                <button id="themeToggle" onclick="toggleTheme()" class="text-xs font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">☀ Light</button>
-                <div class="streak-badge flex flex-col items-center min-w-[110px]">
-                    <span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Win Streak</span>
+                <button onclick="document.getElementById('difficultyModal').classList.remove('hidden')" class="text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">Difficulty</button>
+                <button id="themeToggle" onclick="toggleTheme()" class="text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">☀ Light</button>
+                <div class="streak-badge flex flex-col items-center min-w-[100px]">
+                    <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Win Streak</span>
                     <div class="text-3xl font-black text-[#d1a01d]" id="currentStreak">0</div>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="w-full max-w-4xl flex-grow flex flex-col items-center">
+    <main class="w-full max-w-2xl flex-grow flex flex-col items-center">
         <div id="gameInterface" class="w-full flex flex-col items-center">
             
             <div id="statusMessage" class="hidden mb-10 p-10 border border-zinc-800 w-full text-center bg-black/60 backdrop-blur-xl rounded-3xl shadow-2xl animate-in fade-in zoom-in duration-500">
                 <div class="relative inline-block mb-8">
-                    <img id="final-reveal-img" src="" alt="Poster" class="w-36 h-52 object-cover rounded-xl border border-zinc-700 shadow-[0_0_30px_rgba(0,0,0,0.5)] hidden">
+                    <img id="final-reveal-img" src="" alt="Poster" class="w-32 h-48 object-cover rounded-xl border border-zinc-700 shadow-[0_0_30px_rgba(0,0,0,0.5)] hidden">
                 </div>
                 <h2 id="statusTitle" class="text-4xl font-black mb-2 italic tracking-tight"></h2>
                 <p id="statusDesc" class="text-zinc-400 text-base mb-8"></p>
-                <button onclick="startNewGame()" class="bg-white hover:bg-[#d1a01d] transition-colors text-black font-black py-4 px-12 rounded-xl text-sm uppercase tracking-widest">Continue Journey</button>
+                <button onclick="startNewGame()" class="bg-white hover:bg-[#d1a01d] transition-colors text-black font-black py-4 px-12 rounded-xl text-xs uppercase tracking-widest">Continue Journey</button>
             </div>
 
             <div class="summary-grid mb-8">
@@ -274,7 +310,7 @@
                     <span class="value-text">?</span>
                 </div>
                 <div id="sum-seasons" class="summary-box">
-                    <span class="label-text">Seasons</span>
+                    <span class="label-text">Length</span>
                     <span class="value-text">?</span>
                 </div>
                 <div id="sum-network" class="summary-box">
@@ -300,38 +336,31 @@
             </div>
 
             <div id="emojiHintArea" class="hint-container mb-8">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-3">Emoji Hints</p>
-                <div id="emojiReveal" class="flex justify-center gap-3 flex-wrap"></div>
+                <p class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-3">Emoji Hints</p>
+                <div id="emojiReveal" class="flex justify-center gap-4 flex-wrap"></div>
             </div>
             
-            <div class="w-full max-w-2xl px-4 mb-4">
+            <div class="w-full max-w-md px-4 mb-4">
                 <div class="progress-bar-bg"><div id="progressBarFill" class="progress-bar-fill"></div></div>
-                <div id="guessesLeft" class="text-center text-xs uppercase font-bold tracking-[0.3em] text-zinc-500 mt-3">10 ATTEMPTS REMAINING</div>
+                <div id="guessesLeft" class="text-center text-[9px] uppercase font-bold tracking-[0.3em] text-zinc-500 mt-3">10 ATTEMPTS REMAINING</div>
             </div>
 
-            <div id="inputSection" class="w-full max-w-2xl mb-12 relative px-4">
+            <div id="inputSection" class="w-full max-w-md mb-12 relative px-4">
                 <div class="flex gap-2">
                     <input id="showInput" type="text" placeholder="Search the archive..." autocomplete="off"
-                        class="flex-grow bg-[#1a1c1e] border border-zinc-800 p-5 rounded-2xl focus:outline-none focus:border-[#d1a01d] text-base font-bold placeholder:text-zinc-600">
+                        class="flex-grow bg-[#1a1c1e] border border-zinc-800 p-5 rounded-2xl focus:outline-none focus:border-[#d1a01d] text-sm font-bold placeholder:text-zinc-600">
                     <div class="flex flex-col gap-2">
-                        <button id="hintButton" onclick="useHint()" disabled class="h-1/2 border border-zinc-800 text-zinc-500 font-black px-5 rounded-xl text-[10px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all" title="Costs 1 attempt">Hint −1</button>
-                        <button id="surrenderButton" onclick="confirmSurrender()" class="h-1/2 border border-red-900/50 text-red-500 font-black px-5 rounded-xl text-[10px] uppercase tracking-widest bg-red-950/20 hover:bg-red-950/40 transition-all">Surrender</button>
+                        <button id="hintButton" onclick="useHint()" disabled class="h-1/2 border border-zinc-800 text-zinc-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-zinc-900/50 hover:bg-zinc-800 disabled:opacity-30 transition-all" title="Costs 1 attempt">Hint −1</button>
+                        <button id="surrenderButton" onclick="surrender()" class="h-1/2 border border-red-900/50 text-red-500 font-black px-4 rounded-xl text-[8px] uppercase tracking-widest bg-red-950/20 hover:bg-red-950/40 transition-all">Surrender</button>
                     </div>
                 </div>
                 <div id="autocompleteList" class="autocomplete-items hidden"></div>
-                <div id="surrenderConfirm" class="hidden absolute bottom-full mb-2 right-0 bg-[#1a1c1e] border border-red-900/60 rounded-2xl p-4 shadow-2xl z-50 text-center min-w-[180px]">
-                    <p class="text-[11px] font-black uppercase tracking-widest text-red-400 mb-3">Give up?</p>
-                    <div class="flex gap-2 justify-center">
-                        <button onclick="surrender()" class="bg-red-600 hover:bg-red-500 text-white font-black px-4 py-2 rounded-lg text-[10px] uppercase tracking-widest transition-all">Yes</button>
-                        <button onclick="cancelSurrender()" class="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black px-4 py-2 rounded-lg text-[10px] uppercase tracking-widest transition-all">No</button>
-                    </div>
-                </div>
             </div>
 
             <div id="gameBoard" class="flex flex-col gap-3 w-full items-center mb-20"></div>
         </div>
     </main>
-    <footer class="w-full max-w-4xl py-10 mt-auto border-t border-zinc-900 flex flex-col items-center gap-6">
+    <footer class="w-full max-w-2xl py-10 mt-auto border-t border-zinc-900 flex flex-col items-center gap-6">
         <div class="flex flex-col items-center text-center px-4">
             <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_long_2-9665a76b1ae401a510ec1e0ca40ddcb3b0cfe45f1d51b77a308fea0845885648.svg" alt="TMDB Logo" class="h-5 mb-4 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
             <p class="text-[9px] text-zinc-600 leading-relaxed uppercase tracking-[0.15em] font-black max-w-xs">
@@ -341,6 +370,17 @@
     </footer>
     <script>
         const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+
+        // Apply saved theme immediately
+        (function() {
+            if (localStorage.getItem('showlee_theme') === 'light') {
+                document.body.classList.add('light');
+                document.addEventListener('DOMContentLoaded', () => {
+                    const btn = document.getElementById('themeToggle');
+                    if (btn) btn.textContent = '☽ Dark';
+                });
+            }
+        })();
         
         let tvShows = [];
         let emojiMetadata = {};
@@ -866,11 +906,25 @@
             document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
         }
 
-        function selectDifficulty(diff) { 
-            currentDifficulty = diff; 
+        function closeDifficultyModal(event) {
+            // Only close if a game is already in progress (guesses made or game over)
+            if (guesses.length > 0 || isGameOver) {
+                document.getElementById('difficultyModal').classList.add('hidden');
+            }
+        }
+
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light');
+            localStorage.setItem('showlee_theme', isLight ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = isLight ? '☽ Dark' : '☀ Light';
+        }
+
+        function selectDifficulty(diff) {
+            const same = diff === currentDifficulty;
+            currentDifficulty = diff;
             localStorage.setItem('showlee_difficulty', diff);
-            document.getElementById('difficultyModal').classList.add('hidden'); 
-            startNewGame(); 
+            document.getElementById('difficultyModal').classList.add('hidden');
+            if (!same) startNewGame();
         }
     </script>
 </body>
