@@ -331,6 +331,7 @@
     <div id="difficultyModal" class="fixed inset-0 z-[110] flex items-center justify-center p-6" onclick="closeDifficultyModal(event)">
         <div class="w-full max-w-lg bg-[#0b0c0d] border border-zinc-800 rounded-3xl p-10 shadow-2xl" onclick="event.stopPropagation()">
             <h3 class="text-3xl font-black italic tracking-tighter mb-2 uppercase text-center">Select Experience</h3>
+        
             <div class="grid grid-cols-1 gap-4 mt-8">
                 <div onclick="selectDifficulty('easy')" class="diff-card p-6 rounded-2xl group">
                     <h4 class="font-black text-xl group-hover:text-[#d1a01d]">CINEMA BEGINNER</h4>
@@ -345,6 +346,10 @@
                     <p class="text-zinc-500 text-[11px] uppercase tracking-wider">The complete archive</p>
                 </div>
             </div>
+
+            <p class="text-zinc-500 text-[10px] uppercase tracking-[0.15em] text-center mt-8 opacity-60">
+                Note: Changing difficulty will clear your current streak.
+            </p>
         </div>
     </div>
 
