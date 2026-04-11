@@ -930,7 +930,7 @@
             }
             document.getElementById('statusDesc').textContent = won ? "VICTORY" : "GAME OVER";
             document.getElementById('statusDesc').style.color = won ? '#22c55e' : '#ef4444';
-            document.getElementById('statusTitle').textContent = `The target show was ${targetShow.title}.`;
+            document.getElementById('statusTitle').textContent = `${targetShow.title}.`;
             updateEmojiHint();
             saveSession();
         }
