@@ -928,9 +928,9 @@
                 const img = document.getElementById('final-reveal-img');
                 img.src = targetShow.poster; img.classList.remove('hidden');
             }
-            document.getElementById('statusTitle').textContent = won ? "VICTORY" : "GAME OVER";
-            document.getElementById('statusTitle').style.color = won ? '#22c55e' : '#ef4444';
-            document.getElementById('statusDesc').textContent = `The target show was ${targetShow.title}.`;
+            document.getElementById('statusDesc').textContent = won ? "VICTORY" : "GAME OVER";
+            document.getElementById('statusDesc').style.color = won ? '#22c55e' : '#ef4444';
+            document.getElementById('statusTitle').textContent = `The target show was ${targetShow.title}.`;
             updateEmojiHint();
             saveSession();
         }
