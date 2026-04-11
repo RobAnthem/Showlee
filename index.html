@@ -380,7 +380,7 @@
                     <img id="final-reveal-img" src="" alt="Poster" class="w-32 h-48 object-cover rounded-xl border border-zinc-700 shadow-[0_0_30px_rgba(0,0,0,0.5)] hidden">
                 </div>
                 <h2 id="statusTitle" class="text-4xl font-black mb-2 italic tracking-tight"></h2>
-                <p id="statusDesc" class="text-zinc-400 text-base mb-8"></p>
+                <p id="statusDesc" class="text-zinc-400 text-xl mb-8"></p>
                 <button onclick="startNewGame()" class="bg-white hover:bg-[#d1a01d] transition-colors text-black font-black py-4 px-12 rounded-xl text-xs uppercase tracking-widest">Continue Journey</button>
             </div>
 
@@ -923,14 +923,13 @@
             }
             
             revealAllSummary();
-
+            document.getElementById('statusDesc').textContent = won ? "VICTORY" : "GAME OVER";
+            document.getElementById('statusDesc').style.color = won ? '#22c55e' : '#ef4444';
             if (targetShow.poster) {
                 const img = document.getElementById('final-reveal-img');
                 img.src = targetShow.poster; img.classList.remove('hidden');
             }
-            document.getElementById('statusDesc').textContent = won ? "VICTORY" : "GAME OVER";
-            document.getElementById('statusDesc').style.color = won ? '#22c55e' : '#ef4444';
-            document.getElementById('statusTitle').textContent = `${targetShow.title}.`;
+            document.getElementById('statusTitle').textContent = `${targetShow.title}`;
             updateEmojiHint();
             saveSession();
         }
