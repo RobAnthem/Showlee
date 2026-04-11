@@ -935,13 +935,14 @@
         }
 
         document.getElementById('showInput').addEventListener('input', (e) => {
-            const v = e.target.value.toLowerCase().trim();
+            const normalize = str => str.toLowerCase().replace(/[.\-:;,!?'"()&]/g, '').replace(/\s+/g, ' ').trim();
+            const v = normalize(e.target.value);
             const al = document.getElementById('autocompleteList');
             if (v.length < 1) { al.classList.add('hidden'); return; }
 
-            const matches = tvShows.filter(s => s.title.toLowerCase().includes(v))
+            const matches = tvShows.filter(s => normalize(s.title).includes(v))
                 .map(s => {
-                    const t = s.title.toLowerCase();
+                    const t = normalize(s.title);
                     let score = 0;
                     if (t === v) score += 1000;
                     else if (t.startsWith(v)) score += 500;
