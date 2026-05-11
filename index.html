@@ -349,6 +349,85 @@
         body.light .theme-option { color: #888; }
         body.light .theme-option:hover { background: rgba(0,0,0,0.05); color: #111; }
         body.light .theme-option.active { color: #111; }
+
+        /* ── Column Header Row ── */
+        .col-header-row {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 680px;
+            margin-bottom: 4px;
+        }
+        .col-header {
+            text-align: center;
+            font-size: 7px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #52525b;
+            padding: 2px 0;
+        }
+        body.light .col-header { color: #a1a1aa; }
+
+        /* ── Confetti ── */
+        .confetti-piece {
+            position: fixed;
+            width: 8px; height: 8px;
+            top: -10px;
+            border-radius: 2px;
+            animation: confetti-fall linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+        }
+        @keyframes confetti-fall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            80%  { opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ── Win row glow ── */
+        @keyframes win-glow {
+            0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.0); }
+            40%  { box-shadow: 0 0 30px 8px rgba(34,197,94,0.5); }
+            100% { box-shadow: 0 4px 15px rgba(27,138,50,0.3); }
+        }
+        .win-row .cell { animation: win-glow 1s ease forwards; }
+
+        /* ── Stats Modal ── */
+        #statsModal {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(14px);
+        }
+        #statsModal .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 8px;
+            text-align: center;
+        }
+        #statsModal .stat-val { font-size: 2rem; font-weight: 900; color: #d1a01d; line-height: 1; }
+        #statsModal .stat-lbl { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #71717a; margin-top: 4px; }
+        body.light #statsModal { background: rgba(220,224,230,0.95); }
+        body.light #statsModal .stat-card { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.1); }
+        body.light #statsModal .stat-lbl { color: #888; }
+
+        /* ── Autocomplete keyboard highlight ── */
+        .autocomplete-item.kbd-selected { background-color: #2d2f35; padding-left: 20px; }
+        body.light .autocomplete-item.kbd-selected { background-color: #f0f0f0; }
+
+        /* ── Poster blur-reveal ── */
+        .poster-cell { position: relative; }
+        .poster-cell .poster-blur {
+            position: absolute; inset: 0;
+            background-size: cover; background-position: center;
+            transition: filter 1s ease;
+        }
+        .poster-cell .poster-blur.blurred { filter: blur(12px) brightness(0.5); }
+
+        /* ── Genre matched highlight in cell ── */
+        .genre-match { color: #4ade80; font-weight: 900; }
+        .genre-no-match { opacity: 0.7; }
     </style>
     <link rel="icon" type="image/png" href="icon.png">
 </head>
@@ -377,6 +456,18 @@
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><circle cx="7" cy="7" r="3"/><line x1="7" y1="0.5" x2="7" y2="2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="7" y1="11.5" x2="7" y2="13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="0.5" y1="7" x2="2.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="11.5" y1="7" x2="13.5" y2="7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2.4" y1="2.4" x2="3.8" y2="3.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10.2" y1="10.2" x2="11.6" y2="11.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="10.2" y1="3.8" x2="11.6" y2="2.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="2.4" y1="11.6" x2="3.8" y2="10.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                 Light
             </div>
+        </div>
+    </div>
+
+
+    <!-- Stats Modal -->
+    <div id="statsModal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-6" onclick="closeStats(event)">
+        <div class="w-full max-w-md bg-[#0b0c0d] border border-zinc-800 rounded-3xl p-8 shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-black italic tracking-tighter uppercase">Your Stats</h3>
+                <button onclick="closeStats()" class="text-zinc-500 hover:text-white transition-colors text-lg font-black">✕</button>
+            </div>
+            <div id="statsContent" class="space-y-6"></div>
         </div>
     </div>
 
@@ -422,6 +513,7 @@
             </div>
             <div class="flex justify-end items-center gap-4">
                 <button onclick="document.getElementById('difficultyModal').classList.remove('hidden')" class="header-btn text-[9px] font-black uppercase tracking-widest transition-colors">Difficulty</button>
+                <button onclick="openStats()" class="header-btn text-[9px] font-black uppercase tracking-widest transition-colors">Stats</button>
                 <div class="streak-badge flex flex-col items-center min-w-[100px]">
                     <span class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Win Streak</span>
                     <div class="text-3xl font-black text-[#d1a01d]" id="currentStreak">0</div>
@@ -439,7 +531,10 @@
                 </div>
                 <h2 id="statusTitle" class="text-4xl font-black mb-2 italic tracking-tight"></h2>
                 <p id="statusDesc" class="text-zinc-400 text-xl mb-8"></p>
-                <button onclick="startNewGame()" class="bg-white hover:bg-[#d1a01d] transition-colors text-black font-black py-4 px-12 rounded-xl text-xs uppercase tracking-widest">Continue Journey</button>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <button onclick="shareResult()" id="shareBtn" class="bg-zinc-800 hover:bg-zinc-700 transition-colors text-white font-black py-4 px-8 rounded-xl text-xs uppercase tracking-widest">Share 📋</button>
+                    <button onclick="startNewGame()" class="bg-white hover:bg-[#d1a01d] transition-colors text-black font-black py-4 px-12 rounded-xl text-xs uppercase tracking-widest">Continue Journey</button>
+                </div>
             </div>
 
             <div class="summary-grid mb-8">
@@ -499,6 +594,17 @@
                 <div id="autocompleteList" class="autocomplete-items hidden"></div>
             </div>
 
+
+            <div class="col-header-row" id="colHeaders">
+                <div class="col-header">Show</div>
+                <div class="col-header">Genre</div>
+                <div class="col-header">Year</div>
+                <div class="col-header">Seasons</div>
+                <div class="col-header">Network</div>
+                <div class="col-header">Origin</div>
+                <div class="col-header">Maturity</div>
+                <div class="col-header">Score</div>
+            </div>
             <div id="gameBoard" class="flex flex-col gap-3 w-full items-center mb-20"></div>
         </div>
     </main>
@@ -569,11 +675,19 @@
         let yearGuessed = false, seasonGuessed = false, hintUsed = false, hintPenalty = 0, isGameOver = false;
         let discoveredGenres = new Set(), discoveredNetworks = new Set();
         let streaks = { normal: { current: 0, best: 0 }, anime: { current: 0, best: 0 }, foreign: { current: 0, best: 0 } };
+        // Stats: wins, losses, totalGuesses, guessDistribution
+        let gameStats = {
+            normal:  { wins: 0, losses: 0, totalGuesses: 0, dist: [0,0,0,0,0,0,0,0,0,0] },
+            anime:   { wins: 0, losses: 0, totalGuesses: 0, dist: [0,0,0,0,0,0,0,0,0,0] },
+            foreign: { wins: 0, losses: 0, totalGuesses: 0, dist: [0,0,0,0,0,0,0,0,0,0] }
+        };
         let seenShows = {}; // keyed by `${mode}_${difficulty}` -> Set of show IDs
 
         window.addEventListener('DOMContentLoaded', async () => {
             const savedStreaks = localStorage.getItem('showlee_streaks_v6');
             if (savedStreaks) streaks = JSON.parse(savedStreaks);
+            const savedStats = localStorage.getItem('showlee_stats_v6');
+            if (savedStats) gameStats = JSON.parse(savedStats);
             const savedSeen = localStorage.getItem('showlee_seen_v6');
             if (savedSeen) {
                 const raw = JSON.parse(savedSeen);
@@ -622,11 +736,11 @@
                         id: cells[getIdx('ID')],
                         title: (cells[getIdx('Name')] || "").replace(/"/g, ''),
                         year: parseInt(cells[getIdx('Year')]) || 0,
-                        genres: (cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== '-'),
+                        genres: [...new Set((cells[getIdx('Genres')] || "").replace(/"/g, '').split(',').map(g => g.trim()).filter(g => g && g !== '-'))],
                         country: (cells[getIdx('Country')] || "").replace(/"/g, '') || "??",
                         lang: (cells[getIdx('Language')] || "").replace(/"/g, '').toLowerCase() || "??",
                         seasons: parseInt(cells[getIdx('Seasons')]) || 0,
-                        networks: (cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== '-'),
+                        networks: [...new Set((cells[getIdx('Networks')] || "").replace(/"/g, '').split(',').map(n => n.trim()).filter(n => n && n !== '-'))],
                         contentRating: (cells[getIdx('Rating')] || "").replace(/"/g, '') || "NR",
                         score: parseFloat(cells[getIdx('Vote_Average')]) || 0,
                         votes: parseInt(cells[getIdx('Vote_Count')]) || 0,
@@ -809,7 +923,7 @@
             updateEmojiHint();
             document.getElementById('showInput').value = "";
             document.getElementById('autocompleteList').classList.add('hidden');
-            if (show.id === targetShow.id) endGame(true);
+            if (show.id === targetShow.id) { document.querySelector('#gameBoard .game-grid').classList.add('win-row'); endGame(true); }
             else if (guesses.length + hintPenalty >= MAX_GUESSES) endGame(false);
             else saveSession();
         }
@@ -829,14 +943,27 @@
                 if (animate) { c.classList.add('flip'); c.style.animationDelay = `${i * 60}ms`; }
                 if (f.type === 'p') {
                     c.classList.add('poster-cell');
-                    if (guess.poster) c.style.backgroundImage = `url(${guess.poster})`;
+                    // Blurred poster that sharpens on correct guess
+                    const blurLayer = document.createElement('div');
+                    blurLayer.className = 'poster-blur' + (f.val === targetShow.title ? '' : ' blurred');
+                    if (guess.poster) blurLayer.style.backgroundImage = `url(${guess.poster})`;
+                    c.appendChild(blurLayer);
                     const o = document.createElement('div'); o.className = 'poster-overlay'; o.textContent = f.val;
                     c.appendChild(o);
                     c.classList.add(f.val === targetShow.title ? 'correct' : 'incorrect');
                 } else if (f.type === 'g' || f.type === 'n') {
                     const targetArr = f.type === 'g' ? targetShow.genres : targetShow.networks;
-                    c.textContent = f.val.slice(0, 2).join(", ");
+                    const vals = f.val.slice(0, 2);
                     const common = f.val.filter(x => targetArr.includes(x));
+                    if (f.type === 'g') {
+                        // Highlight matched genres individually
+                        c.innerHTML = vals.map(g => {
+                            const matched = targetArr.includes(g);
+                            return `<span class="${matched ? 'genre-match' : 'genre-no-match'}">${g}</span>`;
+                        }).join('<span style="opacity:0.4">, </span>');
+                    } else {
+                        c.textContent = vals.join(", ");
+                    }
                     if (common.length === targetArr.length) c.classList.add('correct');
                     else if (common.length > 0) c.classList.add('partial'); else c.classList.add('incorrect');
                 } else if (f.type === 'o') {
@@ -978,21 +1105,29 @@
             
             if (!alreadyOver) {
                 const s = streaks[currentGameMode];
+                const st = gameStats[currentGameMode];
                 if (won) {
                     s.current++; if (s.current > s.best) s.best = s.current;
+                    st.wins++;
+                    st.totalGuesses += guesses.length;
+                    const distIdx = Math.min(guesses.length - 1, 9);
+                    st.dist[distIdx]++;
                     // Mark this show as seen so it won't repeat during the streak
                     const seenKey = getSeenKey();
                     if (!seenShows[seenKey]) seenShows[seenKey] = new Set();
                     seenShows[seenKey].add(targetShow.id);
                     saveSeenShows();
+                    setTimeout(() => launchConfetti(), 400);
                 } else {
                     s.current = 0;
+                    st.losses++;
                     // Reset seen shows on streak loss
                     const seenKey = getSeenKey();
                     seenShows[seenKey] = new Set();
                     saveSeenShows();
                 }
                 localStorage.setItem('showlee_streaks_v6', JSON.stringify(streaks));
+                localStorage.setItem('showlee_stats_v6', JSON.stringify(gameStats));
                 updateStreakUI();
             }
             
@@ -1008,7 +1143,35 @@
             saveSession();
         }
 
+        let kbdSelectedIdx = -1;
+
+        document.getElementById('showInput').addEventListener('keydown', (e) => {
+            const al = document.getElementById('autocompleteList');
+            const items = al.querySelectorAll('.autocomplete-item:not(.opacity-30)');
+            if (al.classList.contains('hidden') || items.length === 0) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                kbdSelectedIdx = Math.min(kbdSelectedIdx + 1, items.length - 1);
+                items.forEach((el, i) => el.classList.toggle('kbd-selected', i === kbdSelectedIdx));
+                items[kbdSelectedIdx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                kbdSelectedIdx = Math.max(kbdSelectedIdx - 1, 0);
+                items.forEach((el, i) => el.classList.toggle('kbd-selected', i === kbdSelectedIdx));
+                items[kbdSelectedIdx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                const sel = al.querySelector('.kbd-selected') || items[0];
+                if (sel) sel.click();
+                kbdSelectedIdx = -1;
+            } else if (e.key === 'Escape') {
+                al.classList.add('hidden');
+                kbdSelectedIdx = -1;
+            }
+        });
+
         document.getElementById('showInput').addEventListener('input', (e) => {
+            kbdSelectedIdx = -1;
             const normalize = str => str.toLowerCase().replace(/[.\-:;,!?*'"()&]/g, '').replace(/\s+/g, ' ').trim();
             const v = normalize(e.target.value);
             const al = document.getElementById('autocompleteList');
@@ -1093,6 +1256,119 @@
             document.getElementById('modeNormal').classList.toggle('active', currentGameMode === 'normal');
             document.getElementById('modeAnime').classList.toggle('active', currentGameMode === 'anime');
             document.getElementById('modeForeign').classList.toggle('active', currentGameMode === 'foreign');
+        }
+
+
+        // ── Confetti ──
+        function launchConfetti() {
+            const colors = ['#d1a01d','#22c55e','#3b82f6','#ef4444','#a855f7','#fde047','#fff'];
+            for (let i = 0; i < 80; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.background = colors[Math.floor(Math.random() * colors.length)];
+                el.style.width = (6 + Math.random() * 6) + 'px';
+                el.style.height = (6 + Math.random() * 10) + 'px';
+                el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+                el.style.animationDelay = (Math.random() * 0.6) + 's';
+                document.body.appendChild(el);
+                el.addEventListener('animationend', () => el.remove());
+            }
+        }
+
+        // ── Stats Modal ──
+        function openStats() {
+            const modal = document.getElementById('statsModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            renderStats();
+        }
+        function closeStats(e) {
+            if (e && e.target !== document.getElementById('statsModal')) return;
+            const modal = document.getElementById('statsModal');
+            modal.classList.add('hidden');
+            modal.style.display = '';
+        }
+        function renderStats() {
+            const modeLabels = { normal: 'Series', anime: 'Anime', foreign: 'Global' };
+            let html = '';
+            for (const mode of ['normal', 'anime', 'foreign']) {
+                const st = gameStats[mode];
+                const sk = streaks[mode];
+                const played = st.wins + st.losses;
+                const winPct = played > 0 ? Math.round((st.wins / played) * 100) : 0;
+                const avgGuesses = st.wins > 0 ? (st.totalGuesses / st.wins).toFixed(1) : '—';
+                html += `<div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-3">${modeLabels[mode]}</p>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <div class="stat-card"><div class="stat-val">${played}</div><div class="stat-lbl">Played</div></div>
+                        <div class="stat-card"><div class="stat-val">${winPct}%</div><div class="stat-lbl">Win %</div></div>
+                        <div class="stat-card"><div class="stat-val">${sk.current}</div><div class="stat-lbl">Streak</div></div>
+                        <div class="stat-card"><div class="stat-val">${avgGuesses}</div><div class="stat-lbl">Avg Guesses</div></div>
+                    </div>
+                    <div>
+                        <p class="text-[8px] font-bold uppercase tracking-widest text-zinc-600 mb-2">Guess Distribution</p>
+                        <div class="space-y-1">
+                            ${st.dist.map((count, i) => {
+                                const maxCount = Math.max(...st.dist, 1);
+                                const pct = Math.round((count / maxCount) * 100);
+                                return `<div class="flex items-center gap-2">
+                                    <span class="text-[8px] font-black text-zinc-500 w-3 text-right">${i+1}</span>
+                                    <div class="flex-1 h-4 rounded" style="background:rgba(255,255,255,0.05)">
+                                        <div class="h-4 rounded bg-[#d1a01d] transition-all" style="width:${pct}%;min-width:${count>0?'16px':'0'}">
+                                            ${count > 0 ? `<span class="text-[8px] font-black text-black px-1">${count}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>`;
+                if (mode !== 'foreign') html += '<hr class="border-zinc-800 my-4">';
+            }
+            document.getElementById('statsContent').innerHTML = html;
+        }
+
+        // ── Share Result ──
+        function shareResult() {
+            const won = guesses.length > 0 && guesses[guesses.length - 1].id === targetShow.id;
+            const modeLabel = { normal: 'Series', anime: 'Anime', foreign: 'Global' }[currentGameMode];
+            const guessCount = won ? guesses.length : 'X';
+            const emojiGrid = guesses.map(g => {
+                const cells = [];
+                // Title
+                cells.push(g.title === targetShow.title ? '🟩' : '🟥');
+                // Genre
+                const gc = g.genres.filter(x => targetShow.genres.includes(x));
+                cells.push(gc.length === targetShow.genres.length ? '🟩' : gc.length > 0 ? '🟨' : '🟥');
+                // Year
+                cells.push(g.year === targetShow.year ? '🟩' : Math.abs(g.year - targetShow.year) <= 5 ? '🟨' : '🟥');
+                // Seasons
+                cells.push(g.seasons === targetShow.seasons ? '🟩' : Math.abs(g.seasons - targetShow.seasons) <= 1 ? '🟨' : '🟥');
+                // Network
+                const nc = g.networks.filter(x => targetShow.networks.includes(x));
+                cells.push(nc.length === targetShow.networks.length ? '🟩' : nc.length > 0 ? '🟨' : '🟥');
+                // Origin
+                const langOk = g.lang === targetShow.lang, countryOk = g.country === targetShow.country;
+                cells.push(langOk && countryOk ? '🟩' : langOk || countryOk ? '🟨' : '🟥');
+                // Content rating
+                cells.push(g.contentRating === targetShow.contentRating ? '🟩' : '🟥');
+                // Score
+                cells.push(g.score === targetShow.score ? '🟩' : Math.abs(g.score - targetShow.score) <= 0.5 ? '🟨' : '🟥');
+                return cells.join('');
+            }).join('\n');
+
+            const emojis = (emojiMetadata[targetShow.id] || []).slice(0, 3).join('');
+            const text = `TeeVeedle ${modeLabel} ${guessCount}/${MAX_GUESSES}\n${emojis}\n\n${emojiGrid}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Copied to clipboard!');
+                const btn = document.getElementById('shareBtn');
+                btn.textContent = 'Copied ✓';
+                setTimeout(() => btn.textContent = 'Share 📋', 2000);
+            }).catch(() => {
+                showToast('Could not copy');
+            });
         }
 
         function selectDifficulty(diff) {
