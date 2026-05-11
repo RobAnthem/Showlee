@@ -992,13 +992,16 @@
         function updateSummaryUI(guess) {
             if (isGameOver) return; // Managed by revealAllSummary
 
-            // Genre
+            // Genre — only add genres the guessed show actually has AND the target has
             if (!isSummaryLocked('sum-genre')) {
-                guess.genres.filter(x => targetShow.genres.includes(x)).forEach(x => discoveredGenres.add(x));
+                const targetGenreSet = new Set(targetShow.genres);
+                guess.genres.forEach(g => { if (targetGenreSet.has(g)) discoveredGenres.add(g); });
                 if (discoveredGenres.size > 0) {
                     const el = document.getElementById('sum-genre');
-                    el.querySelector('.value-text').textContent = Array.from(discoveredGenres).join(", ");
-                    el.className = `summary-box ${discoveredGenres.size >= targetShow.genres.length ? 'found' : 'partial-found'}`;
+                    const toShow = Array.from(discoveredGenres).filter(g => targetGenreSet.has(g));
+                    el.querySelector('.value-text').textContent = toShow.join(", ");
+                    const allFound = targetShow.genres.every(g => discoveredGenres.has(g));
+                    el.className = `summary-box ${allFound ? 'found' : 'partial-found'}`;
                 }
             }
 
