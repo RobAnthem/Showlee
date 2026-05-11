@@ -463,12 +463,12 @@
 
     <!-- Stats Modal -->
     <div id="statsModal" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-6" onclick="closeStats(event)">
-        <div class="w-full max-w-md bg-[#0b0c0d] border border-zinc-800 rounded-3xl p-8 shadow-2xl" onclick="event.stopPropagation()">
-            <div class="flex items-center justify-between mb-6">
+        <div class="w-full max-w-md bg-[#0b0c0d] border border-zinc-800 rounded-3xl shadow-2xl flex flex-col" style="max-height:85vh" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between p-8 pb-4 flex-shrink-0">
                 <h3 class="text-2xl font-black italic tracking-tighter uppercase">Your Stats</h3>
                 <button onclick="closeStats()" class="text-zinc-500 hover:text-white transition-colors text-lg font-black">✕</button>
             </div>
-            <div id="statsContent" class="space-y-6"></div>
+            <div id="statsContent" class="space-y-6 overflow-y-auto px-8 pb-8"></div>
         </div>
     </div>
 
