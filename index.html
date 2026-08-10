@@ -521,8 +521,8 @@
     <div id="promotionModal" class="fixed inset-0 z-[130] hidden items-center justify-center p-6">
         <div class="w-full max-w-md border border-zinc-800 rounded-3xl p-10 shadow-2xl text-center" style="background:#0b0c0d;">
             <div class="promo-glow">🏆</div>
-            <h3 class="text-2xl font-black italic tracking-tighter uppercase mb-2">Streak Maxed Out!</h3>
-            <p class="text-zinc-400 text-[12px] uppercase tracking-wider mb-1">You conquered <span id="promoFromLabel" class="text-[#d1a01d] font-bold"></span></p>
+            <h3 class="text-2xl font-black italic tracking-tighter uppercase mb-2">Archive Cleared!</h3>
+            <p class="text-zinc-400 text-[12px] uppercase tracking-wider mb-1">You've guessed every show in <span id="promoFromLabel" class="text-[#d1a01d] font-bold"></span></p>
             <p class="text-zinc-500 text-[11px] uppercase tracking-widest mb-8">Time to level up. Your streak carries over.</p>
             <button onclick="confirmPromotion()" class="promo-btn w-full text-sm uppercase tracking-widest">
                 Enter <span id="promoToLabel"></span> →
@@ -705,7 +705,6 @@
         let currentDifficulty = localStorage.getItem('showlee_difficulty') || 'normal';
         const DIFFICULTY_ORDER = ['easy', 'normal', 'hard'];
         const DIFFICULTY_LABELS = { easy: 'CINEMA BEGINNER', normal: 'TV ENTHUSIAST', hard: 'INDUSTRY EXPERT' };
-        const STREAK_CAPS = { easy: 5, normal: 10, hard: null };
         let pendingPromotion = null;
         let minYearBound = 1900, maxYearBound = new Date().getFullYear();
         let minSeasonBound = 1, maxSeasonBound = 100;
@@ -814,21 +813,26 @@
             return `${currentGameMode}_${currentDifficulty}`;
         }
 
-        function startNewGame() {
+        function getDifficultyPool(mode, difficulty) {
             let pool = tvShows.filter(s => {
                 const isAnime = s.genres.includes('Animation') && s.country === 'JP';
                 const isEnglish = s.lang === 'en';
-                if (currentGameMode === 'anime') return isAnime;
-                if (currentGameMode === 'normal') return isEnglish && !isAnime;
+                if (mode === 'anime') return isAnime;
+                if (mode === 'normal') return isEnglish && !isAnime;
                 return !isEnglish && !isAnime;
             });
 
             // Sort by popularity/votes for difficulty slicing
             pool.sort((a, b) => b.votes - a.votes);
-            
-            if (currentDifficulty === 'easy') pool = pool.slice(0, 500);
-            else if (currentDifficulty === 'normal') pool = pool.slice(0, 2000);
+
+            if (difficulty === 'easy') pool = pool.slice(0, 500);
+            else if (difficulty === 'normal') pool = pool.slice(0, 2000);
             pool = pool.filter(s => s.seasons > 0 && s.year > 0);
+            return pool;
+        }
+
+        function startNewGame() {
+            let pool = getDifficultyPool(currentGameMode, currentDifficulty);
 
             // Exclude already-seen shows during an active streak; reset if pool exhausted
             const seenKey = getSeenKey();
@@ -1159,12 +1163,13 @@
                     saveSeenShows();
                     setTimeout(() => launchConfetti(), 400);
 
-                    // Check for streak-based difficulty promotion
-                    const cap = STREAK_CAPS[currentDifficulty];
-                    if (cap && s.current >= cap) {
-                        const idx = DIFFICULTY_ORDER.indexOf(currentDifficulty);
-                        const next = DIFFICULTY_ORDER[idx + 1];
-                        if (next) {
+                    // Check whether every show in this difficulty/mode pool has now been guessed
+                    const idx = DIFFICULTY_ORDER.indexOf(currentDifficulty);
+                    const next = DIFFICULTY_ORDER[idx + 1];
+                    if (next) {
+                        const fullPool = getDifficultyPool(currentGameMode, currentDifficulty);
+                        const completedAll = fullPool.length > 0 && seenShows[seenKey].size >= fullPool.length;
+                        if (completedAll) {
                             pendingPromotion = { from: currentDifficulty, to: next };
                             setTimeout(() => showPromotionModal(pendingPromotion), 1200);
                         }
