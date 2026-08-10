@@ -135,6 +135,24 @@
         .mode-btn.active { background: #fff; color: #000; border-color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,255,255,0.2); }
 
         #difficultyModal { background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); }
+        #promotionModal { background: rgba(0,0,0,0.92); backdrop-filter: blur(14px); }
+        .promo-glow {
+            width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 20px;
+            display: flex; align-items: center; justify-content: center; font-size: 2.4rem;
+            background: radial-gradient(circle, rgba(209,160,29,0.35) 0%, rgba(209,160,29,0.05) 70%);
+            box-shadow: 0 0 40px rgba(209,160,29,0.4);
+            animation: promo-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes promo-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .promo-btn {
+            background: linear-gradient(145deg, #d1a01d, #a37c15); color: #000; font-weight: 800;
+            border-radius: 12px; padding: 14px 20px; transition: all 0.25s ease; box-shadow: 0 6px 20px rgba(209,160,29,0.3);
+        }
+        .promo-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(209,160,29,0.45); }
+        body.light #promotionModal { background: rgba(230,233,238,0.97); }
         .diff-card { 
             background: rgba(255,255,255,0.03); 
             border: 1px solid var(--border); 
@@ -499,6 +517,19 @@
         </div>
     </div>
 
+    <!-- Promotion Popup -->
+    <div id="promotionModal" class="fixed inset-0 z-[130] hidden items-center justify-center p-6">
+        <div class="w-full max-w-md border border-zinc-800 rounded-3xl p-10 shadow-2xl text-center" style="background:#0b0c0d;">
+            <div class="promo-glow">🏆</div>
+            <h3 class="text-2xl font-black italic tracking-tighter uppercase mb-2">Streak Maxed Out!</h3>
+            <p class="text-zinc-400 text-[12px] uppercase tracking-wider mb-1">You conquered <span id="promoFromLabel" class="text-[#d1a01d] font-bold"></span></p>
+            <p class="text-zinc-500 text-[11px] uppercase tracking-widest mb-8">Time to level up. Your streak carries over.</p>
+            <button onclick="confirmPromotion()" class="promo-btn w-full text-sm uppercase tracking-widest">
+                Enter <span id="promoToLabel"></span> →
+            </button>
+        </div>
+    </div>
+
     <header class="w-full max-w-2xl flex flex-col items-center py-8 mb-4">
         <div class="flex items-center gap-3 mb-8">
             <h1 class="text-5xl font-black tracking-tighter italic drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" id="siteTitle">TeeVeedle</h1>
@@ -672,6 +703,10 @@
         
         let currentGameMode = 'normal';
         let currentDifficulty = localStorage.getItem('showlee_difficulty') || 'normal';
+        const DIFFICULTY_ORDER = ['easy', 'normal', 'hard'];
+        const DIFFICULTY_LABELS = { easy: 'CINEMA BEGINNER', normal: 'TV ENTHUSIAST', hard: 'INDUSTRY EXPERT' };
+        const STREAK_CAPS = { easy: 5, normal: 10, hard: null };
+        let pendingPromotion = null;
         let minYearBound = 1900, maxYearBound = new Date().getFullYear();
         let minSeasonBound = 1, maxSeasonBound = 100;
         let yearGuessed = false, seasonGuessed = false, hintUsed = false, hintPenalty = 0, isGameOver = false;
@@ -1123,6 +1158,17 @@
                     seenShows[seenKey].add(targetShow.id);
                     saveSeenShows();
                     setTimeout(() => launchConfetti(), 400);
+
+                    // Check for streak-based difficulty promotion
+                    const cap = STREAK_CAPS[currentDifficulty];
+                    if (cap && s.current >= cap) {
+                        const idx = DIFFICULTY_ORDER.indexOf(currentDifficulty);
+                        const next = DIFFICULTY_ORDER[idx + 1];
+                        if (next) {
+                            pendingPromotion = { from: currentDifficulty, to: next };
+                            setTimeout(() => showPromotionModal(pendingPromotion), 1200);
+                        }
+                    }
                 } else {
                     s.current = 0;
                     st.losses++;
@@ -1382,6 +1428,24 @@
             localStorage.setItem('showlee_difficulty', diff);
             document.getElementById('difficultyModal').classList.add('hidden');
             if (!same) startNewGame();
+        }
+
+        function showPromotionModal(promotion) {
+            document.getElementById('promoFromLabel').textContent = DIFFICULTY_LABELS[promotion.from];
+            document.getElementById('promoToLabel').textContent = DIFFICULTY_LABELS[promotion.to];
+            const modal = document.getElementById('promotionModal');
+            modal.classList.remove('hidden');
+            modal.style.display = 'flex';
+            launchConfetti();
+        }
+
+        function confirmPromotion() {
+            const promo = pendingPromotion;
+            pendingPromotion = null;
+            const modal = document.getElementById('promotionModal');
+            modal.classList.add('hidden');
+            modal.style.display = '';
+            if (promo) selectDifficulty(promo.to);
         }
     </script>
 </body>
